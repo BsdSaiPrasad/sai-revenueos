@@ -120,3 +120,22 @@ Documentation milestone commit: `77b1614` (`docs: improve repository learning ex
 ### Git commit
 
 Implementation commit: `69e9c4e` (`feat: implement P1.2 identity control`). Authored and committed as `BsdSaiPrasad <bsdsaiprasad1@gmail.com>`. This hash is recorded by a follow-up documentation-only continuity commit to avoid self-reference.
+
+## 2026-10-10 — P1.0–P1.2 Code Documentation and Readability
+
+### Improved
+
+- Added plain-English module, class, function, and method docstrings across the P1.2 ID generation, source normalization, transactional store, architecture validator, and all 23 acceptance scenarios.
+- Added targeted inline comments for UUIDv7 bit placement, source-key normalization, atomic source upsert, idempotency, rollback, candidate state, crosswalk activation, corrections, retired-ID redirects, merge lineage, safe unmerge, and reconciliation.
+- Documented every important SQLite table and explained the business failure prevented by its key constraints, indexes, and triggers.
+- Expanded the identity-control learning guide with a ten-topic implementation map, direct source references, beginner definitions, and exact verification commands.
+
+### Boundaries and verification
+
+- Documentation-only change: no executable statement, assertion, SQL definition, public name, contract, ERD relationship, architecture decision, or dependency changed.
+- Existing P1.2 tests, architecture validation, Python compilation, JSON validation, link checks, semantic Python comparison, SQL definition comparison, protected-file comparison, and secret scan were executed before commit.
+- P1 remains 18.75% complete and overall RevenueOS remains approximately 2.7%. P1.3 has not started.
+
+### Git commit
+
+Pending the documentation commit. The final hash is reported in the task handoff rather than written here to avoid a self-referential commit.

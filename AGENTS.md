@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository contains the SAI RevenueOS architecture and the implemented P1.0/P1.1 documentation foundation. Keep the root focused on project metadata and navigation. Shared cross-project definitions belong in `shared/contracts/`; project-specific work belongs under `projects/<project-name>/`; repository-wide learning and architecture guides belong in `docs/`.
+This repository contains the SAI RevenueOS architecture and the implementation completed through P1.2. Keep the root focused on project metadata and navigation. Shared cross-project definitions belong in `shared/contracts/`; project-specific work belongs under `projects/<project-name>/`; repository-wide learning and architecture guides belong in `docs/`.
 
 When application code is introduced, use clear project-local `src/` and `tests/` directories and mirror source paths in tests where practical. Do not create empty folders for future projects or phases.
 
@@ -42,6 +42,6 @@ Add tests with every behavior change and bug fix. Place unit tests under `tests/
 
 ## Commit & Pull Request Guidelines
 
-There is no repository-local commit history yet. Use concise, imperative commit subjects such as `Add campaign ingestion pipeline`; optional prefixes like `feat:`, `fix:`, and `docs:` are encouraged when applied consistently. Keep commits focused.
+Use concise, imperative commit subjects such as `Add campaign ingestion pipeline`; optional prefixes like `feat:`, `fix:`, and `docs:` are encouraged when applied consistently. Keep commits focused.
 
 Pull requests should explain the problem, summarize the solution, list verification performed, and link relevant issues. Include screenshots or sample output for user-visible changes, and call out configuration changes, migrations, or follow-up work explicitly.

@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Validate the P1 logical architecture and P1.2 reference artifacts."""
+"""Validate P1 architecture and reference artifacts without external packages.
+
+This script checks the shared JavaScript Object Notation (JSON) contract, canonical
+Entity Relationship Diagram (ERD), Architecture Decision Records (ADRs), required
+P1.2 files, schema enforcement names, continuity documents, and secret-like file
+names. It validates repository consistency; it does not execute the P1.2 runtime
+tests or claim that a production service is deployed.
+"""
 
 from __future__ import annotations
 
@@ -79,10 +86,12 @@ def mermaid_name(entity_name: str) -> str:
 
 
 def fail(errors: list[str], message: str) -> None:
+    """Collect a validation problem so the user sees all findings in one run."""
     errors.append(message)
 
 
 def load_contract(errors: list[str]) -> dict:
+    """Load the canonical JSON contract or record a readable failure."""
     try:
         return json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -91,6 +100,7 @@ def load_contract(errors: list[str]) -> dict:
 
 
 def validate_contract(contract: dict, errors: list[str]) -> None:
+    """Check entity definitions, relationships, temporal fields, and P1 invariants."""
     if contract.get("contract_version") != "1.0.0":
         fail(errors, "contract_version must be 1.0.0 for the P1.1 contract")
     if contract.get("owner") != "P1 Data Foundation & Customer Identity":
@@ -171,6 +181,7 @@ def validate_contract(contract: dict, errors: list[str]) -> None:
 
 
 def validate_erd(contract: dict, errors: list[str]) -> None:
+    """Confirm the canonical Mermaid ERD covers the contract's entities and links."""
     try:
         erd = ERD_PATH.read_text(encoding="utf-8")
     except OSError as exc:
@@ -210,6 +221,7 @@ def validate_erd(contract: dict, errors: list[str]) -> None:
 
 
 def validate_decisions_and_continuity(errors: list[str]) -> None:
+    """Check that D001–D013 and the project continuity documents are present."""
     missing_files = [name for name in REQUIRED_CONTINUITY_FILES if not (PROJECT_DIR / name).is_file()]
     if missing_files:
         fail(errors, f"missing continuity files: {', '.join(sorted(missing_files))}")
@@ -228,6 +240,7 @@ def validate_decisions_and_continuity(errors: list[str]) -> None:
 
 
 def validate_p12_reference(errors: list[str]) -> None:
+    """Check that P1.2 teaching, test, diagram, and schema artifacts remain present."""
     required = (IDENTITY_ERD_PATH, IDENTITY_GUIDE_PATH, SCHEMA_PATH, TEST_PATH, REPO_ROOT / "PROGRESS.md")
     missing = [str(path.relative_to(REPO_ROOT)) for path in required if not path.is_file()]
     if missing:
@@ -250,6 +263,7 @@ def validate_p12_reference(errors: list[str]) -> None:
 
 
 def validate_no_tracked_secrets(errors: list[str]) -> None:
+    """Flag secret-like filenames among tracked and candidate repository files."""
     try:
         result = subprocess.run(
             ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
@@ -271,6 +285,7 @@ def validate_no_tracked_secrets(errors: list[str]) -> None:
 
 
 def main() -> int:
+    """Run every architecture check and return a shell-friendly status code."""
     errors: list[str] = []
     contract = load_contract(errors)
     if contract:

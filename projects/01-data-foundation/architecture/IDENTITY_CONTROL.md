@@ -76,6 +76,36 @@ Source payload
 
 See the [runtime ERD](diagrams/identity-control.mmd), [ADRs](adr/), and [executable tests](../tests/test_identity_reference.py).
 
+## Implementation map
+
+Use this order when reading or explaining the implementation in an interview:
+
+| Topic | Start with | What to notice |
+|---|---|---|
+| 1. Canonical ID generation | [`ids.py`](../src/sai_revenueos_identity/ids.py): `uuid7()`, `PrefixedIDGenerator.generate()` | The RFC 9562 bit layout, controlled prefixes, clock rollback guard, and collision retry. |
+| 2. Source registration | [`normalization.py`](../src/sai_revenueos_identity/normalization.py): `normalize_source_identity()`; [`store.py`](../src/sai_revenueos_identity/store.py): `get_or_create_source_record()` | Original identifiers are preserved while the four-part comparison key is database-unique. |
+| 3. Resolution cases | [`store.py`](../src/sai_revenueos_identity/store.py): `request_manual_review()`; [`schema.sql`](../src/sai_revenueos_identity/schema.sql): `resolution_case` | A source may remain unresolved, ambiguous, under review, resolved, or no-match. |
+| 4. Candidate evidence | [`store.py`](../src/sai_revenueos_identity/store.py): `propose_candidate()` and `decide_candidate()` | Confidence and evidence support a decision but never become authoritative by themselves. |
+| 5. Crosswalk mappings | [`store.py`](../src/sai_revenueos_identity/store.py): `activate_mapping()`; [`schema.sql`](../src/sai_revenueos_identity/schema.sql): `external_identity_crosswalk` | Only one approved, active, open-ended mapping is current for a SourceRecord. |
+| 6. Corrections | [`store.py`](../src/sai_revenueos_identity/store.py): `correct_mapping()` | The old interval closes and a replacement row starts; history is not overwritten. |
+| 7. Merge and unmerge | [`store.py`](../src/sai_revenueos_identity/store.py): `merge_identities()` and `unmerge_identities()` | Retired IDs redirect to a survivor, while exact mapping lineage enables safe reversal. |
+| 8. Transactions and rollback | [`store.py`](../src/sai_revenueos_identity/store.py): `_transaction()` | `BEGIN IMMEDIATE` protects concurrent read-then-write operations; exceptions roll back business, audit, and idempotency rows together. |
+| 9. Reconciliation | [`store.py`](../src/sai_revenueos_identity/store.py): `reconcile()` | Read-only checks report inconsistent states; they do not silently repair them. |
+| 10. Executable proof | [`test_identity_reference.py`](../tests/test_identity_reference.py) | Synthetic Globex Health and Northstar Labs scenarios prove retry, concurrency, correction, rollback, and reversal behavior. |
+
+In `schema.sql`, a **constraint** is a database rule that rejects invalid data. A **trigger** is Structured Query Language (SQL) logic that SQLite runs automatically when a specified write is attempted. They provide a second enforcement layer when code outside `IdentityStore` accesses the database.
+
+## Run the verification
+
+From the repository root, using Python 3.9 or newer:
+
+```bash
+python3 -m unittest discover -s projects/01-data-foundation/tests -v
+python3 projects/01-data-foundation/scripts/validate_architecture.py
+```
+
+The first command executes the P1.2 behavior scenarios. The second checks the unchanged canonical contract, Entity Relationship Diagram (ERD), Architecture Decision Records (ADRs), P1.2 artifacts, continuity files, and secret-like filenames. Neither command requires credentials or a live Salesforce, HubSpot, Snowflake, or production service.
+
 ## Production evolution boundary
 
 A production component can keep these contracts while replacing SQLite with a transactional operational database, an authenticated service interface, durable queues, metrics, and scheduled reconciliation. It would publish canonical IDs and crosswalk changes to Snowflake. That deployment, its Snowflake tables, connectors, and matching engine are deliberately deferred.

@@ -43,13 +43,18 @@ T4 = "2026-10-10T12:04:00.000000Z"
 
 
 class IdentityReferenceTests(unittest.TestCase):
+    """Protect the approved P1.2 behaviors with synthetic GTM scenarios."""
+
     def setUp(self) -> None:
+        """Give each test an isolated in-memory SQLite database."""
         self.store = IdentityStore()
 
     def tearDown(self) -> None:
+        """Close the test connection after every scenario."""
         self.store.close()
 
     def canonical(self, entity_type: str = "Account", key: str = "canonical-1", at: str = T0) -> str:
+        """Create a canonical test identity under the approved P1 authority."""
         return self.store.create_canonical_identity(
             entity_type, "p1-service", IDENTITY_WRITER, key, at
         )
@@ -58,6 +63,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self, object_id: str = "001GLOBEX", tenant: str = "globex-prod",
         system: str = "Salesforce", observation: str = "obs-1", at: str = T0,
     ) -> str:
+        """Register a synthetic Salesforce or HubSpot Account observation."""
         return self.store.get_or_create_source_record(
             system, tenant, "Account", object_id, observation, "connector",
             SOURCE_WRITER, "sha256:example", "s3://synthetic/example", at,
@@ -66,6 +72,7 @@ class IdentityReferenceTests(unittest.TestCase):
     def resolve(
         self, source_id: str, canonical_id: str, stem: str = "globex", at: str = T1
     ) -> tuple[str, str]:
+        """Propose, approve, and activate one explicit test mapping."""
         candidate = self.store.propose_candidate(
             source_id, canonical_id, "domain", "%s.example" % stem, 0.97,
             "explicit_test_evidence", "p1.2-v1", "resolver", RESOLUTION_WRITER,
@@ -81,6 +88,7 @@ class IdentityReferenceTests(unittest.TestCase):
         return candidate, mapping
 
     def test_01_unique_prefixed_uuid7_generation(self) -> None:
+        """Every contract entity has a prefix and generated Account IDs stay unique."""
         contract = json.loads(
             (SRC.parents[2] / "shared" / "contracts" / "canonical-model.v1.json").read_text(encoding="utf-8")
         )
@@ -92,6 +100,7 @@ class IdentityReferenceTests(unittest.TestCase):
             self.assertTrue(value.startswith("sai_acc_"))
 
     def test_02_collision_detection_retries_safely(self) -> None:
+        """A detected UUIDv7 collision retries instead of reusing an existing ID."""
         first, second = uuid7(1, 1), uuid7(1, 2)
         sequence = iter([first, first, second])
         generator = PrefixedIDGenerator(max_attempts=3, uuid_factory=lambda: next(sequence))
@@ -100,6 +109,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertEqual("sai_acc_" + str(second), generated)
 
     def test_03_repeated_salesforce_record_is_one_source_with_two_observations(self) -> None:
+        """Salesforce replays reuse one SourceRecord while preserving new arrivals."""
         first = self.source(observation="sf-run-1")
         second = self.source(observation="sf-run-2", at=T1)
         third = self.source(observation="sf-run-2", at=T2)
@@ -109,6 +119,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertEqual(2, self.store.count("source_observation"))
 
     def test_04_salesforce_and_hubspot_link_to_same_account(self) -> None:
+        """Two vendor records can map to one canonical Globex Health Account."""
         account = self.canonical()
         salesforce = self.source(observation="sf-globex")
         hubspot = self.source("987654", "globex-hub", "HubSpot", "hs-globex")
@@ -118,18 +129,21 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertEqual(account, self.store.active_mapping_for_source(hubspot)["canonical_entity_id"])
 
     def test_05_same_vendor_id_in_different_tenants_is_distinct(self) -> None:
+        """Tenant is part of the source key, preventing cross-tenant ID collisions."""
         globex = self.source("001SAME", "globex-prod", observation="obs-globex")
         northstar = self.source("001SAME", "northstar-prod", observation="obs-northstar")
         self.assertNotEqual(globex, northstar)
         self.assertEqual(2, self.store.count("source_record"))
 
     def test_06_new_source_stays_unresolved(self) -> None:
+        """Registration never fabricates a canonical mapping for a new source."""
         source = self.source()
         case = self.store.resolution_case_for_source(source)
         self.assertEqual("unresolved", case["status"])
         self.assertIsNone(self.store.active_mapping_for_source(source))
 
     def test_07_ambiguous_candidates_require_review(self) -> None:
+        """Two plausible Accounts make the case ambiguous and require review."""
         source = self.source()
         globex = self.canonical(key="globex")
         northstar = self.canonical(key="northstar")
@@ -150,6 +164,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertEqual("pending_review", self.store.resolution_case_for_source(source)["status"])
 
     def test_08_correction_preserves_historical_mapping(self) -> None:
+        """A correction closes the wrong mapping and appends its replacement."""
         source = self.source()
         wrong = self.canonical(key="wrong")
         correct = self.canonical(key="correct")
@@ -167,6 +182,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertEqual(2, self.store.count("external_identity_crosswalk"))
 
     def test_09_incorrect_merge_can_be_unmerged_to_original_id(self) -> None:
+        """Unmerge restores Northstar's original ID and mapping after a bad merge."""
         survivor = self.canonical(key="globex-parent")
         original = self.canonical(key="northstar-independent")
         source = self.source("001NORTH", "northstar-prod", observation="northstar-obs")
@@ -189,6 +205,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertEqual(original, self.store.active_mapping_for_source(source)["canonical_entity_id"])
 
     def test_10_retry_returns_same_effect_and_key_reuse_conflicts(self) -> None:
+        """An exact retry is safe, while different input cannot reuse its key."""
         first = self.canonical(key="retry-key")
         second = self.canonical(key="retry-key")
         self.assertEqual(first, second)
@@ -199,6 +216,7 @@ class IdentityReferenceTests(unittest.TestCase):
             )
 
     def test_11_invalid_mapping_transition_is_blocked_by_database(self) -> None:
+        """A revoked historical crosswalk cannot be reopened as active in place."""
         source = self.source()
         account = self.canonical()
         _, mapping = self.resolve(source, account)
@@ -215,6 +233,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertEqual("revoked", history["mapping_status"])
 
     def test_12_concurrent_source_upserts_produce_one_record(self) -> None:
+        """Two workers registering one source key produce one SourceRecord."""
         with tempfile.TemporaryDirectory() as directory:
             database = str(Path(directory) / "identity.db")
             # Initialize the schema once; each concurrent worker then owns its
@@ -226,6 +245,7 @@ class IdentityReferenceTests(unittest.TestCase):
             errors: list[Exception] = []
 
             def worker(index: int) -> None:
+                """Use a worker-owned connection, matching SQLite's thread model."""
                 store = IdentityStore(database)
                 try:
                     barrier.wait()
@@ -250,6 +270,7 @@ class IdentityReferenceTests(unittest.TestCase):
                 self.assertEqual(2, verifier.count("source_observation"))
 
     def test_13_simulated_failure_rolls_back_mapping_and_idempotency_claim(self) -> None:
+        """A mid-correction failure rolls back state so the request can retry."""
         source = self.source()
         wrong = self.canonical(key="wrong")
         correct = self.canonical(key="correct")
@@ -271,6 +292,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertNotEqual(original, replacement)
 
     def test_14_overlapping_mapping_intervals_are_prevented(self) -> None:
+        """The database rejects crosswalk history whose validity periods overlap."""
         source = self.source()
         account = self.canonical()
         _, mapping = self.resolve(source, account)
@@ -283,6 +305,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertEqual(mapping, self.store.active_mapping_for_source(source)["external_identity_crosswalk_id"])
 
     def test_15_malformed_inputs_are_rejected(self) -> None:
+        """Unsafe source IDs, malformed UUIDs, and blank actors fail validation."""
         with self.assertRaises(ValidationError):
             self.store.get_or_create_source_record(
                 "Salesforce", "globex-prod", "Account", "bad\x00id", "obs", "connector",
@@ -297,6 +320,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertEqual(0, self.store.count("source_record"))
 
     def test_16_unauthorized_state_changes_are_rejected(self) -> None:
+        """Source writers cannot create canonical IDs or approve candidates."""
         with self.assertRaises(AuthorizationError):
             self.store.create_canonical_identity("Account", "intruder", SOURCE_WRITER, "bad-auth")
         source = self.source()
@@ -312,12 +336,14 @@ class IdentityReferenceTests(unittest.TestCase):
             )
 
     def test_17_rebrand_retains_account_identity(self) -> None:
+        """A Globex Health name change does not allocate a new Account identity."""
         account = self.canonical()
         # A name change is descriptive history in the canonical model, never a new identity.
         self.assertEqual(account, self.canonical(key="canonical-1"))
         self.assertEqual(1, self.store.count("canonical_identity"))
 
     def test_18_acquisition_does_not_automatically_merge_accounts(self) -> None:
+        """Globex and Northstar remain distinct active Accounts after acquisition."""
         globex = self.canonical(key="globex")
         northstar = self.canonical(key="northstar")
         self.assertNotEqual(globex, northstar)
@@ -325,6 +351,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertEqual("active", self.store.get("canonical_identity", "canonical_id", northstar)["identity_status"])
 
     def test_19_revocation_removes_authority_but_keeps_history(self) -> None:
+        """Revocation removes the active link but preserves its crosswalk row."""
         source = self.source()
         account = self.canonical()
         _, mapping = self.resolve(source, account)
@@ -339,12 +366,14 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertEqual("no_match", self.store.resolution_case_for_source(source)["status"])
 
     def test_20_reconciliation_is_clean_after_valid_flow(self) -> None:
+        """A fully approved and activated mapping produces no reconciliation issue."""
         source = self.source()
         account = self.canonical()
         self.resolve(source, account)
         self.assertEqual([], self.store.reconcile())
 
     def test_21_reconciliation_detects_resolved_case_missing_mapping(self) -> None:
+        """Reconciliation finds an approved case whose mapping was not activated."""
         source = self.source()
         account = self.canonical()
         candidate = self.store.propose_candidate(
@@ -359,6 +388,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertIn("resolved_case_without_active_mapping", issue_types)
 
     def test_22_uncertain_post_merge_change_requires_human_review(self) -> None:
+        """Unmerge preserves a later correction and sends uncertainty to review."""
         globex = self.canonical(key="globex")
         northstar = self.canonical(key="northstar")
         corrected_target = self.canonical(key="third-account")
@@ -383,6 +413,7 @@ class IdentityReferenceTests(unittest.TestCase):
         self.assertEqual(corrected_target, self.store.active_mapping_for_source(source)["canonical_entity_id"])
 
     def test_23_canonical_ids_cannot_be_deleted_or_reused(self) -> None:
+        """The database makes permanent canonical IDs impossible to delete."""
         account = self.canonical()
         with self.assertRaises(sqlite3.IntegrityError):
             self.store._connection.execute(

@@ -1,4 +1,12 @@
-"""Standards-compliant UUIDv7 and controlled SAI RevenueOS identifiers."""
+"""Create and validate permanent SAI RevenueOS identifiers.
+
+UUID means Universally Unique Identifier. RevenueOS uses the time-ordered UUIDv7
+standard with a controlled entity prefix so an Account ID is recognizable as an
+Account ID without embedding a Salesforce, HubSpot, name, or domain value.
+
+This module implements the UUIDv7 bit layout directly because the repository
+supports Python versions that do not provide :func:`uuid.uuid7`.
+"""
 
 from __future__ import annotations
 
@@ -50,10 +58,23 @@ def uuid7(
     timestamp_ms: Optional[int] = None,
     random_bits: Optional[int] = None,
 ) -> uuid.UUID:
-    """Return a UUIDv7 value using the RFC 9562 bit layout.
+    """Build a Universally Unique Identifier version 7 (UUIDv7).
 
-    The function is local so the reference implementation works on Python versions
-    that predate ``uuid.uuid7``. Callers may inject time and randomness in tests.
+    Args:
+        timestamp_ms: Optional Unix time in milliseconds. Production calls omit
+            it; tests may supply it to create deterministic examples.
+        random_bits: Optional 74-bit random value, also intended for deterministic
+            tests.
+
+    Returns:
+        An RFC 9562 UUIDv7 value. For example, the caller may later prefix it with
+        ``sai_acc_`` for the synthetic Globex Health Account.
+
+    Raises:
+        ValidationError: If either injected value does not fit the UUIDv7 layout.
+
+    The local implementation keeps Python 3.9 compatibility. It uses 48 time bits,
+    the version marker, 74 random bits, and the standard ``10`` variant marker.
     """
 
     if timestamp_ms is None:
@@ -66,6 +87,8 @@ def uuid7(
     if not 0 <= random_bits < (1 << 74):
         raise ValidationError("UUIDv7 random payload must fit in 74 bits")
 
+    # RFC 9562 splits the 74 random bits around the UUID variant marker. Keeping
+    # these shifts explicit makes the standards mapping reviewable in interviews.
     rand_a = random_bits >> 62
     rand_b = random_bits & ((1 << 62) - 1)
     value = timestamp_ms << 80
@@ -77,13 +100,27 @@ def uuid7(
 
 
 class PrefixedIDGenerator:
-    """Generate entity-prefixed UUIDv7 IDs with collision detection and retry."""
+    """Generate entity-prefixed UUIDv7 IDs with collision detection and retry.
+
+    The generator combines the controlled registry with UUIDv7. Callers provide an
+    optional database-backed ``exists`` function so even an extremely unlikely
+    duplicate is detected before the identifier is accepted.
+    """
 
     def __init__(
         self,
         max_attempts: int = 5,
         uuid_factory: Optional[Callable[[], uuid.UUID]] = None,
     ) -> None:
+        """Configure safe generation.
+
+        Args:
+            max_attempts: Maximum allocation attempts after detected collisions.
+            uuid_factory: Optional UUIDv7 factory used by deterministic tests.
+
+        Raises:
+            ValidationError: If no allocation attempt is allowed.
+        """
         if max_attempts < 1:
             raise ValidationError("max_attempts must be positive")
         self._max_attempts = max_attempts
@@ -92,6 +129,7 @@ class PrefixedIDGenerator:
         self._last_timestamp_ms = -1
 
     def _next_uuid(self) -> uuid.UUID:
+        """Return the next validated UUIDv7 while guarding local clock rollback."""
         if self._uuid_factory is not uuid7:
             value = self._uuid_factory()
             if value.version != 7:
@@ -112,6 +150,20 @@ class PrefixedIDGenerator:
         entity_type: str,
         exists: Optional[Callable[[str], bool]] = None,
     ) -> str:
+        """Generate one registered, collision-checked RevenueOS identifier.
+
+        Args:
+            entity_type: Registered type such as ``Account`` or ``Person``.
+            exists: Optional callback that reports whether a proposed ID is already
+                stored.
+
+        Returns:
+            A value such as ``sai_acc_<uuidv7>``.
+
+        Raises:
+            ValidationError: If the entity type has no approved prefix.
+            ConflictError: If every safe retry collides.
+        """
         prefix = PREFIX_REGISTRY.get(entity_type)
         if prefix is None:
             raise ValidationError("unregistered entity type: %s" % entity_type)
@@ -124,7 +176,12 @@ class PrefixedIDGenerator:
 
 
 def validate_prefixed_id(entity_type: str, value: str) -> None:
-    """Validate the registered prefix, UUID syntax, version, and variant."""
+    """Validate the registered prefix, UUID syntax, version, and variant.
+
+    This protects boundaries that receive an existing ID rather than generating a
+    new one. It returns nothing on success and raises ``ValidationError`` when the
+    value does not match the approved entity type or RFC 9562 UUIDv7 structure.
+    """
 
     prefix = PREFIX_REGISTRY.get(entity_type)
     if prefix is None:

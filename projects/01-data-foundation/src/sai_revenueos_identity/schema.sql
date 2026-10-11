@@ -1,6 +1,19 @@
+-- SQL means Structured Query Language. This schema is the local P1.2 executable
+-- specification, not a deployed production identity database.
+--
+-- A constraint is a database rule that rejects invalid data. A trigger is logic
+-- that SQLite runs automatically before or after a specified write. Keeping core
+-- identity rules here protects the data even if a future caller bypasses Python.
+
+-- Foreign keys require referenced SourceRecords, canonical identities, and history
+-- rows to exist. The busy timeout lets a concurrent writer briefly wait for the
+-- atomic transaction that currently owns SQLite's write lock.
 PRAGMA foreign_keys = ON;
 PRAGMA busy_timeout = 5000;
 
+-- CANONICAL IDENTITY
+-- Stores the permanent RevenueOS identifier and its entity type. A retired ID is
+-- preserved with a redirect to its active survivor; it is never deleted or reused.
 CREATE TABLE IF NOT EXISTS canonical_identity (
     canonical_id TEXT PRIMARY KEY,
     entity_type TEXT NOT NULL,
@@ -17,12 +30,16 @@ CREATE TABLE IF NOT EXISTS canonical_identity (
     )
 );
 
+-- Prevent deletion so historical Salesforce, HubSpot, and downstream references
+-- can always resolve the same canonical ID.
 CREATE TRIGGER IF NOT EXISTS canonical_identity_no_delete
 BEFORE DELETE ON canonical_identity
 BEGIN
     SELECT RAISE(ABORT, 'canonical IDs are permanent and cannot be deleted');
 END;
 
+-- Permit only the controlled active <-> retired lifecycle used by merge/unmerge.
+-- The ID and entity type themselves can never be rewritten.
 CREATE TRIGGER IF NOT EXISTS canonical_identity_guard_update
 BEFORE UPDATE ON canonical_identity
 WHEN NEW.canonical_id IS NOT OLD.canonical_id
@@ -35,6 +52,10 @@ BEGIN
     SELECT RAISE(ABORT, 'invalid canonical identity mutation');
 END;
 
+-- SOURCE RECORD
+-- Stores one stable reference to one vendor object. Both original and normalized
+-- forms are retained: originals preserve provenance, while normalized values form
+-- the comparison key used for idempotent registration.
 CREATE TABLE IF NOT EXISTS source_record (
     source_record_id TEXT PRIMARY KEY,
     source_system TEXT NOT NULL,
@@ -47,6 +68,8 @@ CREATE TABLE IF NOT EXISTS source_record (
     normalized_source_object_id TEXT NOT NULL,
     created_at TEXT NOT NULL,
     last_observed_at TEXT NOT NULL,
+    -- The complete vendor namespace is system + tenant + object type + object ID.
+    -- For example, identical Salesforce IDs in two tenants remain distinct.
     UNIQUE (
         normalized_source_system,
         normalized_source_tenant,
@@ -55,6 +78,8 @@ CREATE TABLE IF NOT EXISTS source_record (
     )
 );
 
+-- Source identity fields are permanent after registration. Only operational facts
+-- such as last_observed_at may advance as later observations arrive.
 CREATE TRIGGER IF NOT EXISTS source_record_identity_immutable
 BEFORE UPDATE ON source_record
 WHEN NEW.source_record_id IS NOT OLD.source_record_id
@@ -70,6 +95,9 @@ BEGIN
     SELECT RAISE(ABORT, 'source identity fields are immutable');
 END;
 
+-- SOURCE OBSERVATION
+-- Records each distinct arrival of a source object without copying its entire raw
+-- payload. A fingerprint and payload reference can point to later ingestion storage.
 CREATE TABLE IF NOT EXISTS source_observation (
     source_observation_id TEXT PRIMARY KEY,
     source_record_id TEXT NOT NULL,
@@ -80,6 +108,8 @@ CREATE TABLE IF NOT EXISTS source_observation (
     FOREIGN KEY (source_record_id) REFERENCES source_record(source_record_id)
 );
 
+-- Observations are evidence. Updating or deleting them would hide what the system
+-- actually received during a prior Salesforce or HubSpot processing run.
 CREATE TRIGGER IF NOT EXISTS source_observation_immutable
 BEFORE UPDATE ON source_observation
 BEGIN
@@ -92,6 +122,9 @@ BEGIN
     SELECT RAISE(ABORT, 'source observations cannot be deleted');
 END;
 
+-- RESOLUTION CASE
+-- Tracks the workflow for deciding whether one SourceRecord matches a canonical
+-- identity. It intentionally allows unresolved and no-match outcomes.
 CREATE TABLE IF NOT EXISTS resolution_case (
     resolution_case_id TEXT PRIMARY KEY,
     source_record_id TEXT NOT NULL UNIQUE,
@@ -105,6 +138,8 @@ CREATE TABLE IF NOT EXISTS resolution_case (
     FOREIGN KEY (source_record_id) REFERENCES source_record(source_record_id)
 );
 
+-- Reject lifecycle jumps that would bypass required evidence or human review. For
+-- example, an ambiguous case must enter pending_review before becoming resolved.
 CREATE TRIGGER IF NOT EXISTS resolution_case_valid_transition
 BEFORE UPDATE OF status ON resolution_case
 WHEN OLD.status <> NEW.status
@@ -120,6 +155,9 @@ BEGIN
     SELECT RAISE(ABORT, 'invalid resolution status transition');
 END;
 
+-- CANDIDATE EVIDENCE
+-- Stores a possible match, why it was proposed, its confidence, policy version,
+-- and the steward's decision. A candidate is evidence, not authoritative truth.
 CREATE TABLE IF NOT EXISTS candidate_evidence (
     candidate_evidence_id TEXT PRIMARY KEY,
     resolution_case_id TEXT NOT NULL,
@@ -145,6 +183,8 @@ CREATE TABLE IF NOT EXISTS candidate_evidence (
     )
 );
 
+-- Preserve the original proposal. The only allowed update is its first and final
+-- disposition: accepted, rejected, or expired.
 CREATE TRIGGER IF NOT EXISTS candidate_evidence_guard_update
 BEFORE UPDATE ON candidate_evidence
 WHEN NEW.candidate_evidence_id IS NOT OLD.candidate_evidence_id
@@ -162,6 +202,10 @@ BEGIN
     SELECT RAISE(ABORT, 'candidate evidence is immutable except for its first decision');
 END;
 
+-- AUTHORITATIVE EXTERNAL-ID CROSSWALK
+-- Connects one SourceRecord to an approved canonical target over a half-open time
+-- interval: valid_from is included and valid_to is excluded. Only an active row
+-- with no valid_to is current; superseded and revoked rows remain historical.
 CREATE TABLE IF NOT EXISTS external_identity_crosswalk (
     external_identity_crosswalk_id TEXT PRIMARY KEY,
     source_record_id TEXT NOT NULL,
@@ -188,10 +232,16 @@ CREATE TABLE IF NOT EXISTS external_identity_crosswalk (
     CHECK (valid_to IS NULL OR valid_from < valid_to)
 );
 
+-- Prevent one source object from pointing to two current canonical identities.
+-- Without this database rule, downstream teams could count the same Salesforce
+-- Account as two different companies.
 CREATE UNIQUE INDEX IF NOT EXISTS one_active_mapping_per_source
 ON external_identity_crosswalk(source_record_id)
 WHERE mapping_status = 'active' AND valid_to IS NULL;
 
+-- Require the declared target type to match a real, active canonical identity.
+-- This blocks an Account ID from being mislabeled as a Person, and it blocks new
+-- mappings to an identity that has been retired by a merge.
 CREATE TRIGGER IF NOT EXISTS crosswalk_target_type_insert
 BEFORE INSERT ON external_identity_crosswalk
 WHEN NOT EXISTS (
@@ -204,6 +254,8 @@ BEGIN
     SELECT RAISE(ABORT, 'crosswalk target must be an active canonical identity of the declared type');
 END;
 
+-- Historical intervals for one SourceRecord may touch at a boundary but may not
+-- overlap. This keeps "what was authoritative at this time?" unambiguous.
 CREATE TRIGGER IF NOT EXISTS crosswalk_no_overlap_insert
 BEFORE INSERT ON external_identity_crosswalk
 WHEN EXISTS (
@@ -216,6 +268,8 @@ BEGIN
     SELECT RAISE(ABORT, 'crosswalk validity intervals cannot overlap');
 END;
 
+-- Crosswalk corrections are append-oriented. An active row may only be closed as
+-- superseded or revoked; its original target, evidence, and start time stay intact.
 CREATE TRIGGER IF NOT EXISTS crosswalk_guard_update
 BEFORE UPDATE ON external_identity_crosswalk
 WHEN NEW.external_identity_crosswalk_id IS NOT OLD.external_identity_crosswalk_id
@@ -234,12 +288,16 @@ BEGIN
     SELECT RAISE(ABORT, 'crosswalk rows are immutable except for closing an active interval');
 END;
 
+-- Deleting a bad match would erase the explanation for a later correction.
 CREATE TRIGGER IF NOT EXISTS crosswalk_no_delete
 BEFORE DELETE ON external_identity_crosswalk
 BEGIN
     SELECT RAISE(ABORT, 'crosswalk history cannot be deleted');
 END;
 
+-- IDENTITY MERGE EVENT
+-- Records every controlled merge and unmerge. A merge names the surviving and
+-- retired IDs; an unmerge points back to the root merge it reverses.
 CREATE TABLE IF NOT EXISTS identity_merge_event (
     merge_event_id TEXT PRIMARY KEY,
     event_type TEXT NOT NULL CHECK (event_type IN ('merge', 'unmerge')),
@@ -260,6 +318,9 @@ CREATE TABLE IF NOT EXISTS identity_merge_event (
     )
 );
 
+-- MERGE MAPPING CHANGE
+-- Captures each exact crosswalk row replaced during a merge. Unmerge uses this
+-- lineage to restore the old target only when no later correction superseded it.
 CREATE TABLE IF NOT EXISTS merge_mapping_change (
     merge_event_id TEXT NOT NULL,
     source_record_id TEXT NOT NULL,
@@ -272,6 +333,7 @@ CREATE TABLE IF NOT EXISTS merge_mapping_change (
     FOREIGN KEY (merged_crosswalk_id) REFERENCES external_identity_crosswalk(external_identity_crosswalk_id)
 );
 
+-- Merge lineage is evidence and must not be rewritten or deleted.
 CREATE TRIGGER IF NOT EXISTS merge_mapping_change_immutable
 BEFORE UPDATE ON merge_mapping_change
 BEGIN
@@ -284,6 +346,7 @@ BEGIN
     SELECT RAISE(ABORT, 'merge mapping history cannot be deleted');
 END;
 
+-- Merge/unmerge events are an immutable stewardship record.
 CREATE TRIGGER IF NOT EXISTS identity_merge_event_immutable
 BEFORE UPDATE ON identity_merge_event
 BEGIN
@@ -296,6 +359,9 @@ BEGIN
     SELECT RAISE(ABORT, 'merge audit events cannot be deleted');
 END;
 
+-- AUDIT EVENT
+-- Stores who performed a governed operation, when it happened, which subject it
+-- affected, and structured details needed to explain the state change.
 CREATE TABLE IF NOT EXISTS audit_event (
     audit_event_id TEXT PRIMARY KEY,
     event_type TEXT NOT NULL,
@@ -307,6 +373,7 @@ CREATE TABLE IF NOT EXISTS audit_event (
     details_json TEXT NOT NULL
 );
 
+-- Audit history can be appended but never edited or deleted.
 CREATE TRIGGER IF NOT EXISTS audit_event_immutable
 BEFORE UPDATE ON audit_event
 BEGIN
@@ -319,6 +386,9 @@ BEGIN
     SELECT RAISE(ABORT, 'audit events cannot be deleted');
 END;
 
+-- IDEMPOTENCY OPERATION
+-- Binds a caller-supplied retry key to the operation and a hash of its request.
+-- An exact retry returns the first result; different input cannot reuse the key.
 CREATE TABLE IF NOT EXISTS idempotency_operation (
     idempotency_key TEXT PRIMARY KEY,
     operation_type TEXT NOT NULL,
@@ -330,6 +400,8 @@ CREATE TABLE IF NOT EXISTS idempotency_operation (
     completed_at TEXT
 );
 
+-- The only permitted change completes an in-progress claim. Because the claim and
+-- business write share one transaction, rollback removes both after a failure.
 CREATE TRIGGER IF NOT EXISTS idempotency_operation_guard_update
 BEFORE UPDATE ON idempotency_operation
 WHEN NEW.idempotency_key IS NOT OLD.idempotency_key
@@ -341,6 +413,7 @@ BEGIN
     SELECT RAISE(ABORT, 'idempotency history is immutable after completion');
 END;
 
+-- Retaining completed keys prevents an old request from creating a duplicate later.
 CREATE TRIGGER IF NOT EXISTS idempotency_operation_no_delete
 BEFORE DELETE ON idempotency_operation
 BEGIN
