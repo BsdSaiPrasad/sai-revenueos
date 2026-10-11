@@ -119,4 +119,4 @@ Documentation milestone commit: `77b1614` (`docs: improve repository learning ex
 
 ### Git commit
 
-Pending the P1.2 implementation commit. It will use the repository user's configured Git author. The final hash will be recorded in a small follow-up continuity commit.
+Implementation commit: `69e9c4e` (`feat: implement P1.2 identity control`). Authored and committed as `BsdSaiPrasad <bsdsaiprasad1@gmail.com>`. This hash is recorded by a follow-up documentation-only continuity commit to avoid self-reference.

@@ -59,4 +59,4 @@ P1.3 must define source payload/version storage and connector contracts without 
 
 ## Last verified commit
 
-Pending the P1.2 implementation commit. The exact hash will be recorded in `WORK_LOG.md` by a small follow-up continuity commit to avoid a self-referential hash.
+P1.2 implementation commit `69e9c4e` (`feat: implement P1.2 identity control`) passed the checks recorded in `WORK_LOG.md`. This hash is recorded by a small follow-up continuity commit to avoid self-reference.
