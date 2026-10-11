@@ -1,0 +1,41 @@
+{
+  "contract_version": "1.0.0",
+  "event_id": "evt-sf-account-001-v2",
+  "source": {
+    "system": "salesforce",
+    "tenant": "globex-salesforce-prod",
+    "object_type": "Account",
+    "object_id": "001GLOBEX"
+  },
+  "event_type": "upsert",
+  "timestamps": {
+    "source_updated_at": "2026-10-11T14:05:00Z",
+    "observed_at": "2026-10-11T14:05:05Z"
+  },
+  "tracing": {
+    "trace_id": "trace-globex-demo",
+    "extraction_id": "synthetic-sf-run-002"
+  },
+  "checkpoint": {
+    "stream_name": "Account",
+    "cursor": "sf-account-cursor-0002",
+    "high_watermark_at": "2026-10-11T14:05:10Z"
+  },
+  "payload": {
+    "attributes": {
+      "type": "Account",
+      "url": "/services/data/v61.0/sobjects/Account/001GLOBEX"
+    },
+    "Id": "001GLOBEX",
+    "Name": "Globex Health",
+    "Website": "https://www.globex.example",
+    "Industry": "Healthcare",
+    "BillingCountry": "United States",
+    "OwnerId": "005SALESREP",
+    "AnnualRevenue": 13000000,
+    "NumberOfEmployees": 500,
+    "Customer_Tier__c": "Enterprise",
+    "LastModifiedDate": "2026-10-11T14:05:00Z",
+    "IsDeleted": false
+  }
+}

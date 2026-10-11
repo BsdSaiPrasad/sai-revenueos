@@ -4,7 +4,7 @@
 
 This is the index of Project 1's approved architecture decisions. An Architecture Decision Record (ADR) explains the problem, alternatives, decision, technical design, and tradeoffs.
 
-All 13 decisions below are **Accepted**. D001–D008 remain unchanged; D009–D013 implement the five approved P1.2 decisions. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
+All 19 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, and D014–D019 define the P1.3 source model. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
 
 ## Approved Decisions
 
@@ -23,14 +23,20 @@ All 13 decisions below are **Accepted**. D001–D008 remain unchanged; D009–D0
 | **D011** | Resolution workflow, candidate evidence, and authoritative crosswalks are separate layers. | Keeps possible matches and scores from silently becoming accepted identity truth. | [Separate Resolution Cases, Candidate Evidence, and Crosswalks](architecture/adr/0011-separate-resolution-evidence-crosswalk.md) |
 | **D012** | Corrections, merges, and unmerges preserve IDs, redirects, evidence, and audit history. | Makes mistakes traceable and recoverable without deleting source evidence. | [Preserve Identity and Audit History](architecture/adr/0012-audit-preserving-identity-changes.md) |
 | **D013** | Python + SQLite serves as a transactional reference for identity invariants. | Proves constraints, concurrency, rollback, retry, and reconciliation before production deployment. | [Prove Identity Rules with a Transactional SQLite Reference](architecture/adr/0013-transactional-reference-identity-service.md) |
+| **D014** | Preserve every available source payload field before standardization. | Keeps vendor evidence available when validation fails or later field needs emerge. | [Preserve Raw Payloads Before Standardization](architecture/adr/0014-preserve-raw-source-payloads.md) |
+| **D015** | Append source versions and represent source deletion with a tombstone. | Preserves source history without deleting a durable canonical identity. | [Keep Source History and Represent Deletions as Tombstones](architecture/adr/0015-source-history-and-tombstones.md) |
+| **D016** | Use one versioned source-event envelope for origin, identity, time, tracing, event type, checkpoint, and payload. | Gives Salesforce and HubSpot common operational metadata without flattening their payloads. | [Use One Standard Source-Event Envelope](architecture/adr/0016-standard-source-event-envelope.md) |
+| **D017** | Standardize essential Salesforce and HubSpot objects and fields first while retaining full raw payloads. | Keeps the v1 model small and testable without losing unmodeled data. | [Standardize Essential Source Fields First](architecture/adr/0017-essential-source-fields-first.md) |
+| **D018** | Advance checkpoints only after durable processing and replay with overlap plus idempotency. | Prevents gaps after failure and safely handles duplicates or late updates. | [Use Checkpoints, Overlap, Idempotency, and Safe Replay](architecture/adr/0018-checkpoint-overlap-and-safe-replay.md) |
+| **D019** | Reuse the P1.2 source-identity interface and never auto-approve uncertain matches. | Preserves one identity authority and keeps ingestion separate from resolution truth. | [Reuse P1.2 Identity Control Without Automatic Approval](architecture/adr/0019-reuse-identity-interface.md) |
 
 ## What These Decisions Do Not Implement
 
 The decisions define the architecture. They do not mean the following capabilities are running:
 
-- Source-system ingestion.
+- Live Salesforce or HubSpot API ingestion and scheduled connector execution.
 - Complete identity matching or artificial-intelligence scoring.
 - Survivorship or field-level source precedence.
 - Physical warehouse constraints and reconciliation jobs.
 
-The P1.2 mechanics are implemented as a local reference, not a deployed service. The immediate next milestone is **P1.3 — Salesforce + HubSpot Source Model**.
+The P1.2 identity and P1.3 source mechanics are local references, not deployed services. P1.4 and later work require a separate approved scope.

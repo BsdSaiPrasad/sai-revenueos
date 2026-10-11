@@ -1,0 +1,33 @@
+{
+  "contract_version": "1.0.0",
+  "event_id": "evt-sf-account-001-delete",
+  "source": {
+    "system": "salesforce",
+    "tenant": "globex-salesforce-prod",
+    "object_type": "Account",
+    "object_id": "001GLOBEX"
+  },
+  "event_type": "delete",
+  "timestamps": {
+    "source_updated_at": "2026-10-11T14:10:00Z",
+    "observed_at": "2026-10-11T14:10:05Z"
+  },
+  "tracing": {
+    "trace_id": "trace-globex-demo",
+    "extraction_id": "synthetic-sf-run-003"
+  },
+  "checkpoint": {
+    "stream_name": "Account",
+    "cursor": "sf-account-cursor-0003",
+    "high_watermark_at": "2026-10-11T14:10:10Z"
+  },
+  "payload": {
+    "attributes": {
+      "type": "Account",
+      "url": "/services/data/v61.0/sobjects/Account/001GLOBEX"
+    },
+    "Id": "001GLOBEX",
+    "LastModifiedDate": "2026-10-11T14:10:00Z",
+    "IsDeleted": true
+  }
+}

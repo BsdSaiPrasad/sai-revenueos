@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BsdSaiPrasad/sai-revenueos/source-checkpoint.v1.json",
+  "title": "SAI RevenueOS Source Checkpoint v1",
+  "description": "The last durably processed connector position and its overlap-based replay boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "source_system",
+    "source_tenant",
+    "stream_name",
+    "cursor",
+    "high_watermark_at",
+    "last_event_id",
+    "updated_at"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "1.0.0"
+    },
+    "source_system": {
+      "enum": ["salesforce", "hubspot"]
+    },
+    "source_tenant": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stream_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cursor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "high_watermark_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "overlap_seconds": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 300
+    },
+    "replay_from": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Inclusive high-watermark time minus the overlap window."
+    }
+  }
+}

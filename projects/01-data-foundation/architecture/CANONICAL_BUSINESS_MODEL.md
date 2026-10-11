@@ -71,7 +71,7 @@ The interval is half-open: `valid_from` is included, `valid_to` is excluded, and
 
 ### Stable identity
 
-Canonical primary keys are opaque and source-independent. They never contain a Salesforce ID, email address, domain, or another mutable business value. P1.2 will choose the ID-generation method.
+Canonical primary keys are opaque and source-independent. They never contain a Salesforce ID, email address, domain, or another mutable business value. P1.2 implements the approved entity-prefixed UUIDv7 method in its local reference layer.
 
 ### Selective history
 
@@ -177,6 +177,6 @@ The architecture requires provenance, effective dates, append-oriented correctio
 
 ## 11. What Comes Next?
 
-P1.2 will decide canonical ID generation, crosswalk lifecycle, correction, merge/unmerge, idempotency, and recovery semantics. It will not build the full matching or survivorship engines.
+P1.2 defines and locally implements canonical ID generation, crosswalk lifecycle, correction, merge/unmerge, idempotency, and recovery semantics. P1.3 adds synthetic Salesforce/HubSpot source events, raw history, tombstones, and safe replay. Neither phase builds the full matching or survivorship engines.
 
 The following remain deliberately deferred: source ingestion, physical Snowflake design, dbt transformations, customer-status derivation, field survivorship, workflow deployment, and reverse Extract-Transform-Load (ETL).

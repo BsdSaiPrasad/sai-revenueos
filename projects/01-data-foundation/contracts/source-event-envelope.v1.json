@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BsdSaiPrasad/sai-revenueos/source-event-envelope.v1.json",
+  "title": "SAI RevenueOS Source Event Envelope v1",
+  "description": "A vendor-neutral envelope for synthetic or connector-produced source records. The payload remains source-native.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "event_id",
+    "source",
+    "event_type",
+    "timestamps",
+    "tracing",
+    "checkpoint",
+    "payload"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "1.0.0"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "tenant", "object_type", "object_id"],
+      "properties": {
+        "system": {
+          "enum": ["salesforce", "hubspot"]
+        },
+        "tenant": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "object_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "event_type": {
+      "enum": ["upsert", "delete"]
+    },
+    "timestamps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_updated_at", "observed_at"],
+      "properties": {
+        "source_updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "tracing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trace_id", "extraction_id"],
+      "properties": {
+        "trace_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "extraction_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "checkpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stream_name", "cursor", "high_watermark_at"],
+      "properties": {
+        "stream_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "high_watermark_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "description": "The complete available vendor payload. Unknown fields are intentionally retained.",
+      "additionalProperties": true
+    }
+  }
+}

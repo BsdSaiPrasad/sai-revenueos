@@ -1,0 +1,76 @@
+{
+  "contract_name": "salesforce-source",
+  "contract_version": "1.0.0",
+  "source_system": "salesforce",
+  "description": "Essential Salesforce objects are standardized while every available payload field remains in raw event history.",
+  "objects": {
+    "Account": {
+      "id_path": ["Id"],
+      "updated_at_path": ["LastModifiedDate"],
+      "deletion_path": ["IsDeleted"],
+      "required_upsert_paths": [["Id"], ["Name"], ["LastModifiedDate"]],
+      "fields": {
+        "source_object_id": {"path": ["Id"], "type": "string"},
+        "name": {"path": ["Name"], "type": "string"},
+        "domain": {"path": ["Website"], "type": "nullable_string"},
+        "industry": {"path": ["Industry"], "type": "nullable_string"},
+        "billing_country": {"path": ["BillingCountry"], "type": "nullable_string"},
+        "owner_id": {"path": ["OwnerId"], "type": "nullable_string"},
+        "source_updated_at": {"path": ["LastModifiedDate"], "type": "string"},
+        "is_deleted": {"path": ["IsDeleted"], "type": "boolean"}
+      }
+    },
+    "Lead": {
+      "id_path": ["Id"],
+      "updated_at_path": ["LastModifiedDate"],
+      "deletion_path": ["IsDeleted"],
+      "required_upsert_paths": [["Id"], ["LastName"], ["Company"], ["LastModifiedDate"]],
+      "fields": {
+        "source_object_id": {"path": ["Id"], "type": "string"},
+        "first_name": {"path": ["FirstName"], "type": "nullable_string"},
+        "last_name": {"path": ["LastName"], "type": "string"},
+        "email": {"path": ["Email"], "type": "nullable_string"},
+        "company": {"path": ["Company"], "type": "string"},
+        "status": {"path": ["Status"], "type": "nullable_string"},
+        "converted_contact_id": {"path": ["ConvertedContactId"], "type": "nullable_string"},
+        "source_updated_at": {"path": ["LastModifiedDate"], "type": "string"},
+        "is_deleted": {"path": ["IsDeleted"], "type": "boolean"}
+      }
+    },
+    "Contact": {
+      "id_path": ["Id"],
+      "updated_at_path": ["LastModifiedDate"],
+      "deletion_path": ["IsDeleted"],
+      "required_upsert_paths": [["Id"], ["LastName"], ["LastModifiedDate"]],
+      "fields": {
+        "source_object_id": {"path": ["Id"], "type": "string"},
+        "first_name": {"path": ["FirstName"], "type": "nullable_string"},
+        "last_name": {"path": ["LastName"], "type": "string"},
+        "email": {"path": ["Email"], "type": "nullable_string"},
+        "account_id": {"path": ["AccountId"], "type": "nullable_string"},
+        "title": {"path": ["Title"], "type": "nullable_string"},
+        "source_updated_at": {"path": ["LastModifiedDate"], "type": "string"},
+        "is_deleted": {"path": ["IsDeleted"], "type": "boolean"}
+      }
+    },
+    "Opportunity": {
+      "id_path": ["Id"],
+      "updated_at_path": ["LastModifiedDate"],
+      "deletion_path": ["IsDeleted"],
+      "required_upsert_paths": [["Id"], ["Name"], ["StageName"], ["CloseDate"], ["LastModifiedDate"]],
+      "fields": {
+        "source_object_id": {"path": ["Id"], "type": "string"},
+        "name": {"path": ["Name"], "type": "string"},
+        "account_id": {"path": ["AccountId"], "type": "nullable_string"},
+        "stage": {"path": ["StageName"], "type": "string"},
+        "amount": {"path": ["Amount"], "type": "nullable_number"},
+        "currency_code": {"path": ["CurrencyIsoCode"], "type": "nullable_string"},
+        "close_date": {"path": ["CloseDate"], "type": "string"},
+        "is_closed": {"path": ["IsClosed"], "type": "boolean"},
+        "is_won": {"path": ["IsWon"], "type": "boolean"},
+        "source_updated_at": {"path": ["LastModifiedDate"], "type": "string"},
+        "is_deleted": {"path": ["IsDeleted"], "type": "boolean"}
+      }
+    }
+  }
+}

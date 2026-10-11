@@ -1,0 +1,56 @@
+{
+  "contract_name": "hubspot-source",
+  "contract_version": "1.0.0",
+  "source_system": "hubspot",
+  "description": "Essential HubSpot objects are standardized while every available payload field remains in raw event history.",
+  "objects": {
+    "Company": {
+      "id_path": ["id"],
+      "updated_at_path": ["updatedAt"],
+      "deletion_path": ["archived"],
+      "required_upsert_paths": [["id"], ["properties", "name"], ["updatedAt"]],
+      "fields": {
+        "source_object_id": {"path": ["id"], "type": "string"},
+        "name": {"path": ["properties", "name"], "type": "string"},
+        "domain": {"path": ["properties", "domain"], "type": "nullable_string"},
+        "industry": {"path": ["properties", "industry"], "type": "nullable_string"},
+        "country": {"path": ["properties", "country"], "type": "nullable_string"},
+        "owner_id": {"path": ["properties", "hubspot_owner_id"], "type": "nullable_string"},
+        "source_updated_at": {"path": ["updatedAt"], "type": "string"},
+        "is_deleted": {"path": ["archived"], "type": "boolean"}
+      }
+    },
+    "Contact": {
+      "id_path": ["id"],
+      "updated_at_path": ["updatedAt"],
+      "deletion_path": ["archived"],
+      "required_upsert_paths": [["id"], ["properties", "lastname"], ["updatedAt"]],
+      "fields": {
+        "source_object_id": {"path": ["id"], "type": "string"},
+        "first_name": {"path": ["properties", "firstname"], "type": "nullable_string"},
+        "last_name": {"path": ["properties", "lastname"], "type": "string"},
+        "email": {"path": ["properties", "email"], "type": "nullable_string"},
+        "company_id": {"path": ["properties", "associatedcompanyid"], "type": "nullable_string"},
+        "job_title": {"path": ["properties", "jobtitle"], "type": "nullable_string"},
+        "source_updated_at": {"path": ["updatedAt"], "type": "string"},
+        "is_deleted": {"path": ["archived"], "type": "boolean"}
+      }
+    },
+    "Deal": {
+      "id_path": ["id"],
+      "updated_at_path": ["updatedAt"],
+      "deletion_path": ["archived"],
+      "required_upsert_paths": [["id"], ["properties", "dealname"], ["properties", "dealstage"], ["updatedAt"]],
+      "fields": {
+        "source_object_id": {"path": ["id"], "type": "string"},
+        "name": {"path": ["properties", "dealname"], "type": "string"},
+        "stage": {"path": ["properties", "dealstage"], "type": "string"},
+        "amount": {"path": ["properties", "amount"], "type": "nullable_string"},
+        "close_date": {"path": ["properties", "closedate"], "type": "nullable_string"},
+        "owner_id": {"path": ["properties", "hubspot_owner_id"], "type": "nullable_string"},
+        "source_updated_at": {"path": ["updatedAt"], "type": "string"},
+        "is_deleted": {"path": ["archived"], "type": "boolean"}
+      }
+    }
+  }
+}

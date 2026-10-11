@@ -3,9 +3,9 @@
 
 This script checks the shared JavaScript Object Notation (JSON) contract, canonical
 Entity Relationship Diagram (ERD), Architecture Decision Records (ADRs), required
-P1.2 files, schema enforcement names, continuity documents, and secret-like file
-names. It validates repository consistency; it does not execute the P1.2 runtime
-tests or claim that a production service is deployed.
+P1.2 and P1.3 artifacts, schema enforcement names, continuity documents, and
+secret-like filenames. It validates repository consistency; it does not execute
+runtime tests or claim that a production service is deployed.
 """
 
 from __future__ import annotations
@@ -25,6 +25,12 @@ IDENTITY_ERD_PATH = PROJECT_DIR / "architecture/diagrams/identity-control.mmd"
 IDENTITY_GUIDE_PATH = PROJECT_DIR / "architecture/IDENTITY_CONTROL.md"
 SCHEMA_PATH = PROJECT_DIR / "src/sai_revenueos_identity/schema.sql"
 TEST_PATH = PROJECT_DIR / "tests/test_identity_reference.py"
+SOURCE_GUIDE_PATH = PROJECT_DIR / "architecture/SOURCE_MODEL.md"
+SOURCE_SCHEMA_PATH = PROJECT_DIR / "src/sai_revenueos_sources/schema.sql"
+SOURCE_TEST_PATH = PROJECT_DIR / "tests/test_source_model.py"
+SOURCE_DEMO_PATH = PROJECT_DIR / "scripts/demo_source_model.py"
+SOURCE_CONTRACT_DIR = PROJECT_DIR / "contracts"
+DECISION_COUNT = 19
 
 REQUIRED_ENTITIES = {
     "Account",
@@ -230,7 +236,7 @@ def validate_decisions_and_continuity(errors: list[str]) -> None:
     if not decisions_path.exists():
         return
     decisions = decisions_path.read_text(encoding="utf-8")
-    for number in range(1, 14):
+    for number in range(1, DECISION_COUNT + 1):
         decision_id = f"D{number:03d}"
         adr_path = PROJECT_DIR / f"architecture/adr/{number:04d}-"
         if decision_id not in decisions:
@@ -260,6 +266,53 @@ def validate_p12_reference(errors: list[str]) -> None:
     ):
         if enforcement not in schema:
             fail(errors, f"P1.2 schema is missing enforcement rule {enforcement}")
+
+
+def validate_p13_reference(errors: list[str]) -> None:
+    """Check P1.3 contracts, examples, source schema, tests, guide, and demo."""
+    contract_names = (
+        "source-event-envelope.v1.json",
+        "source-checkpoint.v1.json",
+        "salesforce-source.v1.json",
+        "hubspot-source.v1.json",
+    )
+    example_names = (
+        "globex-salesforce-account-created.json",
+        "globex-salesforce-account-updated.json",
+        "globex-salesforce-account-deleted.json",
+        "globex-hubspot-company.json",
+    )
+    required = [
+        SOURCE_GUIDE_PATH,
+        SOURCE_SCHEMA_PATH,
+        SOURCE_TEST_PATH,
+        SOURCE_DEMO_PATH,
+        *(SOURCE_CONTRACT_DIR / name for name in contract_names),
+        *(PROJECT_DIR / "examples/p13" / name for name in example_names),
+    ]
+    missing = [str(path.relative_to(REPO_ROOT)) for path in required if not path.is_file()]
+    if missing:
+        fail(errors, f"missing P1.3 reference artifacts: {', '.join(missing)}")
+        return
+
+    for name in contract_names:
+        path = SOURCE_CONTRACT_DIR / name
+        try:
+            contract = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            fail(errors, f"P1.3 contract cannot be loaded ({name}): {exc}")
+            continue
+        serialized = json.dumps(contract, sort_keys=True)
+        if "1.0.0" not in serialized:
+            fail(errors, f"P1.3 contract does not declare version 1.0.0: {name}")
+
+    schema = SOURCE_SCHEMA_PATH.read_text(encoding="utf-8")
+    for table in ("source_event", "source_record_version", "source_current_state", "connector_checkpoint"):
+        if f"CREATE TABLE IF NOT EXISTS {table}" not in schema:
+            fail(errors, f"P1.3 schema is missing {table}")
+    for enforcement in ("source_event_immutable_envelope", "source_event_no_delete", "source_record_version_immutable"):
+        if enforcement not in schema:
+            fail(errors, f"P1.3 schema is missing enforcement rule {enforcement}")
 
 
 def validate_no_tracked_secrets(errors: list[str]) -> None:
@@ -293,6 +346,7 @@ def main() -> int:
         validate_erd(contract, errors)
     validate_decisions_and_continuity(errors)
     validate_p12_reference(errors)
+    validate_p13_reference(errors)
     validate_no_tracked_secrets(errors)
 
     if errors:
@@ -306,7 +360,8 @@ def main() -> int:
     print(
         "P1 architecture validation PASSED: "
         f"{entity_count} entities, {relationship_count} relationships, "
-        "13 decisions, ERD coverage, P1.2 reference artifacts, continuity files, and secret filename checks."
+        f"{DECISION_COUNT} decisions, ERD coverage, P1.2/P1.3 reference artifacts, "
+        "continuity files, and secret filename checks."
     )
     return 0
 

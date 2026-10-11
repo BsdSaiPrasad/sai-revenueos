@@ -177,3 +177,32 @@ Pending the documentation commit. The final hash is reported in the task handoff
 ### Git commit
 
 Pending the documentation commit. The final hash is reported in the task handoff rather than written here to avoid a self-referential commit.
+
+## 2026-10-11 — P1.3 Salesforce + HubSpot Source Model
+
+### Implemented
+
+- Added version 1 source-event, checkpoint, Salesforce, and HubSpot contracts plus realistic synthetic Globex Health payloads.
+- Added a standard-library Python + SQLite source reference that commits full raw JSON first, validates an essential field subset, appends immutable versions, maintains current source state, and records deletion tombstones.
+- Added durable checkpoint advancement, a configurable overlap replay window, exact-event idempotency, conflicting replay detection, late-update handling, and injected failure recovery.
+- Reused P1.2 `get_or_create_source_record()` with the source event ID as its observation key. P1.3 has source-writer authority only and never approves an identity match.
+- Added accepted Decisions D014–D019, a concise source-model guide, and a runnable temporary-database demonstration.
+
+### Verification evidence
+
+- `python3 -m unittest discover -s projects/01-data-foundation/tests -v` — **passed**, 36/36 scenarios: 23 P1.2 and 13 P1.3.
+- `python3 projects/01-data-foundation/scripts/validate_architecture.py` — **passed**: 23 entities, 31 relationships, 19 decisions, P1.2/P1.3 artifacts, continuity files, and secret-filename checks.
+- `python3 projects/01-data-foundation/scripts/demo_source_model.py` — **passed** with actual before/after, duplicate replay, injected failure, safe retry, HubSpot processing, tombstone, and overlap output.
+- Python compilation and all nine JSON files passed; 84 local links across 33 Markdown files resolved.
+- Mermaid CLI 11.12.0 rendered all 19 ADR diagrams plus the repository and master-architecture diagrams.
+- The canonical v1.0.0 contract and canonical ERD remain unchanged.
+
+### Boundaries and progress
+
+- No live vendor API client, OAuth flow, webhook, scheduler, Snowflake pipeline, dbt model, production service, complete matcher, automatic approval, survivorship logic, or P1.4 work was added.
+- All examples are synthetic. No credentials, real customers, or vendor data are included.
+- P1 is now 25% complete (4 of 16 milestones); overall RevenueOS completion is approximately 3.6%.
+
+### Git commit
+
+Pending the implementation commit. The final hash is reported in the task handoff rather than written here to avoid a self-referential commit.

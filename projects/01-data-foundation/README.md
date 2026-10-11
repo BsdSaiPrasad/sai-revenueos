@@ -47,6 +47,16 @@ Read the repository-wide [beginner walkthrough](../../docs/START_HERE.md) for th
 - SQLite constraints, transactions, safe retries, rollback, concurrency protection, and reconciliation.
 - Twenty-three executed acceptance scenarios using synthetic Globex Health and Northstar Labs data.
 
+### P1.3 — Salesforce + HubSpot Source Model
+
+- Versioned source-event, checkpoint, Salesforce, and HubSpot contracts.
+- Raw-first source events, immutable source versions, current state, and deletion tombstones.
+- Essential Salesforce Account, Lead, Contact, and Opportunity mappings.
+- Essential HubSpot Company, Contact, and Deal mappings.
+- Checkpoint overlap, idempotent replay, late-update handling, and transactional failure recovery.
+- Reuse of the P1.2 source-identity interface without automatic identity approval.
+- Thirteen executed source-model scenarios and a runnable synthetic Globex demonstration.
+
 The [project state](PROJECT_STATE.md) is the authoritative source for current status.
 
 ## Key Documents
@@ -57,7 +67,9 @@ The [project state](PROJECT_STATE.md) is the authoritative source for current st
 | [Mermaid ERD](architecture/diagrams/canonical-model.mmd) | Inspect the version-controlled visual model. |
 | [P1.2 Identity Control Guide](architecture/IDENTITY_CONTROL.md) | Learn the implemented Decisions A–E and runtime flow. |
 | [P1.2 Runtime ERD](architecture/diagrams/identity-control.mmd) | Inspect the operational reference tables. |
-| [Decision Index](DECISIONS.md) | See the eight approved decisions and open their ADRs. |
+| [P1.3 Source Model Guide](architecture/SOURCE_MODEL.md) | Run and understand raw history, tombstones, checkpoints, replay, and identity integration. |
+| [P1.3 Source Contracts](contracts/) | Inspect the versioned envelope, checkpoint, Salesforce, and HubSpot definitions. |
+| [Decision Index](DECISIONS.md) | See all 19 approved decisions and open their ADRs. |
 | [Shared Contract](../../shared/contracts/canonical-model.v1.json) | Inspect the machine-readable technical definition. |
 | [Project State](PROJECT_STATE.md) | Confirm what works, what is deferred, and what comes next. |
 | [Work Log](WORK_LOG.md) | Review chronological implementation and verification evidence. |
@@ -80,13 +92,14 @@ From the repository root, using Python 3.9 or newer:
 ```bash
 python3 projects/01-data-foundation/scripts/validate_architecture.py
 python3 -m unittest discover -s projects/01-data-foundation/tests -v
+python3 projects/01-data-foundation/scripts/demo_source_model.py
 ```
 
 No credentials, package installation, warehouse, or external service is required.
 
 ## What Is Not Implemented?
 
-- Source-system ingestion and a complete identity-matching engine.
+- Live Salesforce/HubSpot API ingestion and a complete identity-matching engine.
 - Survivorship and field-level source precedence.
 - A deployed production identity service or Snowflake publication pipeline.
 - Physical Snowflake tables and dbt transformations.
@@ -97,4 +110,4 @@ The future folders for those capabilities are intentionally absent until they co
 
 ## What Comes Next?
 
-**P1.3 — Salesforce + HubSpot Source Model.** P1.2 deliberately provides no live connectors.
+Review the P1.3 implementation and demonstration before approving any P1.4 scope. No P1.4 work has started.

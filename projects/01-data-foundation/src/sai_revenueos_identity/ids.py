@@ -88,7 +88,7 @@ def uuid7(
         raise ValidationError("UUIDv7 random payload must fit in 74 bits")
 
     # RFC 9562 splits the 74 random bits around the UUID variant marker. Keeping
-    # these shifts explicit makes the standards mapping reviewable in interviews.
+    # these shifts explicit makes the standards mapping easy to review.
     rand_a = random_bits >> 62
     rand_b = random_bits & ((1 << 62) - 1)
     value = timestamp_ms << 80

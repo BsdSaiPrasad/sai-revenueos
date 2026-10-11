@@ -1,12 +1,12 @@
 # SAI RevenueOS
 
-[![Project status: P1.0 through P1.2 complete](https://img.shields.io/badge/status-P1.0%E2%80%93P1.2%20complete-2f855a)](projects/01-data-foundation/PROJECT_STATE.md)
+[![Project status: P1.0 through P1.3 complete](https://img.shields.io/badge/status-P1.0%E2%80%93P1.3%20complete-2f855a)](projects/01-data-foundation/PROJECT_STATE.md)
 
 ## What Is SAI RevenueOS?
 
 SAI RevenueOS is a learning and portfolio project that models how an enterprise business can connect its Go-To-Market (GTM) systems. It creates a consistent view of companies, people, sales opportunities, contracts, subscriptions, and customer activity across disconnected tools. The platform is designed around realistic Business-to-Business Software-as-a-Service (B2B SaaS) scenarios, but every company, person, and data example is synthetic.
 
-The repository contains the completed architecture foundation and a tested local P1.2 identity-control reference. It does not claim to be a deployed production platform.
+The repository contains the completed architecture foundation, a tested local P1.2 identity-control reference, and a tested local P1.3 Salesforce/HubSpot source-model reference. It does not claim to be a deployed production platform.
 
 ## What Business Problem Are We Solving?
 
@@ -39,7 +39,7 @@ Start with the [beginner walkthrough](docs/START_HERE.md). Use the [glossary](do
 
 | Project | Purpose | Status |
 |---|---|---|
-| **P1 — Data Foundation & Customer Identity** | Build shared identities, source mappings, and historical business relationships. | P1.0–P1.2 complete; P1.3 is next |
+| **P1 — Data Foundation & Customer Identity** | Build shared identities, source mappings, and historical business relationships. | P1.0–P1.3 complete |
 | **P2 — Inbound** | Connect future marketing demand, scoring, and routing processes. | Planned |
 | **P3 — Outbound** | Support future prospecting and outbound engagement workflows. | Planned |
 | **P4 — Revenue Intelligence** | Support future pipeline, forecasting, and revenue analysis. | Planned |
@@ -54,11 +54,12 @@ Start with the [beginner walkthrough](docs/START_HERE.md). Use the [glossary](do
 - P1.0 — Engineering and documentation foundation.
 - P1.1 — Canonical business model, shared contract, Entity Relationship Diagram (ERD), eight Architecture Decision Records (ADRs), and architecture validation.
 - P1.2 — Prefixed UUIDv7 IDs, source idempotency, governed crosswalk lifecycle, reversible merge/unmerge, transactions, recovery, and reconciliation.
+- P1.3 — Versioned Salesforce/HubSpot source contracts, raw history, tombstones, safe replay, checkpoints, and P1.2 integration.
 - Repository readability and learning-documentation improvement.
 
 **Planned next**
 
-- P1.3 — Salesforce + HubSpot Source Model.
+- P1.4 scope review; no P1.4 implementation has started.
 
 See the authoritative [progress tracker](PROGRESS.md) and [P1 project state](projects/01-data-foundation/PROJECT_STATE.md) for exact status and limitations.
 
@@ -77,10 +78,12 @@ See the authoritative [progress tracker](PROGRESS.md) and [P1 project state](pro
     ├── PROJECT_STATE.md           # Current, authoritative status
     ├── DECISIONS.md               # Approved decision index
     ├── WORK_LOG.md                # Chronological evidence log
+    ├── contracts/                 # P1.3 source and checkpoint contracts
+    ├── examples/p13/              # Synthetic Salesforce/HubSpot events
     ├── architecture/              # Model, ERD, and ADRs
-    ├── scripts/                   # Architecture validation
-    ├── src/                       # P1.2 Python + SQLite reference
-    └── tests/                     # P1.2 executable acceptance scenarios
+    ├── scripts/                   # Validation and runnable demonstration
+    ├── src/                       # P1.2/P1.3 Python + SQLite references
+    └── tests/                     # P1.2/P1.3 executable acceptance scenarios
 ```
 
 Future project folders are intentionally absent until they contain real work.
@@ -92,8 +95,9 @@ Future project folders are intentionally absent until they contain real work.
 3. [Canonical Business Model](projects/01-data-foundation/architecture/CANONICAL_BUSINESS_MODEL.md) — learn all 23 entities and the ERD.
 4. [Decision Index](projects/01-data-foundation/DECISIONS.md) — see what was decided and open the ADRs to learn why.
 5. [Shared Contract](shared/contracts/canonical-model.v1.json) — inspect the machine-readable technical definition.
-6. [Project State](projects/01-data-foundation/PROJECT_STATE.md) — confirm what is actually working and what comes next.
-7. [Progress](PROGRESS.md) — see the milestone-based completion calculation.
+6. [P1.3 Source Model](projects/01-data-foundation/architecture/SOURCE_MODEL.md) — run the synthetic source history and recovery demonstration.
+7. [Project State](projects/01-data-foundation/PROJECT_STATE.md) — confirm what is actually working and what comes next.
+8. [Progress](PROGRESS.md) — see the milestone-based completion calculation.
 
 ## How to Verify the Current Implementation
 
@@ -102,14 +106,15 @@ Requirements: Python 3.9 or newer. The validator uses only the Python standard l
 ```bash
 python3 projects/01-data-foundation/scripts/validate_architecture.py
 python3 -m unittest discover -s projects/01-data-foundation/tests -v
+python3 projects/01-data-foundation/scripts/demo_source_model.py
 ```
 
-These commands check the unchanged 23 entities and 31 relationships, 13 approved decisions, ERD coverage, continuity files, secret-like filenames, and 23 P1.2 runtime scenarios.
+These commands check the unchanged 23 entities and 31 relationships, 19 approved decisions, required reference artifacts, 36 P1.2/P1.3 scenarios, and the synthetic Globex demonstration.
 
 ## Important Limitations
 
-- The P1.2 runtime is a local reference implementation, not a deployed identity service or data platform.
-- There is no production Snowflake schema, ingestion pipeline, identity-matching engine, survivorship engine, reverse Extract-Transform-Load (ETL), or workflow service.
+- The P1.2 and P1.3 runtimes are local reference implementations, not deployed services or a data platform.
+- There is no live Salesforce/HubSpot connector, production Snowflake schema, identity-matching engine, survivorship engine, reverse Extract-Transform-Load (ETL), or workflow service.
 - The shared JSON contract describes intended meaning and relationships; it does not prove that source data has been loaded.
 - P2–P7 are planned boundaries, not implemented capabilities.
 

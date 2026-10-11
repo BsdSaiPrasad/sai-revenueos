@@ -1,62 +1,60 @@
 # P1 Project State
 
-**As of:** 2026-10-10
+**As of:** 2026-10-11
 
-**Current phase:** P1.2 complete and verified; ready for P1.3 architecture discussion
+**Current phase:** P1.3 complete and verified; P1.4 has not started
 
-**Completed phases:** P1.0 Engineering Foundation; P1.1 Canonical Business Model & ERD; P1.2 Canonical ID Generation & External-ID Crosswalk Strategy
+**Completed phases:** P1.0 Engineering Foundation; P1.1 Canonical Business Model and Entity Relationship Diagram (ERD); P1.2 Canonical ID and Crosswalk Control; P1.3 Salesforce + HubSpot Source Model
 
 ## Current implementation status
 
-P1 retains its versioned logical architecture: 23 entities, 31 declared relationships, the canonical ERD, and Decisions D001–D008 are unchanged. P1.2 adds Decisions D009–D013 and an executable standard-library Python + SQLite reference for identity control.
+P1 retains the unchanged canonical v1.0.0 architecture: 23 entities, 31 declared relationships, and its canonical ERD. Decisions D001–D013 remain unchanged. P1.3 adds accepted Decisions D014–D019 and a standard-library Python + SQLite reference for source-event validation, raw payload history, standardized source versions, current state, tombstones, checkpoints, safe replay, and P1.2 identity integration.
 
-The reference generates controlled entity-prefixed UUIDv7 IDs; atomically identifies source records by system, tenant, object type, and object ID; preserves source observations; separates resolution cases and candidate evidence from authoritative crosswalks; and supports audited corrections, retirement redirects, merge, unmerge, retry, rollback, concurrency protection, and reconciliation.
+All P1.3 payloads are realistic synthetic examples. No Salesforce or HubSpot API is called.
 
 ### What is working
 
-- All previously verified P1.1 model and documentation capabilities.
-- P1-only canonical identity creation for 12 approved crosswalk target types.
-- Database-enforced source uniqueness and non-overlapping mapping history.
-- Explicit steward approval before a mapping becomes authoritative.
-- Immutable source observations, audit events, merge events, and mapping lineage.
-- Safe retry through request-bound idempotency keys.
-- Recovery from an injected partial correction failure without partial state.
-- Restoration of original canonical IDs after an incorrect merge, with human review for uncertain post-merge changes.
-- Reconciliation reporting for key invalid or incomplete states.
+- Version 1 contracts for the source-event envelope, connector checkpoint, Salesforce objects, and HubSpot objects.
+- Essential Salesforce Account, Lead, Contact, and Opportunity field validation.
+- Essential HubSpot Company, Contact, and Deal field validation.
+- Complete available payload preservation before standardization.
+- Immutable update history, deletion tombstones, and late-event retention without current-state regression.
+- Checkpoints that advance only with durable history, plus a configurable overlap replay window.
+- Exact duplicate replay, conflicting event-ID detection, and safe retry after an injected failure.
+- P1.2 four-part SourceRecord registration and immutable observations through the existing public interface.
+- Unresolved identity state after ingestion; P1.3 never approves a candidate or activates a crosswalk.
+- A runnable temporary-database demonstration using synthetic Globex Health events.
 
 ### Verification status
 
-On 2026-10-10, all 23 P1.2 scenarios passed, including the 14 required behaviors, malformed inputs, unauthorized changes, permanent-ID protection, rebrand/acquisition boundaries, uncertain unmerge handling, revocation, and reconciliation. The architecture validator also passed with 23 entities, 31 relationships, 13 decisions, ERD coverage, continuity files, and secret-filename checks. JSON, Python compilation, documentation links, canonical contract/ERD preservation, and Git secret scans were separately checked as recorded in `WORK_LOG.md`.
+On 2026-10-11, all 36 scenarios passed: 23 P1.2 identity scenarios and 13 P1.3 source-model scenarios. The P1.3 suite covers versioned contracts, both vendors, raw-field retention, duplicate replay, updates, tombstones, malformed envelopes and payloads, late updates, overlap windows, injected failure and recovery, event-ID conflict, and unresolved identity.
 
-SQLite is an executable specification, not the final operational database. No deployed identity service, source connector, warehouse model, or scheduled reconciliation job is claimed.
+Architecture validation passed with 23 canonical entities, 31 relationships, 19 accepted decisions, P1.2/P1.3 artifacts, continuity files, and secret-filename checks. The synthetic demonstration completed successfully.
 
 ## Intentionally deferred
 
-- P1.3 Salesforce + HubSpot source integration and raw history design.
-- Complete identity matching, confidence thresholds, or artificial-intelligence scoring.
-- Survivorship and field-level source precedence.
-- Production operational database/service, authentication, monitoring, and publication to Snowflake.
-- Physical Snowflake DDL, dbt models, reverse Extract-Transform-Load (ETL), or P2–P7 workflows.
+- Live Salesforce or HubSpot authentication, API clients, webhooks, pagination, rate-limit handling, and scheduled extraction.
+- Production object storage, message queues, distributed transactions, observability, privacy controls, and retention enforcement.
+- Complete identity matching, confidence thresholds, automatic approval, and survivorship.
+- Snowflake tables, dbt models, warehouse loading, and reverse Extract-Transform-Load (ETL).
+- P1.4 and all P2–P7 implementation.
 
 ## Blockers and architecture flags
 
-No blocker prevents P1.2 closure. No **MASTER ARCHITECTURE DECISION NEEDED** item was introduced: the implementation stays inside the approved P1 identity boundary.
-
-P1.3 must define source payload/version storage and connector contracts without weakening P1.2's four-part source identity or audit guarantees.
+No blocker prevents P1.3 closure. No **MASTER ARCHITECTURE DECISION NEEDED** item was introduced. The implementation reuses P1.2 source identity and does not modify the canonical contract or its ERD.
 
 ## Next immediate step
 
-**P1.3 — Salesforce + HubSpot Source Model.** Begin with the source envelope, raw-version history, deletion semantics, connector checkpoints, and how source observations feed the existing P1.2 interface. Do not design matching or survivorship as part of that phase.
+Review the P1.3 contracts, source-processing function, tests, and runnable Globex demonstration. Define and approve P1.4 scope before implementation begins.
 
 ## Relevant paths
 
+- `projects/01-data-foundation/contracts/`
+- `projects/01-data-foundation/examples/p13/`
+- `projects/01-data-foundation/src/sai_revenueos_sources/`
+- `projects/01-data-foundation/tests/test_source_model.py`
+- `projects/01-data-foundation/scripts/demo_source_model.py`
+- `projects/01-data-foundation/architecture/SOURCE_MODEL.md`
 - `projects/01-data-foundation/src/sai_revenueos_identity/`
-- `projects/01-data-foundation/tests/test_identity_reference.py`
-- `projects/01-data-foundation/architecture/IDENTITY_CONTROL.md`
-- `projects/01-data-foundation/architecture/diagrams/identity-control.mmd`
 - `shared/contracts/canonical-model.v1.json` (unchanged v1.0.0)
 - `PROGRESS.md`
-
-## Last verified commit
-
-P1.2 implementation commit `69e9c4e` (`feat: implement P1.2 identity control`) passed the checks recorded in `WORK_LOG.md`. This hash is recorded by a small follow-up continuity commit to avoid self-reference.

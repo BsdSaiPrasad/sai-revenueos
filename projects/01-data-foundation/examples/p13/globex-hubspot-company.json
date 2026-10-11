@@ -1,0 +1,49 @@
+{
+  "contract_version": "1.0.0",
+  "event_id": "evt-hs-company-987654-v1",
+  "source": {
+    "system": "hubspot",
+    "tenant": "globex-hubspot-prod",
+    "object_type": "Company",
+    "object_id": "987654"
+  },
+  "event_type": "upsert",
+  "timestamps": {
+    "source_updated_at": "2026-10-11T14:02:00Z",
+    "observed_at": "2026-10-11T14:02:05Z"
+  },
+  "tracing": {
+    "trace_id": "trace-globex-demo",
+    "extraction_id": "synthetic-hs-run-001"
+  },
+  "checkpoint": {
+    "stream_name": "Company",
+    "cursor": "hs-company-after-987654",
+    "high_watermark_at": "2026-10-11T14:02:10Z"
+  },
+  "payload": {
+    "id": "987654",
+    "properties": {
+      "name": "Globex Health",
+      "domain": "globex.example",
+      "industry": "HEALTHCARE",
+      "country": "United States",
+      "hubspot_owner_id": "84201",
+      "lifecyclestage": "customer",
+      "annualrevenue": "12500000",
+      "numberofemployees": "480"
+    },
+    "propertiesWithHistory": {
+      "domain": [
+        {
+          "value": "globex.example",
+          "timestamp": "2026-10-11T14:02:00Z",
+          "sourceType": "CRM_UI"
+        }
+      ]
+    },
+    "createdAt": "2026-01-15T09:30:00Z",
+    "updatedAt": "2026-10-11T14:02:00Z",
+    "archived": false
+  }
+}

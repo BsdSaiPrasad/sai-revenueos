@@ -6,15 +6,15 @@ This walkthrough explains Project 1 through one continuous, synthetic example. N
 
 **Globex Health** appears in both Salesforce and HubSpot. **Sarah Kim** and **John Lee** work there. The company is evaluating a fictional analytics product, signs a contract, and starts a subscription.
 
-The architecture and local identity-control reference are complete through P1.2. Source ingestion and complete identity matching are later work.
+The architecture and local references are complete through P1.3. P1.3 uses realistic synthetic source events; live connector execution and complete identity matching are later work.
 
 ## Step 1 — Preserve the Source Records
 
 Salesforce Account `SF-1001` and HubSpot Company `HS-502` are different system records, even when they describe the same company. RevenueOS represents each one as a `SourceRecord`.
 
-**Implemented locally:** the stable four-part source identity, database uniqueness, atomic replay handling, and immutable observations.
+**Implemented locally:** the stable four-part source identity, database uniqueness, atomic replay handling, immutable observations, complete raw payload history, standardized source versions, tombstones, and checkpoints.
 
-**Later:** P1.3 will connect real source systems and store incoming versions. No connector runs today.
+**Important boundary:** no connector or vendor API runs today. The P1.3 examples simulate what a connector would deliver.
 
 ## Step 2 — Give the Company a Canonical Account
 
@@ -96,3 +96,4 @@ If an identity mapping is wrong, the prior crosswalk row remains in history and 
 4. Read the [decision index](../projects/01-data-foundation/DECISIONS.md) and its ADRs.
 5. Check [project state](../projects/01-data-foundation/PROJECT_STATE.md) before assuming a feature is implemented.
 6. Read the [P1.2 identity-control guide](../projects/01-data-foundation/architecture/IDENTITY_CONTROL.md) for the executable workflow.
+7. Run the [P1.3 source-model guide](../projects/01-data-foundation/architecture/SOURCE_MODEL.md) for raw history, replay, failure, and tombstone behavior.
