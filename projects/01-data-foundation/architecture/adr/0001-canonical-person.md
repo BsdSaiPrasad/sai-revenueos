@@ -8,9 +8,13 @@
 
 The same human can appear in a Customer Relationship Management (CRM) system, marketing platform, product application, and support tool. Treating every record as a different person creates duplicates and breaks history.
 
-## 2. Real-World Example
+## 2. Connected Example
 
-Synthetic person **Sarah Kim** appears as a Salesforce Lead, a HubSpot contact, and a product user. She works at **Globex Health** and later joins **Northstar Labs**. Sarah is still one human.
+**Example:** Sarah Kim appears as a Salesforce Lead, a HubSpot contact, and a product user before moving from Globex Health to Northstar Labs.
+
+**Problem:** Treating each record or employer change as a new person would duplicate Sarah and split her history.
+
+**Our Solution:** One durable Person represents Sarah, while source records and effective-dated employment relationships preserve where each fact came from.
 
 ## 3. Options We Considered
 

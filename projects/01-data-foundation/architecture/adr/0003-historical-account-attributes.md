@@ -8,14 +8,18 @@
 
 Company names, domains, and parent relationships change. Overwriting the current value makes past reports and identity decisions difficult to explain.
 
-## 2. Real-World Example
+## 2. Connected Example
 
-Synthetic **Globex Health** rebrands to **Helio Health** and changes its domain. An analyst reviewing last year's Opportunity should still be able to see the name and domain that were valid then.
+**Example:** Globex Health rebrands to Helio Health and changes its primary domain after closing an Opportunity.
+
+**Problem:** Overwriting the old name and domain would make last year's report show facts that were not valid at that time.
+
+**Our Solution:** Selective Slowly Changing Dimension Type 2 (SCD Type 2) history closes the old values and starts new effective-dated rows without changing the Account ID.
 
 ## 3. Options We Considered
 
 - Keep only the latest value. This is simple but destroys history.
-- Apply Slowly Changing Dimension Type 2 (SCD Type 2) to every Account attribute. This preserves everything but creates unnecessary complexity.
+- Apply SCD Type 2 to every Account attribute. This preserves everything but creates unnecessary complexity.
 - Preserve history only for attributes with a clear as-of business need.
 
 ## 4. Our Decision

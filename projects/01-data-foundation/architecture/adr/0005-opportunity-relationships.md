@@ -8,9 +8,13 @@
 
 A sales Opportunity needs one clear buying company, but a Business-to-Business (B2B) purchase usually involves several people with different roles.
 
-## 2. Real-World Example
+## 2. Connected Example
 
-Synthetic **Globex Health** is buying an analytics product. **Sarah Kim** is the champion, **John Lee** is the economic buyer, and **Emily Chen** is the technical evaluator.
+**Example:** Globex Health evaluates an analytics product with Sarah Kim as champion, John Lee as economic buyer, and Emily Chen as technical evaluator.
+
+**Problem:** Repeating person columns would limit the buying committee, while multiple primary Accounts would make pipeline ownership unclear.
+
+**Our Solution:** The Opportunity has one primary Globex Account, and OpportunityPersonRole stores any number of people with explicit roles.
 
 ## 3. Options We Considered
 

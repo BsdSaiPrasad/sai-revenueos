@@ -4,9 +4,13 @@
 - **Status:** Accepted and implemented in the reference layer
 - **Scope:** P1 identity resolution lifecycle
 
-## Problem and example
+## Connected Example
 
-A possible match must not become business truth automatically. If a Northstar Labs source record has two plausible Accounts, RevenueOS needs to show ambiguity and require a decision.
+**Example:** A new Northstar Labs source record has name and domain evidence pointing to two plausible Accounts.
+
+**Problem:** Writing the highest score directly to the crosswalk could turn an uncertain guess into authoritative customer identity.
+
+**Our Solution:** A ResolutionCase records ambiguity, CandidateEvidence preserves both possibilities, and only a reviewed active crosswalk becomes authoritative.
 
 ## Options considered
 

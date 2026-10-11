@@ -8,9 +8,13 @@
 
 A marketing initiative, an individual interaction, and a product login describe different things. Combining them produces unclear metrics and weak provenance.
 
-## 2. Real-World Example
+## 2. Connected Example
 
-Synthetic **Globex Health** is included in the “2026 Analytics Readiness” Campaign. Sarah Kim attends its webinar, creating an Activity. Later she signs into the product through a ProductUser profile.
+**Example:** Globex Health joins the “2026 Analytics Readiness” Campaign, Sarah Kim attends its webinar, and later she signs in through a ProductUser profile.
+
+**Problem:** Combining the initiative, attendance event, and product profile into one generic record would blur their different meanings and lifecycles.
+
+**Our Solution:** Campaign, Activity, and ProductUser stay separate while linking to the same canonical Person and Account when resolved.
 
 ## 3. Options We Considered
 

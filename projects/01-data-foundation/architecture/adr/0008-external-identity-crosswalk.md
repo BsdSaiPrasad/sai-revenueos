@@ -8,9 +8,13 @@
 
 One canonical entity can have records in several systems. Matches can also be wrong and require correction. Embedding external IDs directly in canonical entities makes both problems difficult to manage.
 
-## 2. Real-World Example
+## 2. Connected Example
 
-Salesforce Account `SF-1001` and HubSpot Company `HS-502` both describe synthetic Globex Health. Later, an analyst discovers that another HubSpot company was mapped to Globex by mistake.
+**Example:** Salesforce Account `SF-1001` and HubSpot Company `HS-502` both describe Globex Health, but a different HubSpot company is later mapped there by mistake.
+
+**Problem:** Vendor columns on Account would not scale, and overwriting the bad match would erase evidence of what happened.
+
+**Our Solution:** An effective-dated crosswalk maps each SourceRecord separately and corrects the mistake by closing the old mapping and appending a reviewed replacement.
 
 ## 3. Options We Considered
 

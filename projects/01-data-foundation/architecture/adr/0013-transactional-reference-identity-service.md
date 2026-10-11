@@ -4,9 +4,13 @@
 - **Status:** Accepted and implemented in the reference layer
 - **Scope:** P1 operational reference behavior
 
-## Problem and example
+## Connected Example
 
-Application checks alone cannot prevent two workers from creating duplicates or a failure from leaving half a correction. Closing Globex's old mapping and creating its replacement must succeed or fail together.
+**Example:** Two workers replay the same Globex Health source record while a mapping correction fails after closing the old row.
+
+**Problem:** Application checks alone could create duplicate SourceRecords or leave Globex with no active mapping after a partial failure.
+
+**Our Solution:** One SQLite transaction serializes the write and commits the mapping, audit, and idempotency changes together—or rolls all of them back.
 
 ## Options considered
 
@@ -17,7 +21,7 @@ Application checks alone cannot prevent two workers from creating duplicates or 
 
 ## Decision and technical design
 
-Use a standard-library Python service and SQLite schema with atomic transactions, unique constraints, state triggers, non-overlapping mapping intervals, immutable audit rows, idempotency claims, write serialization, rollback, and reconciliation. Tests exercise concurrent connections and injected partial failure.
+Use Python's standard library and SQLite, an embedded Structured Query Language (SQL) database, with atomic transactions, unique constraints, state triggers, non-overlapping mapping intervals, immutable audit rows, idempotency claims, write serialization, rollback, and reconciliation. Tests exercise concurrent connections and injected partial failure.
 
 ## Tradeoffs
 

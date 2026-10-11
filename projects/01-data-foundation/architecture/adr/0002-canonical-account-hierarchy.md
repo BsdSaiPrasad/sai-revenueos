@@ -8,9 +8,13 @@
 
 A corporate group can contain a parent company and several subsidiaries. Sales, contracts, product use, and support may happen at different levels of that hierarchy.
 
-## 2. Real-World Example
+## 2. Connected Example
 
-Synthetic **Helio Systems** owns **Globex Health**. Globex Health signs its own contract and has its own users. Combining both companies into one Account would attach Globex activity to the wrong legal or operating entity.
+**Example:** Helio Systems owns Globex Health, but Globex signs its own contract and supports its own users.
+
+**Problem:** Combining them into one Account would attach Globex revenue and activity to the wrong legal or operating company.
+
+**Our Solution:** Each company keeps its own Account, and an effective-dated hierarchy relationship connects the parent to the subsidiary.
 
 ## 3. Options We Considered
 

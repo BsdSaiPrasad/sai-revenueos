@@ -8,9 +8,13 @@
 
 A prospect can become a customer, renew, pause service, or stop being a customer. Creating a second company record when this happens would split the organization's history.
 
-## 2. Real-World Example
+## 2. Connected Example
 
-Synthetic **Globex Health** begins as a prospect. It signs a Contract and starts a Subscription. Globex Health is now a customer, but it is still the same Account.
+**Example:** Globex Health begins as a prospect, signs a Contract, and starts a Subscription.
+
+**Problem:** Creating a second Customer record would split its marketing, sales, billing, product, and support history across two company identities.
+
+**Our Solution:** Globex keeps one Account whose lifecycle can become customer, while Contract and Subscription retain their own identities and histories.
 
 ## 3. Options We Considered
 

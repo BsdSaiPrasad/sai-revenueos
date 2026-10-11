@@ -4,9 +4,13 @@
 - **Status:** Accepted and implemented in the reference layer
 - **Scope:** P1 source identity
 
-## Problem and example
+## Connected Example
 
-An object ID is not globally unique. Salesforce ID `001ABC` in the Globex sandbox and production tenants may refer to different objects, while replaying the production record must not create a duplicate.
+**Example:** Salesforce identifier `001ABC` appears in both Globex Health's sandbox and production tenants, and the production record is delivered twice.
+
+**Problem:** Object ID alone could combine two tenant records, while an unprotected replay could create a duplicate SourceRecord.
+
+**Our Solution:** The database enforces uniqueness across system, tenant, object type, and object ID, while atomic upsert and idempotency preserve one source identity across retries.
 
 ## Options considered
 

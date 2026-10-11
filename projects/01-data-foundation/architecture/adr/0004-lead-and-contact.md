@@ -6,11 +6,15 @@
 
 ## 1. The Problem
 
-Salesforce and HubSpot use Lead and Contact objects for operational lifecycle stages. One human can have several such records or be converted from one type to another.
+Salesforce and HubSpot Customer Relationship Management (CRM) platforms use Lead and Contact objects for operational lifecycle stages. One human can have several such records or be converted from one type to another.
 
-## 2. Real-World Example
+## 2. Connected Example
 
-Synthetic **Sarah Kim** first appears as Salesforce Lead `00Q-17`. After qualification, Salesforce creates Contact `003-82`. HubSpot also has a contact for Sarah. These are three source representations of one human.
+**Example:** Sarah Kim begins as Salesforce Lead `00Q-17`, becomes Contact `003-82`, and also appears as a HubSpot contact.
+
+**Problem:** Creating a canonical Lead, Contact, and HubSpot person would turn one human into three identities and lose conversion context.
+
+**Our Solution:** All three stay as SourceRecords and can map to Sarah's one canonical Person after identity resolution.
 
 ## 3. Options We Considered
 

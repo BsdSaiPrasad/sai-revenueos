@@ -4,9 +4,13 @@
 - **Status:** Accepted and implemented in the reference layer
 - **Scope:** P1 stewardship
 
-## Problem and example
+## Connected Example
 
-Incorrect mappings and merges happen. If Northstar Labs is incorrectly merged into Globex Health, deleting rows cannot explain the mistake or restore stable downstream references.
+**Example:** A steward incorrectly merges Northstar Labs into Globex Health after misreading an acquisition announcement.
+
+**Problem:** Deleting Northstar or rewriting its mappings would break historical references and hide why the identity changed.
+
+**Our Solution:** The merge retires Northstar with a redirect and immutable lineage; unmerge can reactivate the same original ID and sends later uncertain changes to human review.
 
 ## Options considered
 

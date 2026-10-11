@@ -139,3 +139,22 @@ Implementation commit: `69e9c4e` (`feat: implement P1.2 identity control`). Auth
 ### Git commit
 
 Pending the documentation commit. The final hash is reported in the task handoff rather than written here to avoid a self-referential commit.
+
+## 2026-10-11 — ADR Example Clarity Improvement
+
+### Improved
+
+- Reworked the existing example in every Architecture Decision Record (ADR), D001–D013, into one consistent three-part format: business example, failure risk, and RevenueOS solution.
+- Connected the examples through Globex Health, Northstar Labs, Sarah Kim, Salesforce, and HubSpot while keeping each example to three short sentences.
+- Expanded technical acronyms where needed and preserved the concise alternatives, decision, tradeoff, and interview explanations.
+
+### Verification and boundaries
+
+- Confirmed 13/13 ADRs contain exactly one `Example`, `Problem`, and `Our Solution` section.
+- Confirmed D001–D013 retain their existing decision IDs, approval statuses, scopes, technical meanings, and tradeoffs.
+- Architecture validation, 23 P1.2 tests, Python compilation, JSON parsing, relative Markdown links, documentation-only diff review, and secret checks passed.
+- No executable code, schema, test, contract, diagram, progress percentage, P1.3 work, or new architecture decision was introduced.
+
+### Git commit
+
+Pending the documentation commit. The final hash is reported in the task handoff rather than written here to avoid a self-referential commit.
