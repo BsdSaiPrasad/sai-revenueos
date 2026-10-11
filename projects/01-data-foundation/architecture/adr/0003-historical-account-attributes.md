@@ -4,43 +4,37 @@
 - **Status:** Accepted
 - **Scope:** P1 temporal modeling
 
-## 1. The Problem
+## The Problem
 
-Company names, domains, and parent relationships change. Overwriting the current value makes past reports and identity decisions difficult to explain.
+Company names, domains, and parent relationships change. Overwriting those values would make historical reports and identity decisions show facts that were not valid at the time.
 
-## 2. Connected Example
+## Visual Diagram
 
-**Example:** Globex Health rebrands to Helio Health and changes its primary domain after closing an Opportunity.
+The arrow shows the change between two non-overlapping validity intervals, not a processing workflow.
 
-**Problem:** Overwriting the old name and domain would make last year's report show facts that were not valid at that time.
+```mermaid
+flowchart LR
+    O[Globex Health<br/>valid until rebrand] -->|close old interval| N[Helio Health<br/>valid from rebrand]
+    A[Same Account ID] --- O
+    A --- N
+```
 
-**Our Solution:** Selective Slowly Changing Dimension Type 2 (SCD Type 2) history closes the old values and starts new effective-dated rows without changing the Account ID.
+## Simple Example
 
-## 3. Options We Considered
+Globex Health closes an Opportunity and later rebrands as Helio Health. RevenueOS closes the old name interval and starts a new one. A report for the earlier period still shows Globex Health. The canonical `account_id` stays the same.
 
-- Keep only the latest value. This is simple but destroys history.
-- Apply SCD Type 2 to every Account attribute. This preserves everything but creates unnecessary complexity.
-- Preserve history only for attributes with a clear as-of business need.
+## How We Implement It
 
-## 4. Our Decision
+| Component | Responsibility |
+|---|---|
+| `AccountNameHistory` | Stores legal names, trade names, aliases, and preferred-name intervals. |
+| `AccountDomainHistory` | Stores normalized domains and primary-domain intervals. |
+| `AccountHierarchyRelationship` | Stores parent-child relationships over time. |
+| `valid_from`, `valid_to` | Define half-open intervals: the start is included and the end is excluded. |
 
-Use selective SCD Type 2 semantics for Account names, domains, and hierarchy relationships. Do not apply SCD Type 2 blindly to every table or field.
+## Why This Design
 
-## 5. How It Works Technically
-
-- `AccountNameHistory` stores legal names, trade names, aliases, and preferred-name intervals.
-- `AccountDomainHistory` stores normalized domains and primary-domain intervals.
-- `AccountHierarchyRelationship` stores effective-dated parent/child links.
-- `valid_from` is inclusive, `valid_to` is exclusive, and null `valid_to` means current.
-
-## 6. Why We Chose It
-
-These attributes matter for identity resolution, attribution, and as-of reporting. Selective history preserves that value without turning every entity into a complex history model.
-
-## 7. Tradeoffs and Limitations
-
-Queries need time-aware joins, and future tests must prevent overlapping preferred or primary intervals. Attributes not selected for history will rely on source history or later requirements.
-
-## 8. Interview Explanation
-
-“I used SCD Type 2 only for identity-sensitive Account attributes such as name, domain, and hierarchy. That supports as-of analysis without adding history complexity everywhere.”
+- **Rejected alternative:** Keep only the latest value or apply Slowly Changing Dimension Type 2 (SCD Type 2) history to every field.
+- **Why rejected:** Current-only values destroy history, while universal history adds complexity without a clear business need.
+- **Why this is better:** Selective SCD Type 2 preserves identity-sensitive facts needed for matching, attribution, and as-of reporting.
+- **Tradeoff:** Queries need time-aware joins, and interval rules must prevent overlapping preferred names, primary domains, or hierarchy links.

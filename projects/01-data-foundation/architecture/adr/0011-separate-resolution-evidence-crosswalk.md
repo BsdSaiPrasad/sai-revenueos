@@ -4,28 +4,39 @@
 - **Status:** Accepted and implemented in the reference layer
 - **Scope:** P1 identity resolution lifecycle
 
-## Connected Example
+## The Problem
 
-**Example:** A new Northstar Labs source record has name and domain evidence pointing to two plausible Accounts.
+A possible identity match is not the same as approved identity truth. Writing the highest score directly to a crosswalk could turn uncertain evidence into an authoritative customer mapping.
 
-**Problem:** Writing the highest score directly to the crosswalk could turn an uncertain guess into authoritative customer identity.
+## Visual Diagram
 
-**Our Solution:** A ResolutionCase records ambiguity, CandidateEvidence preserves both possibilities, and only a reviewed active crosswalk becomes authoritative.
+Arrows show the governed resolution path; only the active crosswalk is authoritative.
 
-## Options considered
+```mermaid
+flowchart LR
+    S[SourceRecord] --> C[ResolutionCase<br/>workflow state]
+    C --> E[CandidateEvidence<br/>possible targets and reasons]
+    E -->|accepted after policy or review| X[Active Crosswalk<br/>authoritative mapping]
+    E -->|ambiguous| H[Human review]
+```
 
-- Put scores directly on the crosswalk, which mixes guesses with approved truth.
-- Overwrite one status row, which loses evidence and reviewer history.
-- Separate workflow state, evidence, and authoritative mappings.
+## Simple Example
 
-## Decision and technical design
+A Northstar Labs source record has name and domain evidence for two plausible Accounts. RevenueOS records both candidates instead of choosing the highest score automatically. The case enters review because the result is ambiguous. Only an accepted candidate can produce an active crosswalk.
 
-`ResolutionCase` tracks `unresolved`, `candidate`, `ambiguous`, `pending_review`, `resolved`, or `no_match`. `CandidateEvidence` records possible targets, evidence, confidence, policy, and a review disposition. Only an approved `active` `ExternalIdentityCrosswalk` is authoritative; earlier rows become `superseded` or `revoked`.
+## How We Implement It
 
-## Tradeoffs
+| Component | Responsibility |
+|---|---|
+| `ResolutionCase` | Tracks `unresolved`, `candidate`, `ambiguous`, `pending_review`, `resolved`, or `no_match`. |
+| `CandidateEvidence` | Stores a possible target, evidence, confidence, policy version, and review disposition. |
+| `propose_candidate()` | Adds candidate evidence without making it authoritative. |
+| `request_manual_review()`, `decide_candidate()` | Enforce reviewed transitions for uncertain cases. |
+| `ExternalIdentityCrosswalk` | Holds the approved active mapping; prior rows remain superseded or revoked. |
 
-More tables and explicit transitions create operational work, but they prevent a heuristic from silently changing identity. Complete matching and artificial-intelligence scoring remain deferred.
+## Why This Design
 
-## Interview explanation
-
-“I separated what we are investigating, why we think it matches, and what the business has approved. Only the approved active crosswalk is truth.”
+- **Rejected alternative:** Put scores directly on the crosswalk or overwrite one combined status row.
+- **Why rejected:** Those designs mix guesses with truth and lose the evidence and review history behind a decision.
+- **Why this is better:** Workflow state, supporting evidence, and authoritative mappings remain explicit and independently auditable.
+- **Tradeoff:** The model requires more tables and transitions, and the complete production matching engine remains deferred.

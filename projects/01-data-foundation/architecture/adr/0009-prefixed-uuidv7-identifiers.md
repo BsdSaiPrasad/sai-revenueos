@@ -4,29 +4,38 @@
 - **Status:** Accepted and implemented in the reference layer
 - **Scope:** P1 canonical identity creation
 
-## Connected Example
+## The Problem
 
-**Example:** Globex Health receives a permanent Account identifier before it rebrands and changes its domain.
+Canonical identifiers must stay stable when vendor records, company names, domains, or employers change. Sequential numbers need central allocation, while untyped random identifiers are harder for people to recognize and troubleshoot.
 
-**Problem:** A Salesforce identifier, company name, domain, or sequential number would either change, couple RevenueOS to one vendor, or require central allocation.
+## Visual Diagram
 
-**Our Solution:** RevenueOS assigns an entity prefix plus Universally Unique Identifier version 7 (UUIDv7), so the Account ID stays stable, recognizable, and roughly time ordered.
+The arrow shows identifier construction, not a data-processing pipeline.
 
-## Options considered
+```mermaid
+flowchart LR
+    P[Controlled prefix<br/>sai_acc_] --> I[Canonical Account ID]
+    U[UUIDv7<br/>time ordered and unique] --> I
+    I --> E[Globex Health]
+```
 
-- Vendor IDs couple RevenueOS to one system.
-- Sequential integers are compact but require centralized allocation and reveal volume.
-- Random Universally Unique Identifier version 4 (UUIDv4) values are portable but do not provide creation-time ordering.
-- Entity-prefixed UUIDv7 values combine readable type context, distributed uniqueness, and time ordering.
+## Simple Example
 
-## Decision and technical design
+Globex Health receives an Account ID before it rebrands and changes its domain. RevenueOS combines the `sai_acc_` prefix with a Universally Unique Identifier version 7 (UUIDv7). The ID remains stable after those business changes. Its prefix also tells an operator that it identifies an Account.
 
-Generate a Request for Comments (RFC) 9562 UUIDv7 and prepend a controlled entity prefix such as `sai_acc_`, `sai_person_`, or `sai_opp_`. IDs are permanent and non-reusable. P1 owns creation authority. The implementation validates version and variant, detects a collision, and retries safely without assuming the host Python has `uuid.uuid7()`.
+## How We Implement It
 
-## Tradeoffs
+| Component | Responsibility |
+|---|---|
+| `uuid7()` | Generates a Request for Comments (RFC) 9562 UUIDv7 without requiring `uuid.uuid7()`. |
+| `PrefixedIDGenerator.generate()` | Combines the controlled entity prefix with the UUIDv7 value. |
+| `validate_prefixed_id()` | Confirms the expected prefix, UUID version, and UUID variant. |
+| Prefix registry | Maps supported entity types to prefixes such as `sai_acc_`, `sai_person_`, and `sai_opp_`. |
+| Collision retry | Generates another value if the database already contains the candidate ID. |
 
-IDs are longer than integers, the prefix registry requires governance, and UUIDv7 time bits reveal approximate creation time. The benefit is source independence and reliable distributed generation.
+## Why This Design
 
-## Interview explanation
-
-“I used controlled entity prefixes plus standards-compliant UUIDv7 so IDs are readable, globally unique, roughly time ordered, and never tied to a vendor record.”
+- **Rejected alternative:** Use vendor IDs, sequential integers, or random UUID version 4 (UUIDv4) values.
+- **Why rejected:** Vendor IDs create source coupling, integers require central allocation, and UUIDv4 provides no creation-time ordering.
+- **Why this is better:** Entity-prefixed UUIDv7 values are source-independent, distributed, recognizable, and roughly time ordered.
+- **Tradeoff:** IDs are longer, prefixes require governance, and UUIDv7 exposes approximate creation time.

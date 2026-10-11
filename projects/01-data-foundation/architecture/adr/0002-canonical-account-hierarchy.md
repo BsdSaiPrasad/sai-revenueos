@@ -4,44 +4,36 @@
 - **Status:** Accepted
 - **Scope:** P1 organization identity
 
-## 1. The Problem
+## The Problem
 
-A corporate group can contain a parent company and several subsidiaries. Sales, contracts, product use, and support may happen at different levels of that hierarchy.
+A corporate group can contain a parent company and several subsidiaries. Combining them into one Account would attach contracts, revenue, users, and support activity to the wrong legal or operating company.
 
-## 2. Connected Example
+## Visual Diagram
 
-**Example:** Helio Systems owns Globex Health, but Globex signs its own contract and supports its own users.
+The line is a logical, effective-dated relationship between two independent Accounts.
 
-**Problem:** Combining them into one Account would attach Globex revenue and activity to the wrong legal or operating company.
+```mermaid
+flowchart LR
+    H[Helio Systems<br/>Parent Account] ---|AccountHierarchyRelationship| G[Globex Health<br/>Subsidiary Account]
+```
 
-**Our Solution:** Each company keeps its own Account, and an effective-dated hierarchy relationship connects the parent to the subsidiary.
+## Simple Example
 
-## 3. Options We Considered
+Helio Systems owns Globex Health, but Globex signs its own contract and supports its own users. RevenueOS gives each company a separate `account_id`. An effective-dated hierarchy relationship connects Globex to Helio. Globex revenue stays with Globex while group reporting can include both Accounts.
 
-- Flatten the group into one Account. Reporting is easy, but entity-level facts become inaccurate.
-- Copy parent fields onto each subsidiary. This duplicates data and loses history when ownership changes.
-- Give each organization its own Account and connect them with explicit relationships.
+## How We Implement It
 
-## 4. Our Decision
+| Component | Responsibility |
+|---|---|
+| `Account.account_id` | Gives each parent or subsidiary its own canonical identity. |
+| `AccountHierarchyRelationship.parent_account_id` | Identifies the parent Account. |
+| `AccountHierarchyRelationship.child_account_id` | Identifies the subsidiary Account. |
+| `relationship_type`, `valid_from`, `valid_to` | Describe the hierarchy and when it is valid. |
+| Hierarchy rules | Define self-links and cycles as invalid; later physical implementations must enforce them. |
 
-Parent companies and subsidiaries receive independent canonical `Account` identities connected through `AccountHierarchyRelationship`.
+## Why This Design
 
-## 5. How It Works Technically
-
-- Both Helio Systems and Globex Health have their own `account_id`.
-- `AccountHierarchyRelationship.parent_account_id` points to Helio Systems.
-- `child_account_id` points to Globex Health.
-- `valid_from` and `valid_to` preserve changes in ownership over time.
-- Self-links and hierarchy cycles are invalid.
-
-## 6. Why We Chose It
-
-The design keeps contracts, revenue, users, and support attached to the correct organization while still supporting parent-level rollups.
-
-## 7. Tradeoffs and Limitations
-
-Queries need hierarchy traversal, and later validation must prevent cycles or conflicting active parents. That extra work is preferable to losing legal and operational detail.
-
-## 8. Interview Explanation
-
-“I modeled parents and subsidiaries as separate Accounts with effective-dated hierarchy edges. This preserves entity-level revenue and contracts while still allowing corporate-family reporting.”
+- **Rejected alternative:** Flatten the corporate group into one Account or copy parent fields onto subsidiaries.
+- **Why rejected:** Flattening loses entity-level facts, while copied fields become stale and erase ownership history.
+- **Why this is better:** Independent Accounts preserve legal and operational detail while explicit relationships support rollups.
+- **Tradeoff:** Queries must traverse the hierarchy, and validation must prevent cycles or conflicting active parents.

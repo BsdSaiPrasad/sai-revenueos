@@ -4,45 +4,38 @@
 - **Status:** Accepted
 - **Scope:** P1 source-to-canonical identity
 
-## 1. The Problem
+## The Problem
 
-One canonical entity can have records in several systems. Matches can also be wrong and require correction. Embedding external IDs directly in canonical entities makes both problems difficult to manage.
+One canonical entity can have records in several systems, and a match can later prove wrong. Storing vendor identifiers directly on canonical entities does not scale and makes corrections difficult to explain.
 
-## 2. Connected Example
+## Visual Diagram
 
-**Example:** Salesforce Account `SF-1001` and HubSpot Company `HS-502` both describe Globex Health, but a different HubSpot company is later mapped there by mistake.
+Arrows show effective-dated mappings from source records to one canonical Account, not ingestion steps.
 
-**Problem:** Vendor columns on Account would not scale, and overwriting the bad match would erase evidence of what happened.
+```mermaid
+flowchart LR
+    SF[Salesforce Account<br/>SourceRecord] -->|Active crosswalk| G[Globex Health<br/>Canonical Account]
+    HS[HubSpot Company<br/>SourceRecord] -->|Active crosswalk| G
+    OLD[Incorrect mapping] -.->|Closed and superseded| G
+```
 
-**Our Solution:** An effective-dated crosswalk maps each SourceRecord separately and corrects the mistake by closing the old mapping and appending a reviewed replacement.
+## Simple Example
 
-## 3. Options We Considered
+Salesforce Account `SF-1001` and HubSpot Company `HS-502` both describe Globex Health. A different HubSpot company is later mapped there by mistake. RevenueOS closes the incorrect crosswalk interval and appends a reviewed replacement. The original mapping remains available for audit.
 
-- Add one Salesforce ID, HubSpot ID, and other vendor columns to Account. This does not scale and assumes one record per source.
-- Use a domain or external ID as the canonical Account ID. Source values can change and are not globally reliable.
-- Store source records separately and use an effective-dated mapping table.
+## How We Implement It
 
-## 4. Our Decision
+| Component | Responsibility |
+|---|---|
+| `SourceRecord` | Identifies one source-system object without making it canonical truth. |
+| `canonical_entity_type`, `canonical_entity_id` | Identify the supported canonical target. |
+| `mapping_status`, `mapping_method`, `confidence` | Describe the mapping outcome and how it was established. |
+| `valid_from`, `valid_to` | Preserve when each mapping was authoritative. |
+| `supersedes_crosswalk_id`, `reviewed_by`, `reviewed_at` | Preserve correction lineage and review evidence. |
 
-Use `ExternalIdentityCrosswalk` as a separate, auditable mapping from `SourceRecord` to a supported canonical entity. Support multiple source records, historical mappings, and future manual corrections.
+## Why This Design
 
-## 5. How It Works Technically
-
-- `source_record_id` identifies the source object.
-- `canonical_entity_type` and `canonical_entity_id` identify the supported target.
-- `mapping_status`, `mapping_method`, and `confidence` describe the mapping outcome, not the original source object.
-- `valid_from` and `valid_to` preserve mapping intervals.
-- `supersedes_crosswalk_id`, reviewer, and review time support correction lineage.
-- One SourceRecord may have historical mappings but at most one active target at a time.
-
-## 6. Why We Chose It
-
-The crosswalk keeps canonical IDs vendor-independent, supports many source records per entity, and makes corrections explainable without rewriting history.
-
-## 7. Tradeoffs and Limitations
-
-The system needs mapping governance, temporal uniqueness, reconciliation, and manual review. P1.2 now implements those mechanics in a local transactional reference; production deployment and a complete matching engine remain deferred.
-
-## 8. Interview Explanation
-
-“I used an effective-dated crosswalk between source records and canonical entities. That supports many systems, preserves provenance, and lets us correct a bad match without deleting the old evidence.”
+- **Rejected alternative:** Add one vendor-ID column per system or use a vendor value as the canonical ID.
+- **Why rejected:** Vendor columns do not support many records per source and couple identity to mutable external values.
+- **Why this is better:** A separate crosswalk supports multiple systems, vendor-independent canonical IDs, and traceable corrections.
+- **Tradeoff:** The system needs mapping governance, temporal uniqueness, reconciliation, and manual review; P1.2 proves these mechanics only in a local reference implementation.

@@ -4,29 +4,41 @@
 - **Status:** Accepted and implemented in the reference layer
 - **Scope:** P1 source identity
 
-## Connected Example
+## The Problem
 
-**Example:** Salesforce identifier `001ABC` appears in both Globex Health's sandbox and production tenants, and the production record is delivered twice.
+A vendor object identifier may repeat across systems, tenants, or object types. Retries and concurrent deliveries can also send the same record more than once, so application checks alone cannot guarantee one stable SourceRecord.
 
-**Problem:** Object ID alone could combine two tenant records, while an unprotected replay could create a duplicate SourceRecord.
+## Visual Diagram
 
-**Our Solution:** The database enforces uniqueness across system, tenant, object type, and object ID, while atomic upsert and idempotency preserve one source identity across retries.
+The four inputs form one logical source identity; repeated writes resolve to the same SourceRecord.
 
-## Options considered
+```mermaid
+flowchart LR
+    S[source_system] --> K[Unique four-part key]
+    T[source_tenant] --> K
+    O[source_object_type] --> K
+    I[source_object_id] --> K
+    K --> R[One SourceRecord]
+```
 
-- Object ID alone is ambiguous.
-- System plus object ID still conflates tenants and object types.
-- A generated SourceRecord with no natural-key constraint cannot stop duplicates.
-- A four-part key captures the actual vendor namespace.
+## Simple Example
 
-## Decision and technical design
+Salesforce identifier `001ABC` exists in both Globex Health's sandbox and production tenants. The production record is also delivered twice. RevenueOS includes system, tenant, object type, and object ID in the unique key. Both production deliveries return one SourceRecord without colliding with the sandbox record.
 
-Uniquely identify a source object by `source_system`, `source_tenant`, `source_object_type`, and `source_object_id`. Preserve originals, normalize only under documented vendor rules, enforce the normalized tuple in SQLite, and perform lookup/insert inside one write transaction. Immutable observations record reprocessing. Governed commands also use request-bound idempotency keys.
+## How We Implement It
 
-## Tradeoffs
+| Component | Responsibility |
+|---|---|
+| `normalize_source_identity()` | Validates and normalizes the four identity components under documented rules. |
+| Original source fields | Preserve the exact values received for provenance. |
+| Normalized four-part unique constraint | Prevents duplicate source identities in the database. |
+| `get_or_create_source_record()` | Performs lookup and insert inside one atomic write transaction. |
+| `source_observation` | Records distinct deliveries without creating duplicate SourceRecords. |
+| `idempotency_operation` | Binds a governed command's retry key to its request and first result. |
 
-Every connector must supply tenant and object type consistently. Normalization changes require care because the key is permanent. In return, retries and multiple tenants are safe.
+## Why This Design
 
-## Interview explanation
-
-“I modeled the complete vendor namespace and enforced it in the database, so concurrent replays return one SourceRecord while every observation remains auditable.”
+- **Rejected alternative:** Identify a record by object ID alone, system plus ID, or an unconstrained generated ID.
+- **Why rejected:** Those choices can combine different tenants or object types and cannot prevent duplicate rows during retries.
+- **Why this is better:** The complete vendor namespace plus database uniqueness gives one durable source identity under replay and concurrency.
+- **Tradeoff:** Every connector must provide the four fields consistently, and normalization changes require careful migration because the key is permanent.

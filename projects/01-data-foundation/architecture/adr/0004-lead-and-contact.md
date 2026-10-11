@@ -4,43 +4,37 @@
 - **Status:** Accepted
 - **Scope:** P1 person modeling
 
-## 1. The Problem
+## The Problem
 
-Salesforce and HubSpot Customer Relationship Management (CRM) platforms use Lead and Contact objects for operational lifecycle stages. One human can have several such records or be converted from one type to another.
+Customer Relationship Management (CRM) platforms use Lead and Contact as operational stages. Treating those records as separate canonical people would split one human's history when a Lead converts or appears in another system.
 
-## 2. Connected Example
+## Visual Diagram
 
-**Example:** Sarah Kim begins as Salesforce Lead `00Q-17`, becomes Contact `003-82`, and also appears as a HubSpot contact.
+Arrows show logical source-to-canonical mappings, not a Lead-conversion workflow.
 
-**Problem:** Creating a canonical Lead, Contact, and HubSpot person would turn one human into three identities and lose conversion context.
+```mermaid
+flowchart LR
+    L[Salesforce Lead<br/>SourceRecord] -->|Crosswalk row| P[Canonical Person<br/>Sarah Kim]
+    C[Salesforce Contact<br/>SourceRecord] -->|Crosswalk row| P
+    H[HubSpot contact<br/>SourceRecord] -->|Crosswalk row| P
+```
 
-**Our Solution:** All three stay as SourceRecords and can map to Sarah's one canonical Person after identity resolution.
+## Simple Example
 
-## 3. Options We Considered
+Sarah Kim begins as Salesforce Lead `00Q-17` and later becomes Contact `003-82`. She also appears as a HubSpot contact. RevenueOS preserves all three SourceRecords and can map them to Sarah's one canonical Person. The conversion does not create a new human identity.
 
-- Create canonical Lead and Contact entities. This copies CRM lifecycle concepts into the shared identity model.
-- Replace the Lead record when conversion occurs. This loses source and conversion history.
-- Preserve both as source records and link them to one Person when resolved.
+## How We Implement It
 
-## 4. Our Decision
+| Component | Responsibility |
+|---|---|
+| `SourceRecord.source_object_type` | Records whether the source object is a Lead, Contact, or another source type. |
+| `SourceRecord.source_record_id` | Preserves each source representation and its provenance. |
+| `ExternalIdentityCrosswalk` | Maps confirmed source records to the canonical Person. |
+| `Person.person_id` | Provides one durable identity for the human. |
 
-Lead and Contact are `SourceRecord.source_object_type` values, not canonical Person subtypes. They map to `Person` through `ExternalIdentityCrosswalk`.
+## Why This Design
 
-## 5. How It Works Technically
-
-- Each source object receives its own `source_record_id`.
-- External IDs and conversion lineage remain source evidence.
-- Confirmed mappings can point several source records to Sarah's one `person_id`.
-- Operational Lead or Contact fields stay with source data rather than Person.
-
-## 6. Why We Chose It
-
-A CRM lifecycle change does not create a new human. Keeping source objects separate preserves operational detail without fragmenting canonical identity.
-
-## 7. Tradeoffs and Limitations
-
-Consumers that need Lead- or Contact-specific fields must join source lineage. Later ingestion and identity phases must preserve conversion events and handle duplicate source records safely.
-
-## 8. Interview Explanation
-
-“I treated Lead and Contact as CRM representations, not different people. Both remain auditable source records and can resolve to the same canonical Person.”
+- **Rejected alternative:** Create canonical Lead and Contact entities or replace the Lead when conversion occurs.
+- **Why rejected:** Canonical lifecycle types duplicate the human, while replacement destroys source and conversion history.
+- **Why this is better:** Source-specific stages remain auditable without fragmenting Person identity.
+- **Tradeoff:** Consumers needing Lead- or Contact-specific fields must join to source lineage, and ingestion must preserve conversion evidence.

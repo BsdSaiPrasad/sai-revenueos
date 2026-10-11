@@ -4,43 +4,39 @@
 - **Status:** Accepted
 - **Scope:** P1 revenue model
 
-## 1. The Problem
+## The Problem
 
-A sales Opportunity needs one clear buying company, but a Business-to-Business (B2B) purchase usually involves several people with different roles.
+A sales Opportunity needs one clear buying company, but a business purchase can involve many people. Repeated participant columns limit the buying committee, while several primary Accounts make pipeline ownership ambiguous.
 
-## 2. Connected Example
+## Visual Diagram
 
-**Example:** Globex Health evaluates an analytics product with Sarah Kim as champion, John Lee as economic buyer, and Emily Chen as technical evaluator.
+Lines show canonical relationships; they do not represent the order of sales activity.
 
-**Problem:** Repeating person columns would limit the buying committee, while multiple primary Accounts would make pipeline ownership unclear.
+```mermaid
+flowchart LR
+    G[Globex Health<br/>Primary Account] --- O[Opportunity]
+    O ---|OpportunityPersonRole<br/>Champion| S[Sarah Kim]
+    O ---|OpportunityPersonRole<br/>Economic buyer| J[John Lee]
+    O ---|OpportunityPersonRole<br/>Technical evaluator| E[Emily Chen]
+```
 
-**Our Solution:** The Opportunity has one primary Globex Account, and OpportunityPersonRole stores any number of people with explicit roles.
+## Simple Example
 
-## 3. Options We Considered
+Globex Health evaluates an analytics product. Sarah Kim is the champion, John Lee is the economic buyer, and Emily Chen is the technical evaluator. The Opportunity points to Globex as its one primary Account. Each person participates through a separate role relationship.
 
-- Store several contact columns on Opportunity. This limits the buying committee and makes roles hard to extend.
-- Allow several primary Accounts. This makes pipeline and revenue attribution ambiguous.
-- Require one primary Account and use a relationship entity for participating Persons.
+## How We Implement It
 
-## 4. Our Decision
+| Component | Responsibility |
+|---|---|
+| `Opportunity.primary_account_id` | Identifies the one primary buying Account. |
+| `OpportunityPersonRole.opportunity_id` | Connects a participation record to the Opportunity. |
+| `OpportunityPersonRole.person_id` | Connects the participation record to a Person. |
+| `role_type`, `influence_level`, `is_primary_contact` | Describe how the Person participates. |
+| `valid_from`, `valid_to` | Preserve role changes over time. |
 
-Every canonical `Opportunity` has exactly one primary buying `Account`. People participate through `OpportunityPersonRole`, which records their specific roles.
+## Why This Design
 
-## 5. How It Works Technically
-
-- `Opportunity.primary_account_id` points to the buying Account.
-- `OpportunityPersonRole.opportunity_id` and `person_id` connect one Person to one Opportunity.
-- `role_type`, `influence_level`, and `is_primary_contact` describe participation.
-- `valid_from` and `valid_to` preserve role changes.
-
-## 6. Why We Chose It
-
-One primary Account makes pipeline ownership clear. The relationship table supports any number of people and roles without changing the Opportunity schema.
-
-## 7. Tradeoffs and Limitations
-
-Buying-committee queries require a join. Future partner, reseller, or multi-account deal roles must be modeled explicitly rather than weakening the primary-Account rule.
-
-## 8. Interview Explanation
-
-“I gave each Opportunity one primary buying Account for clear attribution and modeled the buying committee through a role table, so any number of people can participate with changing roles.”
+- **Rejected alternative:** Add fixed contact columns to Opportunity or allow several primary Accounts.
+- **Why rejected:** Fixed columns cannot support changing committees, while several primary Accounts weaken attribution.
+- **Why this is better:** One buying Account keeps pipeline ownership clear, and a relationship entity supports any number of people and roles.
+- **Tradeoff:** Buying-committee analysis requires joins, and partner or reseller participation must be modeled explicitly.

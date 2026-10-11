@@ -1,47 +1,41 @@
-# ADR-0006: Customer Is an Account Lifecycle Status
+# ADR-0006: Treat Customer as an Account Lifecycle Status
 
 - **Decision ID:** D006
 - **Status:** Accepted
 - **Scope:** P1 commercial identity
 
-## 1. The Problem
+## The Problem
 
-A prospect can become a customer, renew, pause service, or stop being a customer. Creating a second company record when this happens would split the organization's history.
+A prospect can become a customer, renew, pause service, or stop being a customer. Creating a new company identity at each change would split its marketing, sales, billing, product, and support history.
 
-## 2. Connected Example
+## Visual Diagram
 
-**Example:** Globex Health begins as a prospect, signs a Contract, and starts a Subscription.
+Lines show separate commercial records related to one Account, not an implemented status-calculation workflow.
 
-**Problem:** Creating a second Customer record would split its marketing, sales, billing, product, and support history across two company identities.
+```mermaid
+flowchart LR
+    A[Globex Health<br/>One Account] --- C[Contract]
+    A --- S[Subscription]
+    A --- L[Lifecycle status<br/>prospect or customer]
+```
 
-**Our Solution:** Globex keeps one Account whose lifecycle can become customer, while Contract and Subscription retain their own identities and histories.
+## Simple Example
 
-## 3. Options We Considered
+Globex Health begins as a prospect and later signs a Contract and starts a Subscription. RevenueOS keeps the same Account and can change its lifecycle status to customer under a governed rule. Contract and Subscription retain their own identities and histories. The authoritative status-derivation rule is still deferred.
 
-- Create a separate Customer entity that duplicates the Account. This fragments company identity.
-- Infer customer state independently in every report. This produces inconsistent answers.
-- Keep one Account and represent customer as governed lifecycle status while preserving commercial entities separately.
+## How We Implement It
 
-## 4. Our Decision
+| Component | Responsibility |
+|---|---|
+| `Account.lifecycle_status` | Holds the governed business lifecycle state. |
+| `customer_since_at`, `ended_customer_at` | Record selected customer-status timing. |
+| `Contract` | Stores the signed agreement independently from Account status. |
+| `Subscription` | Stores time-bounded service entitlement independently from the Contract. |
+| Future governed derivation rule | Will define who may calculate and write customer status; it is not yet implemented. |
 
-Customer is a business lifecycle status associated with `Account`, not another company identity. `Contract` and `Subscription` remain independent entities with their own identities and histories.
+## Why This Design
 
-## 5. How It Works Technically
-
-- `Account.lifecycle_status` carries the governed business state.
-- `customer_since_at` and `ended_customer_at` provide selected lifecycle timing.
-- Contract records signed agreements.
-- Subscription records time-bounded service entitlement.
-- The authoritative rule that derives customer status is deliberately deferred.
-
-## 6. Why We Chose It
-
-Marketing, sales, billing, product, and support facts stay attached to one Account throughout its lifecycle. Commercial agreements remain detailed rather than being reduced to a label.
-
-## 7. Tradeoffs and Limitations
-
-Customer status requires one future governed derivation rule and clear write authority. Until that rule is approved and implemented, the architecture must not claim to calculate customer status operationally.
-
-## 8. Interview Explanation
-
-“I modeled customer as a lifecycle state on Account, not a duplicate company. Contracts and subscriptions stay separate so the commercial history remains accurate.”
+- **Rejected alternative:** Create a separate Customer entity or let every report infer customer state independently.
+- **Why rejected:** A second entity duplicates the company, while local report rules produce conflicting answers.
+- **Why this is better:** One Account keeps the organization's history together while commercial records preserve agreement and service detail.
+- **Tradeoff:** RevenueOS still needs one approved derivation rule and clear write authority before customer status can be calculated operationally.

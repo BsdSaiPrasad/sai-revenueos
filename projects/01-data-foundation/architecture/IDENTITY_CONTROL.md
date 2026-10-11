@@ -78,7 +78,7 @@ See the [runtime ERD](diagrams/identity-control.mmd), [ADRs](adr/), and [executa
 
 ## Implementation map
 
-Use this order when reading or explaining the implementation in an interview:
+Use this order when reviewing or explaining the implementation:
 
 | Topic | Start with | What to notice |
 |---|---|---|

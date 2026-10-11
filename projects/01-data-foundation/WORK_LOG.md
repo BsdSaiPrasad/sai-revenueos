@@ -61,7 +61,7 @@ Implementation commit: `33e35c9` (`feat: establish P1 canonical data architectur
 - Updated the repository description and local `origin` URL.
 - Reworked the main README as a beginner-friendly landing page with the seven-project map, current progress, repository structure, and reading order.
 - Added one central glossary and one continuous beginner walkthrough using synthetic Globex Health, Sarah Kim, John Lee, and related examples.
-- Rewrote all eight ADRs with the same approved decisions and a consistent problem → example → options → decision → technical design → reasoning → tradeoffs → interview explanation structure.
+- Rewrote all eight ADRs with the same approved decisions and a consistent problem → example → options → decision → technical design → reasoning → tradeoffs structure.
 - Reorganized the canonical model explanation into five logical learning sections and added an ERD reading guide while preserving all 23 entity names and technical identifiers.
 - Simplified the P1 README, master architecture, and decision index while keeping each document focused on one responsibility.
 - Updated repository-wide documentation guidelines in `AGENTS.md`.
@@ -146,7 +146,7 @@ Pending the documentation commit. The final hash is reported in the task handoff
 
 - Reworked the existing example in every Architecture Decision Record (ADR), D001–D013, into one consistent three-part format: business example, failure risk, and RevenueOS solution.
 - Connected the examples through Globex Health, Northstar Labs, Sarah Kim, Salesforce, and HubSpot while keeping each example to three short sentences.
-- Expanded technical acronyms where needed and preserved the concise alternatives, decision, tradeoff, and interview explanations.
+- Expanded technical acronyms where needed and preserved the concise alternatives, decision, and tradeoff explanations.
 
 ### Verification and boundaries
 
@@ -154,6 +154,25 @@ Pending the documentation commit. The final hash is reported in the task handoff
 - Confirmed D001–D013 retain their existing decision IDs, approval statuses, scopes, technical meanings, and tradeoffs.
 - Architecture validation, 23 P1.2 tests, Python compilation, JSON parsing, relative Markdown links, documentation-only diff review, and secret checks passed.
 - No executable code, schema, test, contract, diagram, progress percentage, P1.3 work, or new architecture decision was introduced.
+
+### Git commit
+
+Pending the documentation commit. The final hash is reported in the task handoff rather than written here to avoid a self-referential commit.
+
+## 2026-10-11 — ADR Visual Redesign
+
+### Improved
+
+- Redesigned ADR-0001 through ADR-0013 around one compact problem statement, one rendered diagram, one short business example, one implementation table, and one design rationale.
+- Removed audience-specific explanation sections and wording while preserving each accepted decision, scope, alternative, recovery behavior, and tradeoff.
+- Clearly separated logical relationships from executable workflows and distinguished the local P1.2 reference layer from deferred production capabilities.
+
+### Verification and boundaries
+
+- Confirmed 13/13 ADRs contain the approved five-section structure and exactly one Mermaid diagram; Mermaid CLI 11.12.0 rendered all 13 diagrams successfully.
+- Architecture validation passed with 23 entities, 31 relationships, and 13 accepted decisions; all 23 P1.2 tests passed.
+- All 64 local links across 26 tracked Markdown files resolved, and the Git whitespace check passed.
+- Changes are documentation-only. No code, schema, contract, canonical diagram, approved decision, progress percentage, or P1.3 work changed.
 
 ### Git commit
 

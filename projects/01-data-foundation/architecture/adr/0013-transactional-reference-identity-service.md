@@ -4,29 +4,42 @@
 - **Status:** Accepted and implemented in the reference layer
 - **Scope:** P1 operational reference behavior
 
-## Connected Example
+## The Problem
 
-**Example:** Two workers replay the same Globex Health source record while a mapping correction fails after closing the old row.
+Documentation alone cannot prove that identity writes remain safe under retries, concurrency, or partial failure. Building a deployed production service at P1.2 would exceed the project boundary before the required data rules were proven.
 
-**Problem:** Application checks alone could create duplicate SourceRecords or leave Globex with no active mapping after a partial failure.
+## Visual Diagram
 
-**Our Solution:** One SQLite transaction serializes the write and commits the mapping, audit, and idempotency changes together—or rolls all of them back.
+The transaction commits all related writes together or rolls all of them back.
 
-## Options considered
+```mermaid
+flowchart LR
+    C[Identity command] --> T[SQLite transaction]
+    T --> M[Mapping change]
+    T --> A[Audit event]
+    T --> I[Idempotency result]
+    T -->|success| OK[Commit all]
+    T -->|failure| NO[Rollback all]
+```
 
-- Documentation-only rules cannot prove behavior.
-- In-memory objects do not prove database constraints or transactions.
-- Deploying a production platform now would cross the P1.2 boundary.
-- Python plus SQLite can demonstrate the rules locally with no service dependency.
+## Simple Example
 
-## Decision and technical design
+Two workers replay the same Globex Health source record while a mapping correction fails after closing the old row. SQLite serializes the competing write and database uniqueness preserves one SourceRecord. The failed correction rolls back its mapping, audit, and idempotency changes together. Globex keeps its previous active mapping.
 
-Use Python's standard library and SQLite, an embedded Structured Query Language (SQL) database, with atomic transactions, unique constraints, state triggers, non-overlapping mapping intervals, immutable audit rows, idempotency claims, write serialization, rollback, and reconciliation. Tests exercise concurrent connections and injected partial failure.
+## How We Implement It
 
-## Tradeoffs
+| Component | Responsibility |
+|---|---|
+| `IdentityStore._transaction()` | Starts an immediate transaction, commits success, and rolls back failure. |
+| SQLite constraints and triggers | Enforce uniqueness, valid state transitions, non-overlapping intervals, and immutable history. |
+| `idempotency_operation` | Returns the first result for an exact retry and rejects key reuse with different input. |
+| Write serialization and busy timeout | Protect concurrent local writes. |
+| `reconcile()` | Reports invariant violations that should not exist in valid stored state. |
+| Automated tests | Exercise concurrent connections, retries, and injected partial failures. |
 
-SQLite is not the production topology and its locking model is not a distributed-service design. A later operational service must preserve these semantics while adding authentication, deployment, observability, and reliable publication to Snowflake.
+## Why This Design
 
-## Interview explanation
-
-“I used SQLite as an executable specification: database constraints and transactions prove the identity invariants without pretending it is the production database.”
+- **Rejected alternative:** Rely on documentation, in-memory objects, or deploy a production platform immediately.
+- **Why rejected:** The first two cannot prove database behavior, while production deployment would cross the P1.2 scope boundary.
+- **Why this is better:** Python and SQLite, an embedded Structured Query Language (SQL) database, provide an executable local specification with no external service dependency.
+- **Tradeoff:** SQLite is not the production topology; a later service must preserve these semantics while adding authentication, deployment, observability, and reliable publication to Snowflake.

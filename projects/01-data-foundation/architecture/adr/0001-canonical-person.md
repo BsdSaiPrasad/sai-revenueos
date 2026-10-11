@@ -1,46 +1,42 @@
-# ADR-0001: One Canonical Person Represents One Human
+# ADR-0001: Use One Person Identity for One Human
 
 - **Decision ID:** D001
 - **Status:** Accepted
 - **Scope:** P1 canonical identity
 
-## 1. The Problem
+## The Problem
 
-The same human can appear in a Customer Relationship Management (CRM) system, marketing platform, product application, and support tool. Treating every record as a different person creates duplicates and breaks history.
+One human can appear in a Customer Relationship Management (CRM) system, marketing platform, product application, and support tool. Creating a Person for every source record would duplicate the human and split their history.
 
-## 2. Connected Example
+## Visual Diagram
 
-**Example:** Sarah Kim appears as a Salesforce Lead, a HubSpot contact, and a product user before moving from Globex Health to Northstar Labs.
+Arrows show logical mappings and relationships, not an automated workflow.
 
-**Problem:** Treating each record or employer change as a new person would duplicate Sarah and split her history.
+```mermaid
+flowchart LR
+    SF[Salesforce Lead<br/>SourceRecord] -->|Crosswalk row| P[Canonical Person<br/>Sarah Kim]
+    HS[HubSpot contact<br/>SourceRecord] -->|Crosswalk row| P
+    PU[Product user<br/>SourceRecord] -->|Crosswalk row| P
+    P ---|AccountPersonRelationship| G[Globex Health]
+    P ---|AccountPersonRelationship| N[Northstar Labs]
+```
 
-**Our Solution:** One durable Person represents Sarah, while source records and effective-dated employment relationships preserve where each fact came from.
+## Simple Example
 
-## 3. Options We Considered
+Sarah Kim has Salesforce, HubSpot, and product-user records while working at Globex Health. Confirmed crosswalk rows connect those source records to one canonical Person. When Sarah moves to Northstar Labs, the Globex relationship closes and a Northstar relationship begins. Her `person_id` does not change.
 
-- Create a different Person for each source record. This is simple but produces duplicates.
-- Use email as the Person ID. Email can change, be shared, or be missing.
-- Create one source-independent Person and connect source and employment records separately.
+## How We Implement It
 
-## 4. Our Decision
+| Component | Responsibility |
+|---|---|
+| `Person.person_id` | Provides Sarah's permanent, source-independent identity. |
+| `SourceRecord` | Preserves each Salesforce, HubSpot, or product representation. |
+| `ExternalIdentityCrosswalk` | Maps each confirmed source record to the canonical Person. |
+| `AccountPersonRelationship` | Stores effective-dated employment and other Account affiliations. |
 
-Create one durable canonical `Person` for one human across source systems, lifecycle stages, and employers.
+## Why This Design
 
-## 5. How It Works Technically
-
-- `Person.person_id` is the stable canonical identity.
-- Salesforce Leads, Contacts, HubSpot contacts, and product profiles remain `SourceRecord` objects.
-- `ExternalIdentityCrosswalk` maps confirmed source records to Person.
-- `AccountPersonRelationship` stores Sarah's effective-dated employment at Globex Health and Northstar Labs.
-
-## 6. Why We Chose It
-
-The human is more stable than an email address, employer, or CRM lifecycle. This design preserves a continuous view of the person while keeping source evidence and employer history.
-
-## 7. Tradeoffs and Limitations
-
-This model requires identity resolution, relationship history, and safe merge/unmerge controls. A bad match can affect many downstream records, so later phases must use conservative rules and auditability.
-
-## 8. Interview Explanation
-
-“I separated a person's permanent identity from CRM records and employment relationships. That lets one person appear in several systems or change employers without creating duplicate identities or losing history.”
+- **Rejected alternative:** Create a Person per source record or use email as the Person ID.
+- **Why rejected:** Source records duplicate the human, while email can change, be shared, or be missing.
+- **Why this is better:** One Person preserves continuous history while source and employment facts remain separate and auditable.
+- **Tradeoff:** Identity resolution must be conservative because a bad match can affect many downstream records and may require controlled merge or unmerge.

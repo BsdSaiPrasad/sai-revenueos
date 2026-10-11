@@ -4,28 +4,38 @@
 - **Status:** Accepted and implemented in the reference layer
 - **Scope:** P1 stewardship
 
-## Connected Example
+## The Problem
 
-**Example:** A steward incorrectly merges Northstar Labs into Globex Health after misreading an acquisition announcement.
+Identity decisions can be wrong and must be corrected without deleting evidence or breaking historical references. A merge also needs a safe reversal path when later information shows that two identities should remain separate.
 
-**Problem:** Deleting Northstar or rewriting its mappings would break historical references and hide why the identity changed.
+## Visual Diagram
 
-**Our Solution:** The merge retires Northstar with a redirect and immutable lineage; unmerge can reactivate the same original ID and sends later uncertain changes to human review.
+Arrows show controlled identity state changes and the redirect retained after a merge.
 
-## Options considered
+```mermaid
+flowchart LR
+    N[Northstar Labs<br/>active ID] -->|merge| R[Retired Northstar ID]
+    R -->|redirect| G[Globex Health<br/>surviving ID]
+    R -->|unmerge reactivates<br/>same original ID| N
+```
 
-- Delete and recreate identities, which breaks references and evidence.
-- Rewrite mappings in place, which hides prior truth.
-- Retire IDs with redirects and append correction/merge history.
+## Simple Example
 
-## Decision and technical design
+A steward incorrectly merges Northstar Labs into Globex Health after misreading an acquisition announcement. RevenueOS retires Northstar's ID, retains a redirect, and records every moved mapping. Unmerge reactivates the same Northstar ID when lineage is unchanged. Mappings changed after the merge go to human review instead of being restored blindly.
 
-Corrections close a prior interval and create a superseding crosswalk. Merge retires the losing ID, creates a redirect, and records every moved mapping. Unmerge reactivates the original ID and restores mappings whose lineage is unchanged; uncertain records enter human review. Events and mapping lineage are immutable. A rebrand retains an Account ID, and acquisition never triggers automatic merge.
+## How We Implement It
 
-## Tradeoffs
+| Component | Responsibility |
+|---|---|
+| `correct_mapping()` | Closes the old crosswalk interval and appends a superseding mapping. |
+| `merge_identities()` | Retires the losing ID, creates a redirect, and moves active mappings with lineage. |
+| `identity_merge_event`, `merge_mapping_change` | Preserve immutable merge, unmerge, and mapping-change history. |
+| `unmerge_identities()` | Reactivates the original ID and restores only mappings whose lineage is unchanged. |
+| `audit_event` | Records the actor, operation, subject, time, and structured details. |
 
-History grows and consumers must understand redirects and effective dates. Unmerge can require manual review after later edits. Those costs buy explainability and recoverability.
+## Why This Design
 
-## Interview explanation
-
-“I never delete an identity mistake. I close history, redirect retired IDs, and retain enough lineage to reverse a bad merge safely.”
+- **Rejected alternative:** Delete and recreate identities or rewrite mappings in place.
+- **Why rejected:** Deletion breaks references, while in-place rewrites hide prior truth and make recovery unreliable.
+- **Why this is better:** Stable IDs, redirects, effective dates, and immutable lineage make mistakes explainable and reversible.
+- **Tradeoff:** History grows, consumers must follow redirects, and unmerge may require manual review after later changes; a rebrand or acquisition never triggers automatic merge.

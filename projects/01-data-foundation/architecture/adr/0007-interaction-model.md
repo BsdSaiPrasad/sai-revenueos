@@ -4,43 +4,39 @@
 - **Status:** Accepted
 - **Scope:** P1 engagement model
 
-## 1. The Problem
+## The Problem
 
-A marketing initiative, an individual interaction, and a product login describe different things. Combining them produces unclear metrics and weak provenance.
+A marketing initiative, an individual interaction, and a product profile describe different things. Combining them into one generic record would blur their meaning, lifecycle, provenance, and metrics.
 
-## 2. Connected Example
+## Visual Diagram
 
-**Example:** Globex Health joins the “2026 Analytics Readiness” Campaign, Sarah Kim attends its webinar, and later she signs in through a ProductUser profile.
+Lines show logical associations among distinct entities, not a required execution sequence.
 
-**Problem:** Combining the initiative, attendance event, and product profile into one generic record would blur their different meanings and lifecycles.
+```mermaid
+flowchart LR
+    C[Campaign<br/>2026 Analytics Readiness] --- A[Activity<br/>Webinar attendance]
+    A --- P[Person<br/>Sarah Kim]
+    U[ProductUser<br/>Application profile] --- P
+    U --- G[Account<br/>Globex Health]
+```
 
-**Our Solution:** Campaign, Activity, and ProductUser stay separate while linking to the same canonical Person and Account when resolved.
+## Simple Example
 
-## 3. Options We Considered
+Globex Health joins the “2026 Analytics Readiness” Campaign. Sarah Kim's webinar attendance is represented as an Activity, and her application profile is represented as a ProductUser. RevenueOS keeps the initiative, event, and product profile separate. Resolved links can connect them to the same Person and Account.
 
-- Store every item as one generic engagement record. This is flexible but hides important differences.
-- Put campaign and product fields directly on Activity. This creates sparse, confusing records.
-- Model each concept separately and connect it to canonical context when known.
+## How We Implement It
 
-## 4. Our Decision
+| Component | Responsibility |
+|---|---|
+| `Campaign` | Represents a marketing initiative and its active period. |
+| `Activity` | Represents a time-stamped interaction and optional canonical context. |
+| `ProductUser` | Represents an application profile, tenancy, and usage identity. |
+| `person_id`, `account_id`, `opportunity_id`, `campaign_id` | Connect records to canonical context when known. |
+| `source_record_id`, `resolution_status` | Preserve source provenance and allow unresolved records. |
 
-`Activity`, `Campaign`, and `ProductUser` are distinct entities. They link to Person, Account, Opportunity, and source context where relevant, while supporting unresolved identity.
+## Why This Design
 
-## 5. How It Works Technically
-
-- Campaign represents the initiative.
-- Activity represents a time-stamped interaction and can reference Campaign, Person, Account, Opportunity, and SourceRecord.
-- ProductUser represents a product-system profile and can reference Person, Account, and SourceRecord.
-- Optional canonical links remain null until identity is resolved; `resolution_status` records that condition.
-
-## 6. Why We Chose It
-
-The model supports clear campaign attribution, interaction history, and product usage without pretending they share one lifecycle or identity.
-
-## 7. Tradeoffs and Limitations
-
-Analysis requires explicit joins, and consumers must handle unresolved records. Later matching and ingestion work must update links without dropping early-arriving interactions.
-
-## 8. Interview Explanation
-
-“I separated campaigns, individual activities, and product profiles because they have different meanings and lifecycles. Each can still connect to the same canonical customer context.”
+- **Rejected alternative:** Store every engagement as one generic record or add campaign and product fields to Activity.
+- **Why rejected:** A generic record hides important differences, while mixed fields create sparse and confusing rows.
+- **Why this is better:** Separate entities produce clear campaign, interaction, and product metrics while sharing canonical context when resolved.
+- **Tradeoff:** Analysis requires explicit joins, and consumers must handle records whose canonical identity is not yet resolved.
