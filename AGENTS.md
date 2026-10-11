@@ -10,10 +10,11 @@ Avoid committing generated output, local environments, editor settings, credenti
 
 ## Build, Test, and Development Commands
 
-No application runtime has been configured yet. The current architecture can be checked with:
+The P1.2 reference uses Python 3.9+ and the standard library. Run the complete checks with:
 
 ```bash
 python3 projects/01-data-foundation/scripts/validate_architecture.py
+python3 -m unittest discover -s projects/01-data-foundation/tests -v
 ```
 
 When a build system is added, provide a small, documented command surface—preferably through a `Makefile` or package scripts. Recommended targets are:

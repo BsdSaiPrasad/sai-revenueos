@@ -1,0 +1,78 @@
+erDiagram
+    CANONICAL_IDENTITY ||--o{ CANDIDATE_EVIDENCE : "may be proposed"
+    CANONICAL_IDENTITY ||--o{ EXTERNAL_IDENTITY_CROSSWALK : "is authoritative target"
+    CANONICAL_IDENTITY ||--o{ IDENTITY_MERGE_EVENT : "survives or retires"
+    SOURCE_RECORD ||--o{ SOURCE_OBSERVATION : "is observed"
+    SOURCE_RECORD ||--|| RESOLUTION_CASE : "has"
+    RESOLUTION_CASE ||--o{ CANDIDATE_EVIDENCE : "collects"
+    SOURCE_RECORD ||--o{ EXTERNAL_IDENTITY_CROSSWALK : "maps over time"
+    IDENTITY_MERGE_EVENT ||--o{ MERGE_MAPPING_CHANGE : "records"
+    EXTERNAL_IDENTITY_CROSSWALK ||--o{ MERGE_MAPPING_CHANGE : "provides lineage"
+
+    CANONICAL_IDENTITY {
+        text canonical_id PK
+        text entity_type
+        text identity_status
+        text redirect_to_canonical_id FK
+    }
+    SOURCE_RECORD {
+        text source_record_id PK
+        text source_system
+        text source_tenant
+        text source_object_type
+        text source_object_id
+    }
+    SOURCE_OBSERVATION {
+        text source_observation_id PK
+        text source_record_id FK
+        text observation_key UK
+        text observed_at
+    }
+    RESOLUTION_CASE {
+        text resolution_case_id PK
+        text source_record_id FK
+        text status
+        boolean review_required
+    }
+    CANDIDATE_EVIDENCE {
+        text candidate_evidence_id PK
+        text resolution_case_id FK
+        text candidate_canonical_id FK
+        real confidence
+        text disposition
+    }
+    EXTERNAL_IDENTITY_CROSSWALK {
+        text external_identity_crosswalk_id PK
+        text source_record_id FK
+        text canonical_entity_id FK
+        text mapping_status
+        text valid_from
+        text valid_to
+    }
+    IDENTITY_MERGE_EVENT {
+        text merge_event_id PK
+        text event_type
+        text survivor_canonical_id FK
+        text retired_canonical_id FK
+    }
+    MERGE_MAPPING_CHANGE {
+        text merge_event_id FK
+        text source_record_id FK
+        text prior_crosswalk_id FK
+        text merged_crosswalk_id FK
+    }
+    AUDIT_EVENT {
+        text audit_event_id PK
+        text event_type
+        text actor_id
+        text subject_type
+        text subject_id
+        text occurred_at
+    }
+    IDEMPOTENCY_OPERATION {
+        text idempotency_key PK
+        text operation_type
+        text request_hash
+        text result_id
+        text status
+    }

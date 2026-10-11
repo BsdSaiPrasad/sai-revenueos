@@ -90,3 +90,33 @@ Observed results after the complete documentation edit:
 ### Git commit
 
 Documentation milestone commit: `77b1614` (`docs: improve repository learning experience`). Authored and committed under the repository user's configured Git identity. This hash is recorded by a follow-up continuity commit to avoid self-reference.
+
+## 2026-10-10 — P1.2 Canonical ID and External-ID Crosswalk Strategy
+
+### Implemented
+
+- Added a standards-compliant UUIDv7 generator, controlled entity prefixes, validation, collision detection, and retry.
+- Added a SQLite schema for permanent canonical identities, database-unique four-part source keys, immutable observations, resolution cases, candidate evidence, effective-dated crosswalks, merge lineage, audit events, and idempotency operations.
+- Added a transactional Python interface for source upsert, evidence proposal, manual review, explicit decisions, mapping activation/revocation/correction, merge/unmerge, and reconciliation.
+- Added write-authority checks for identity creation, source ingestion, resolution proposals, and steward-only decisions.
+- Added five accepted ADRs (D009–D013), a P1.2 learning guide, and a separate runtime ERD. The canonical v1.0.0 contract and its technical ERD remain unchanged.
+- Added the repository's authoritative milestone progress tracker.
+
+### Verification evidence
+
+- `python3 -m unittest discover -s projects/01-data-foundation/tests -v` — **passed**, 23/23 scenarios. This includes all 14 required behaviors, malformed input, unauthorized transitions, permanent-ID protection, rebrand/acquisition boundaries, uncertain unmerge review, revocation, and reconciliation.
+- Concurrent upsert used two worker-owned SQLite connections and produced one SourceRecord plus two observations.
+- Injected failure after closing a mapping rolled back mapping, audit, and idempotency state; retry then succeeded.
+- Direct invalid-transition and overlapping-interval writes were rejected by SQLite enforcement.
+- `python3 projects/01-data-foundation/scripts/validate_architecture.py` — **passed** after extension for 13 decisions and required P1.2 artifacts; canonical counts remained 23 entities and 31 relationships.
+- Python compilation, JSON parsing, relative documentation links, canonical protected-file comparison, Mermaid rendering, and secret scans were run in final verification before commit.
+
+### Architecture boundaries
+
+- No Salesforce/HubSpot connector, complete matching engine, survivorship algorithm, production database, Snowflake deployment, dbt pipeline, reverse ETL, or P2–P7 workflow was added.
+- SQLite is a local executable specification only. A future operational service can preserve these transaction and contract semantics and publish governed identity changes to Snowflake.
+- No **MASTER ARCHITECTURE DECISION NEEDED** item was introduced.
+
+### Git commit
+
+Pending the P1.2 implementation commit. It will use the repository user's configured Git author. The final hash will be recorded in a small follow-up continuity commit.

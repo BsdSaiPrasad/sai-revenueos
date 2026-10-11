@@ -37,7 +37,7 @@ The crosswalk keeps canonical IDs vendor-independent, supports many source recor
 
 ## 7. Tradeoffs and Limitations
 
-The system needs mapping governance, temporal uniqueness, reconciliation, and manual review. P1.2 must define ID generation, lifecycle states, idempotency, correction, merge/unmerge, and recovery before these mechanics are implemented.
+The system needs mapping governance, temporal uniqueness, reconciliation, and manual review. P1.2 now implements those mechanics in a local transactional reference; production deployment and a complete matching engine remain deferred.
 
 ## 8. Interview Explanation
 

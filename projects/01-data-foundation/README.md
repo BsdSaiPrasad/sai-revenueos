@@ -38,6 +38,15 @@ Read the repository-wide [beginner walkthrough](../../docs/START_HERE.md) for th
 - Eight approved Architecture Decision Records (ADRs).
 - Verified contract, relationship, documentation, and secret-filename checks.
 
+### P1.2 — Canonical ID and Crosswalk Control
+
+- Entity-prefixed UUIDv7 IDs under P1 write authority.
+- Atomic four-part source identity and immutable observations.
+- Separate resolution cases, candidate evidence, and authoritative crosswalks.
+- History-preserving correction, merge, unmerge, redirects, and audit events.
+- SQLite constraints, transactions, safe retries, rollback, concurrency protection, and reconciliation.
+- Twenty-three executed acceptance scenarios using synthetic Globex Health and Northstar Labs data.
+
 The [project state](PROJECT_STATE.md) is the authoritative source for current status.
 
 ## Key Documents
@@ -46,6 +55,8 @@ The [project state](PROJECT_STATE.md) is the authoritative source for current st
 |---|---|
 | [Canonical Business Model](architecture/CANONICAL_BUSINESS_MODEL.md) | Learn all 23 entities, relationships, history, and ERD notation. |
 | [Mermaid ERD](architecture/diagrams/canonical-model.mmd) | Inspect the version-controlled visual model. |
+| [P1.2 Identity Control Guide](architecture/IDENTITY_CONTROL.md) | Learn the implemented Decisions A–E and runtime flow. |
+| [P1.2 Runtime ERD](architecture/diagrams/identity-control.mmd) | Inspect the operational reference tables. |
 | [Decision Index](DECISIONS.md) | See the eight approved decisions and open their ADRs. |
 | [Shared Contract](../../shared/contracts/canonical-model.v1.json) | Inspect the machine-readable technical definition. |
 | [Project State](PROJECT_STATE.md) | Confirm what works, what is deferred, and what comes next. |
@@ -68,15 +79,16 @@ From the repository root, using Python 3.9 or newer:
 
 ```bash
 python3 projects/01-data-foundation/scripts/validate_architecture.py
+python3 -m unittest discover -s projects/01-data-foundation/tests -v
 ```
 
 No credentials, package installation, warehouse, or external service is required.
 
 ## What Is Not Implemented?
 
-- Source-system ingestion.
-- Canonical ID generation and operational crosswalk rules.
-- Identity matching, survivorship, merge, and unmerge engines.
+- Source-system ingestion and a complete identity-matching engine.
+- Survivorship and field-level source precedence.
+- A deployed production identity service or Snowflake publication pipeline.
 - Physical Snowflake tables and dbt transformations.
 - Reverse Extract-Transform-Load (ETL), activation, scoring, routing, or forecasting.
 - Production security policies, monitoring, or stewardship interfaces.
@@ -85,4 +97,4 @@ The future folders for those capabilities are intentionally absent until they co
 
 ## What Comes Next?
 
-**P1.2 — Canonical ID Generation and External-ID Crosswalk Strategy.** Architecture approval is required before that implementation begins.
+**P1.3 — Salesforce + HubSpot Source Model.** P1.2 deliberately provides no live connectors.

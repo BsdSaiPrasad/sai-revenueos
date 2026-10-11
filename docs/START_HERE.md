@@ -6,13 +6,13 @@ This walkthrough explains Project 1 through one continuous, synthetic example. N
 
 **Globex Health** appears in both Salesforce and HubSpot. **Sarah Kim** and **John Lee** work there. The company is evaluating a fictional analytics product, signs a contract, and starts a subscription.
 
-The architecture for this journey is complete through P1.1. The ingestion, identity matching, and operational workflows are later work.
+The architecture and local identity-control reference are complete through P1.2. Source ingestion and complete identity matching are later work.
 
 ## Step 1 — Preserve the Source Records
 
 Salesforce Account `SF-1001` and HubSpot Company `HS-502` are different system records, even when they describe the same company. RevenueOS represents each one as a `SourceRecord`.
 
-**Already designed:** the stable four-part source identity: source system, tenant, object type, and object ID.
+**Implemented locally:** the stable four-part source identity, database uniqueness, atomic replay handling, and immutable observations.
 
 **Later:** P1.3 will connect real source systems and store incoming versions. No connector runs today.
 
@@ -22,7 +22,7 @@ RevenueOS needs one durable `Account` for Globex Health. Reports and downstream 
 
 **Already designed:** the Account entity is independent of Salesforce and HubSpot identifiers.
 
-**Later:** P1.2 will define how the canonical ID is generated. No final ID format has been approved yet.
+**Implemented locally:** P1 generates an entity prefix plus UUIDv7, for example `sai_acc_<uuidv7>`. The ID survives rebrands and source-system changes.
 
 ## Step 3 — Connect Sources Through the Crosswalk
 
@@ -36,9 +36,9 @@ HubSpot HS-502 ─────┘
 
 The source records are preserved; they are not replaced by the canonical Account.
 
-**Already designed:** mappings are auditable and effective-dated, and unresolved records can remain unresolved.
+**Implemented locally:** unresolved cases, candidate evidence, explicit steward decisions, authoritative active mappings, and effective-dated correction history.
 
-**Later:** P1.2 will define mapping states, idempotency, correction, merge, and unmerge rules. The matching engine comes even later.
+**Implemented locally:** mapping states, idempotency, correction, merge, unmerge, rollback, and reconciliation. The complete matching engine still comes later.
 
 ## Step 4 — Connect a Person to the Account
 
@@ -86,7 +86,7 @@ If an identity mapping is wrong, the prior crosswalk row remains in history and 
 
 **Already designed:** selective Slowly Changing Dimension Type 2 (SCD Type 2) history and append-oriented corrections.
 
-**Later:** physical database constraints, reconciliation jobs, and stewardship tools will enforce these rules operationally.
+**Implemented locally:** SQLite constraints and reconciliation prove these rules. A deployed database, scheduled jobs, and stewardship user interface remain later work.
 
 ## Where to Go Next
 
@@ -95,3 +95,4 @@ If an identity mapping is wrong, the prior crosswalk row remains in history and 
 3. Explore all entities in the [canonical business model](../projects/01-data-foundation/architecture/CANONICAL_BUSINESS_MODEL.md).
 4. Read the [decision index](../projects/01-data-foundation/DECISIONS.md) and its ADRs.
 5. Check [project state](../projects/01-data-foundation/PROJECT_STATE.md) before assuming a feature is implemented.
+6. Read the [P1.2 identity-control guide](../projects/01-data-foundation/architecture/IDENTITY_CONTROL.md) for the executable workflow.

@@ -2,61 +2,61 @@
 
 **As of:** 2026-10-10
 
-**Current phase:** P1.1 complete; ready for P1.2 design
+**Current phase:** P1.2 complete and verified; ready for P1.3 architecture discussion
 
-**Completed phases:** P1.0 Engineering Foundation; P1.1 Canonical Business Model & ERD
-
-**Completed supporting milestone:** Repository cleanup and documentation improvement
+**Completed phases:** P1.0 Engineering Foundation; P1.1 Canonical Business Model & ERD; P1.2 Canonical ID Generation & External-ID Crosswalk Strategy
 
 ## Current implementation status
 
-P1 has a versioned logical architecture contract, human-readable canonical entity dictionary, Mermaid ERD, approved-decision index with eight ADRs, repository/configuration conventions, continuity documentation, and a standard-library-only validation script.
+P1 retains its versioned logical architecture: 23 entities, 31 declared relationships, the canonical ERD, and Decisions D001–D008 are unchanged. P1.2 adds Decisions D009–D013 and an executable standard-library Python + SQLite reference for identity control.
 
-The GitHub repository is named `BsdSaiPrasad/sai-revenueos`. Documentation now includes a beginner walkthrough, central glossary, simplified repository navigation, a plain-English guide to all 23 entities, an ERD reading guide, and eight teaching-focused ADRs. The cleanup did not change the shared contract, ERD, or approved decisions.
+The reference generates controlled entity-prefixed UUIDv7 IDs; atomically identifies source records by system, tenant, object type, and object ID; preserves source observations; separates resolution cases and candidate evidence from authoritative crosswalks; and supports audited corrections, retirement redirects, merge, unmerge, retry, rollback, concurrency protection, and reconciliation.
 
 ### What is working
 
-- Machine-readable catalog of 23 required canonical/history structures and 31 explicit relationships.
-- Source-independent Account and Person identities with time-aware organization, affiliation, name, domain, and crosswalk structures.
-- Lead and Contact represented as SourceRecord object types, with conversion/mapping history conceptually preserved.
-- Complete visual ERD with declared cardinalities and documented polymorphic logical references.
-- Offline validation of contract structure, PK/FK references, temporal fields, approved invariants, ERD coverage, ADR/continuity presence, and secret-like filenames.
-- Beginner-friendly learning path from repository overview to detailed architecture and verified project state.
+- All previously verified P1.1 model and documentation capabilities.
+- P1-only canonical identity creation for 12 approved crosswalk target types.
+- Database-enforced source uniqueness and non-overlapping mapping history.
+- Explicit steward approval before a mapping becomes authoritative.
+- Immutable source observations, audit events, merge events, and mapping lineage.
+- Safe retry through request-bound idempotency keys.
+- Recovery from an injected partial correction failure without partial state.
+- Restoration of original canonical IDs after an incorrect merge, with human review for uncertain post-merge changes.
+- Reconciliation reporting for key invalid or incomplete states.
 
 ### Verification status
 
-P1.1 was verified on 2026-10-08. The documentation milestone is verified separately on 2026-10-10, including the existing architecture validator, contract counts, Mermaid compilation, relative links, approved-decision preservation, repository references, Git remote, and P1.2 boundary. Exact commands and observed results are recorded in `WORK_LOG.md`. No deployed service, warehouse model, ingestion job, or source integration exists, so no runtime/data quality claim is made.
+On 2026-10-10, all 23 P1.2 scenarios passed, including the 14 required behaviors, malformed inputs, unauthorized changes, permanent-ID protection, rebrand/acquisition boundaries, uncertain unmerge handling, revocation, and reconciliation. The architecture validator also passed with 23 entities, 31 relationships, 13 decisions, ERD coverage, continuity files, and secret-filename checks. JSON, Python compilation, documentation links, canonical contract/ERD preservation, and Git secret scans were separately checked as recorded in `WORK_LOG.md`.
 
-## Unimplemented / intentionally deferred
+SQLite is an executable specification, not the final operational database. No deployed identity service, source connector, warehouse model, or scheduled reconciliation job is claimed.
 
-- Canonical ID generation policy and detailed crosswalk state/reconciliation rules (P1.2).
-- Matching, confidence thresholds, merge/unmerge, and manual stewardship workflows.
+## Intentionally deferred
+
+- P1.3 Salesforce + HubSpot source integration and raw history design.
+- Complete identity matching, confidence thresholds, or artificial-intelligence scoring.
 - Survivorship and field-level source precedence.
-- Salesforce/HubSpot or other ingestion and raw history storage.
-- Physical Snowflake DDL, dbt models/tests, security policies, and orchestration.
-- Authoritative customer lifecycle derivation.
-- Reverse ETL, activation, scoring, routing, forecasting, quote generation, and renewal/churn workflows.
+- Production operational database/service, authentication, monitoring, and publication to Snowflake.
+- Physical Snowflake DDL, dbt models, reverse Extract-Transform-Load (ETL), or P2–P7 workflows.
 
-## Blockers
+## Blockers and architecture flags
 
-None for closing P1.0/P1.1. P1.2 requires an explicit design choice for canonical ID format/generation and detailed crosswalk behavior; the approved D008 boundary already constrains that decision.
+No blocker prevents P1.2 closure. No **MASTER ARCHITECTURE DECISION NEEDED** item was introduced: the implementation stays inside the approved P1 identity boundary.
+
+P1.3 must define source payload/version storage and connector contracts without weakening P1.2's four-part source identity or audit guarantees.
 
 ## Next immediate step
 
-**P1.2 — Canonical ID Generation & External-ID Crosswalk Strategy.** Define ID format/creation ownership, mapping states, uniqueness intervals, deterministic idempotency, merge/unmerge and correction semantics, confidence/review rules, and reconciliation/failure recovery.
+**P1.3 — Salesforce + HubSpot Source Model.** Begin with the source envelope, raw-version history, deletion semantics, connector checkpoints, and how source observations feed the existing P1.2 interface. Do not design matching or survivorship as part of that phase.
 
 ## Relevant paths
 
-- `shared/contracts/canonical-model.v1.json`
-- `projects/01-data-foundation/architecture/CANONICAL_BUSINESS_MODEL.md`
-- `projects/01-data-foundation/architecture/diagrams/canonical-model.mmd`
-- `projects/01-data-foundation/DECISIONS.md`
-- `projects/01-data-foundation/architecture/adr/`
-- `projects/01-data-foundation/scripts/validate_architecture.py`
-- `projects/01-data-foundation/WORK_LOG.md`
-- `docs/START_HERE.md`
-- `docs/GLOSSARY.md`
+- `projects/01-data-foundation/src/sai_revenueos_identity/`
+- `projects/01-data-foundation/tests/test_identity_reference.py`
+- `projects/01-data-foundation/architecture/IDENTITY_CONTROL.md`
+- `projects/01-data-foundation/architecture/diagrams/identity-control.mmd`
+- `shared/contracts/canonical-model.v1.json` (unchanged v1.0.0)
+- `PROGRESS.md`
 
 ## Last verified commit
 
-P1.1 implementation commit `33e35c9` remains the last engineering implementation. Documentation milestone commit `77b1614` (`docs: improve repository learning experience`) passed the checks recorded in `WORK_LOG.md`; it does not implement P1.2 or change the architecture.
+Pending the P1.2 implementation commit. The exact hash will be recorded in `WORK_LOG.md` by a small follow-up continuity commit to avoid a self-referential hash.

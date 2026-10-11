@@ -25,6 +25,9 @@ This glossary explains terms used in the repository. Definitions are specific to
 | **PK — Primary Key** | The field that uniquely identifies one entity record. | `person_id` uniquely identifies a Person. |
 | **Provenance** | Evidence about the origin and authority of a fact or mapping. | A crosswalk records how and when a match was created. |
 | **Reconciliation** | A check that compares records and finds missing, conflicting, or inconsistent states. | A future job may find two active mappings for one SourceRecord. |
+| **ResolutionCase** | The workflow record that tracks whether one source identity is unresolved, a candidate, ambiguous, under review, resolved, or has no match. | Two plausible Northstar Labs Accounts make the case ambiguous. |
+| **CandidateEvidence** | An append-oriented record of a possible canonical match, its evidence, confidence, policy, and review decision. | A verified Globex domain supports a proposed Account match. |
+| **UUIDv7 — Universally Unique Identifier version 7** | A standards-based unique identifier whose leading bits preserve approximate creation-time order. | P1 combines UUIDv7 with `sai_acc_` for an Account ID. |
 | **Reverse ETL — Reverse Extract, Transform, Load** | Sending prepared warehouse data back into operational tools. | A future process may send a canonical Account segment to a CRM. |
 | **RevOps — Revenue Operations** | The people and processes that align marketing, sales, customer success, and revenue data. | RevOps needs one reliable view of an Account across tools. |
 | **Rollback** | Undoing all changes in a failed transaction so partial data is not left behind. | If crosswalk creation fails, canonical creation should not remain half-finished. |

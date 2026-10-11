@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the P1.0/P1.1 logical architecture without third-party packages."""
+"""Validate the P1 logical architecture and P1.2 reference artifacts."""
 
 from __future__ import annotations
 
@@ -14,6 +14,10 @@ PROJECT_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = PROJECT_DIR.parents[1]
 CONTRACT_PATH = REPO_ROOT / "shared/contracts/canonical-model.v1.json"
 ERD_PATH = PROJECT_DIR / "architecture/diagrams/canonical-model.mmd"
+IDENTITY_ERD_PATH = PROJECT_DIR / "architecture/diagrams/identity-control.mmd"
+IDENTITY_GUIDE_PATH = PROJECT_DIR / "architecture/IDENTITY_CONTROL.md"
+SCHEMA_PATH = PROJECT_DIR / "src/sai_revenueos_identity/schema.sql"
+TEST_PATH = PROJECT_DIR / "tests/test_identity_reference.py"
 
 REQUIRED_ENTITIES = {
     "Account",
@@ -214,13 +218,35 @@ def validate_decisions_and_continuity(errors: list[str]) -> None:
     if not decisions_path.exists():
         return
     decisions = decisions_path.read_text(encoding="utf-8")
-    for number in range(1, 9):
+    for number in range(1, 14):
         decision_id = f"D{number:03d}"
         adr_path = PROJECT_DIR / f"architecture/adr/{number:04d}-"
         if decision_id not in decisions:
             fail(errors, f"DECISIONS.md is missing {decision_id}")
         if not any(adr_path.parent.glob(f"{number:04d}-*.md")):
             fail(errors, f"missing ADR for {decision_id}")
+
+
+def validate_p12_reference(errors: list[str]) -> None:
+    required = (IDENTITY_ERD_PATH, IDENTITY_GUIDE_PATH, SCHEMA_PATH, TEST_PATH, REPO_ROOT / "PROGRESS.md")
+    missing = [str(path.relative_to(REPO_ROOT)) for path in required if not path.is_file()]
+    if missing:
+        fail(errors, f"missing P1.2 reference artifacts: {', '.join(missing)}")
+        return
+    schema = SCHEMA_PATH.read_text(encoding="utf-8")
+    for table in (
+        "canonical_identity", "source_record", "source_observation", "resolution_case",
+        "candidate_evidence", "external_identity_crosswalk", "identity_merge_event",
+        "audit_event", "idempotency_operation",
+    ):
+        if f"CREATE TABLE IF NOT EXISTS {table}" not in schema:
+            fail(errors, f"P1.2 schema is missing {table}")
+    for enforcement in (
+        "one_active_mapping_per_source", "crosswalk_no_overlap_insert",
+        "canonical_identity_no_delete", "source_observation_immutable",
+    ):
+        if enforcement not in schema:
+            fail(errors, f"P1.2 schema is missing enforcement rule {enforcement}")
 
 
 def validate_no_tracked_secrets(errors: list[str]) -> None:
@@ -251,6 +277,7 @@ def main() -> int:
         validate_contract(contract, errors)
         validate_erd(contract, errors)
     validate_decisions_and_continuity(errors)
+    validate_p12_reference(errors)
     validate_no_tracked_secrets(errors)
 
     if errors:
@@ -264,7 +291,7 @@ def main() -> int:
     print(
         "P1 architecture validation PASSED: "
         f"{entity_count} entities, {relationship_count} relationships, "
-        "8 decisions, ERD coverage, continuity files, and secret filename checks."
+        "13 decisions, ERD coverage, P1.2 reference artifacts, continuity files, and secret filename checks."
     )
     return 0
 
