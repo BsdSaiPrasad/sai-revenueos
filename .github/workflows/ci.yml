@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Python ${{ matrix.python-version }} required checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+          - "3.9"
+          - "3.14"
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Show the Python runtime
+        run: python --version
+
+      - name: Verify Python syntax
+        run: >-
+          python -m compileall -q
+          projects/01-data-foundation/src
+          projects/01-data-foundation/scripts
+          projects/01-data-foundation/tests
+
+      - name: Validate JSON contracts and synthetic examples
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          json_files = sorted(Path("shared").rglob("*.json"))
+          json_files += sorted(Path("projects").rglob("*.json"))
+          if not json_files:
+              raise SystemExit("No JSON contracts or examples were found.")
+
+          for path in json_files:
+              with path.open(encoding="utf-8") as handle:
+                  json.load(handle)
+
+          print(f"Validated {len(json_files)} JSON files.")
+          PY
+
+      - name: Run all 36 Python tests
+        run: python -m unittest discover -s projects/01-data-foundation/tests -v
+
+      - name: Run architecture validation
+        run: python projects/01-data-foundation/scripts/validate_architecture.py
+
+      - name: Run the synthetic Globex demonstration
+        run: python projects/01-data-foundation/scripts/demo_source_model.py
