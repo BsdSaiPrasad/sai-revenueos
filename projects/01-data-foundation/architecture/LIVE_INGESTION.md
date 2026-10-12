@@ -120,6 +120,7 @@ Repeat either incremental command without `--update-globex --confirm-test-write`
 - A network or processing failure stops that object stream and leaves its checkpoint before the gap.
 - Other object streams receive separate results.
 - The next poll starts five minutes before the checkpoint and reuses deterministic event IDs.
+- Salesforce `LastViewedDate` and `LastReferencedDate` change when records are read. They remain in the first raw response but are excluded, with the API `attributes` wrapper, from source-version identity. Every business field remains part of identity, so a real value change still produces a new event.
 - A malformed event remains in raw history with its error and does not move the checkpoint.
 
 Run the mocked recovery acceptance scenarios:

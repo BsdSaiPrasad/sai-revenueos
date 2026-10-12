@@ -337,3 +337,24 @@ GitHub Actions run [38213609446](https://github.com/BsdSaiPrasad/sai-revenueos/a
 Implementation commit: `3c6a9df` (`feat: implement P1.6 live CRM ingestion`). Authored and committed as `BsdSaiPrasad <bsdsaiprasad1@gmail.com>` with no co-author attribution.
 
 GitHub Actions run [38276397965](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38276397965) passed the complete workflow on Python 3.9 and 3.14, including all 87 tests, architecture validation, four demonstrations, and 25-company file generation. This CI evidence is credential-free and does not replace the two pending authenticated account checks.
+
+## 2026-10-12 — P1.6 Salesforce Incremental Idempotency Repair
+
+### Finding and fix
+
+- Confirmed from the live SQLite history that Salesforce kept `LastModifiedDate` and `SystemModstamp` unchanged while each read advanced `LastViewedDate` and `LastReferencedDate`.
+- Before the fix, two authenticated incremental polls each reported `fetched=1, processed=1, replayed=0`; total source events grew from 36 to 38 and the Globex version count grew from 7 to 9 with no business change.
+- Changed P1.6 event identity to exclude only Salesforce's `attributes`, `LastViewedDate`, and `LastReferencedDate`. The complete first API response remains raw, and every business field still participates in deterministic identity.
+- Added compatibility lookup for already-stored pre-fix envelopes. Historical duplicates remain immutable; the repair neither deletes nor rewrites them.
+
+### Verification evidence
+
+- Two authenticated incremental polls each reported `fetched=1, processed=0, replayed=1`; source events stayed at 38, Globex versions stayed at 9, and the checkpoint stayed at `2026-10-12T22:57:31.000000Z`.
+- Two authenticated initial polls each fetched 14 Accounts and replayed all 14; source events stayed at 38, Salesforce events stayed at 35, and source-history rows stayed at 38.
+- Added regression coverage for changing view timestamps, overlap-window replay, legitimate stable-field changes, and compatibility with pre-fix history.
+- `python3 -m unittest discover -s projects/01-data-foundation/tests -v` — **passed**, 90/90 scenarios; architecture validation, Python compilation, 13 JSON files, Markdown links, and the concise/verbose P1.6 demonstrations also passed.
+- P1.2–P1.6 contracts, canonical entities, relationships, approved decisions, and completion percentages remain unchanged. P1.7 was not started.
+
+### Git commit and CI
+
+The repair commit and GitHub Actions run are recorded after the verified push.

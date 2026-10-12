@@ -18,7 +18,12 @@ def utc_now() -> str:
 
 @dataclass(frozen=True)
 class VendorRecord:
-    """One source-native record plus the cursor metadata needed by P1.3."""
+    """One source-native record plus the cursor metadata needed by P1.3.
+
+    ``event_identity_exclude`` names vendor fields that change because RevenueOS
+    read a record rather than because the business record changed. Those fields
+    remain in the raw payload but do not create a new source-version identity.
+    """
 
     source_system: str
     source_tenant: str
@@ -30,10 +35,21 @@ class VendorRecord:
     cursor: str
     request_method: str
     request_url: str
+    event_identity_exclude: tuple[str, ...] = ()
+
+    def _identity_payload_json(self, payload: Mapping[str, Any]) -> str:
+        identity_payload = dict(payload)
+        for field_name in self.event_identity_exclude:
+            identity_payload.pop(field_name, None)
+        return json.dumps(identity_payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+    def same_source_version(self, payload: Mapping[str, Any]) -> bool:
+        """Return whether another raw response represents the same stable version."""
+        return self._identity_payload_json(self.payload) == self._identity_payload_json(payload)
 
     def to_event(self, observed_at: str) -> SourceEvent:
         """Wrap the untouched vendor record in the existing P1.3 envelope."""
-        payload_json = json.dumps(self.payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        identity_payload_json = self._identity_payload_json(self.payload)
         digest_input = "\x1f".join(
             (
                 self.source_system,
@@ -42,7 +58,7 @@ class VendorRecord:
                 self.object_id,
                 self.event_type,
                 self.source_updated_at,
-                payload_json,
+                identity_payload_json,
             )
         )
         event_digest = hashlib.sha256(digest_input.encode("utf-8")).hexdigest()

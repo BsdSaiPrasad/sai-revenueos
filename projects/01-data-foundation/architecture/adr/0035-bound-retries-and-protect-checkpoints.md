@@ -29,7 +29,7 @@ Salesforce briefly resets the Globex request. RevenueOS retries with bounded exp
 |---|---|
 | `RetryPolicy` | Caps attempts and exponential delay with jitter. |
 | `JsonHttpClient` | Retries safe reads and selected idempotent requests for transient status codes. |
-| `VendorRecord.to_event()` | Produces a deterministic ID for one source version. |
+| `VendorRecord.to_event()` | Produces a deterministic ID from stable source-version content while preserving volatile read metadata in raw JSON. |
 | `LiveIngestionRunner` | Isolates object streams and stops a failed stream before a checkpoint gap. |
 
 ## Why This Design

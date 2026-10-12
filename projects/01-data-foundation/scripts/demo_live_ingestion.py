@@ -76,16 +76,27 @@ def main() -> int:
         "BillingCountry": "United States",
         "Description": "SAI_REVENUEOS_P16_TEST_ONLY",
         "LastModifiedDate": "2026-10-12T12:00:00Z",
+        "LastViewedDate": "2026-10-12T12:00:01Z",
+        "LastReferencedDate": "2026-10-12T12:00:01Z",
         "IsDeleted": False,
     }
-    updated = {**created, "Name": "[SAI TEST] Globex Health - Incremental Update", "LastModifiedDate": "2026-10-12T12:30:00Z"}
+    reread = {
+        **created,
+        "LastViewedDate": "2026-10-12T12:10:01Z",
+        "LastReferencedDate": "2026-10-12T12:10:01Z",
+    }
+    updated = {
+        **reread,
+        "Name": "[SAI TEST] Globex Health - Incremental Update",
+        "LastModifiedDate": "2026-10-12T12:30:00Z",
+    }
     query_page = {
         "done": True,
         "records": [{"Id": created["Id"], "LastModifiedDate": created["LastModifiedDate"], "IsDeleted": False}],
     }
     replies: list[object] = [
         response(query_page), response(created),
-        response(query_page), response(created),
+        response(query_page), response(reread),
         OSError("simulated connection reset"), OSError("simulated connection reset"),
         response({"ids": [created["Id"]], "latestDateCovered": "2026-10-12T13:00:00Z"}),
         response(updated),
@@ -131,7 +142,7 @@ def main() -> int:
             print("Before: no source state or checkpoint")
             print("After initial: name=%s; raw payload preserved=yes" % first_state["standardized_payload"]["name"])
             print("Identity: status=%s; automatic mapping=no" % case["status"])
-            print("Repeat: processed=%d; replayed=%d; history rows=%d" % (
+            print("Repeat: view time changed=yes; processed=%d; replayed=%d; history rows=%d" % (
                 repeated.processed, repeated.replayed, history_after_repeat
             ))
             print("Simulated API failure: failures=%d; stored error is credential-free" % failed.streams[0].failed)
@@ -149,6 +160,7 @@ def main() -> int:
 
             if args.verbose:
                 show("MOCK API INPUT - INITIAL", created)
+                show("MOCK API INPUT - UNCHANGED REREAD", reread)
                 show("MOCK API INPUT - UPDATE", updated)
                 show("CREDENTIAL-FREE REQUESTS", transport.requests)
                 show("REQUEST ATTEMPTS", [trace.__dict__ for trace in traces])

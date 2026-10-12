@@ -2,7 +2,7 @@
 
 **As of:** 2026-10-12
 
-**Current phase:** P1.6 implemented and verified with mocked APIs; authenticated Salesforce and HubSpot verification is pending
+**Current phase:** P1.6 implemented; mocked APIs and authenticated Salesforce polling pass, while the complete two-platform live checklist remains pending
 
 **Completed phases:** P1.0 Engineering Foundation; P1.1 Canonical Business Model and Entity Relationship Diagram (ERD); P1.2 Canonical ID and Crosswalk Control; P1.3 Salesforce + HubSpot Source Model; P1.4 Source of Truth and Write Authority; P1.5 Synthetic GTM Data Generation
 
@@ -10,7 +10,7 @@
 
 P1 retains the unchanged canonical v1.0.0 architecture: 23 entities, 31 declared relationships, and its canonical ERD. Decisions D001–D030 remain unchanged. P1.6 adds accepted Decisions D031–D036 plus standard-library Python connectors that feed the existing P1.2/P1.3 interfaces.
 
-All checked-in examples and automated test records are synthetic. The connector code can call live test accounts after local authentication, but no authenticated Salesforce or HubSpot call has been executed in this verification environment. No external write-back, automatic identity merge, or downstream workflow runs.
+All checked-in examples and automated test records are synthetic. Authenticated Salesforce reads were executed against the explicitly marked fictional records to verify the P1.6 idempotency repair. No external write-back, automatic identity merge, or downstream workflow runs, and this check does not by itself complete the full Salesforce and HubSpot live checklist.
 
 ### What is working
 
@@ -32,14 +32,15 @@ All checked-in examples and automated test records are synthetic. The connector 
 - Explicit, marker-protected Globex seeding and updates that refuse unmarked CRM-record collisions.
 - Ignored mode-600 local credential storage plus a browser-based Salesforce PKCE helper and hidden HubSpot token entry.
 - A 14-line credential-free P1.6 demonstration with complete `--verbose` request, raw-storage, replay, failure, checkpoint, and recovery evidence.
+- Stable Salesforce event identity that preserves `LastViewedDate` and `LastReferencedDate` in raw evidence without treating their read-side changes as new business versions.
 
 ### Verification status
 
-On 2026-10-12, all 87 scenarios passed locally: 23 P1.2 identity scenarios, 13 P1.3 source-model scenarios, 15 P1.4 field-authority scenarios, 11 P1.5 generator scenarios, 17 mocked P1.6 connector scenarios, and 8 demonstration-output scenarios.
+On 2026-10-12, all 90 scenarios passed locally: 23 P1.2 identity scenarios, 13 P1.3 source-model scenarios, 15 P1.4 field-authority scenarios, 11 P1.5 generator scenarios, 20 mocked P1.6 connector scenarios, and 8 demonstration-output scenarios.
 
 Architecture validation passed with 23 canonical entities, 31 relationships, 36 accepted decisions, P1.2–P1.6 artifacts, continuity files, generated-data exclusion, and secret-filename checks. Python compilation, all JSON files, local Markdown links, all four concise demonstrations, both P1.5 command modes, and the 2,500-company scale case passed locally.
 
-The P1.6 mocked implementation passed the complete Python 3.9 and 3.14 GitHub Actions matrix on 2026-10-12: [Actions run 38276397965](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38276397965). The run executed all 87 tests, architecture validation, four demonstrations, and a generated 25-company smoke dataset without vendor credentials.
+The latest recorded P1.6 GitHub Actions evidence is updated with the idempotency-fix commit after its Python 3.9 and 3.14 matrix completes.
 
 ### Verified preset counts with seed 42
 
@@ -51,7 +52,7 @@ The P1.6 mocked implementation passed the complete Python 3.9 and 3.14 GitHub Ac
 
 ## Intentionally deferred
 
-- Authenticated Salesforce and HubSpot verification in Sai's accounts; local credentials are not available in this environment.
+- Completion of the complete authenticated Salesforce and HubSpot verification checklist; this repair verified Salesforce initial and incremental polling only.
 - Webhook receivers, periodic scheduling, production reconciliation orchestration, and managed secret rotation.
 - A complete automatic identity matcher, automatic candidate approval, or unrestricted survivorship.
 - Production object storage, message queues, distributed execution, observability, privacy controls, and retention enforcement.
@@ -64,7 +65,7 @@ The P1.6 mocked implementation passed the complete Python 3.9 and 3.14 GitHub Ac
 
 No **MASTER ARCHITECTURE DECISION NEEDED** item was introduced. P1.6 reuses the existing canonical model, P1.2 unresolved identity behavior, P1.3 raw-history/checkpoint storage, and P1.4 no-write-back boundary.
 
-P1.6 cannot be marked fully complete until both real platforms pass authenticated creation/confirmation, initial retrieval, raw storage, update, incremental retrieval, idempotent repeat, and checkpoint checks. The local credential directory is absent, so Salesforce status is **unverified** and HubSpot status is **unverified**. P1 progress therefore remains 6 of 16 milestones (37.5%), and overall RevenueOS progress remains approximately 5.4%.
+P1.6 cannot be marked fully complete until both real platforms pass authenticated creation/confirmation, initial retrieval, raw storage, update, incremental retrieval, idempotent repeat, and checkpoint checks. Salesforce authenticated initial and incremental reads now pass repeated-poll idempotency; HubSpot and the remaining end-to-end evidence are not reclassified by this repair. P1 progress therefore remains 6 of 16 milestones (37.5%), and overall RevenueOS progress remains approximately 5.4%.
 
 ## Next immediate step
 

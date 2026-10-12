@@ -18,6 +18,7 @@ SALESFORCE_OBJECTS = ("Account", "Lead", "Contact", "Opportunity")
 TEST_MARKER = "SAI_REVENUEOS_P16_TEST_ONLY"
 TEST_NAME = "[SAI TEST] Globex Health"
 TEST_WEBSITE = "https://globex-p16.invalid"
+READ_SIDE_FIELDS = ("attributes", "LastViewedDate", "LastReferencedDate")
 
 
 class SalesforceTokenProvider(Protocol):
@@ -163,6 +164,11 @@ class SalesforceConnector:
         parsed = datetime.fromisoformat(value.replace("Z", "+00:00")).astimezone(timezone.utc)
         return parsed.isoformat(timespec="seconds").replace("+00:00", "Z")
 
+    @staticmethod
+    def _event_identity_fields() -> tuple[str, ...]:
+        """Exclude metadata changed by a read while preserving it in raw JSON."""
+        return READ_SIDE_FIELDS
+
     def _query_all(self, soql: str) -> Iterable[tuple[Dict[str, Any], str]]:
         url = "%s/queryAll/?%s" % (self.api_root, urlencode({"q": soql}))
         while url:
@@ -211,6 +217,7 @@ class SalesforceConnector:
                     "%s|%s" % (updated_at, object_id),
                     "GET",
                     request_url,
+                    self._event_identity_fields(),
                 )
             )
         return records
@@ -242,6 +249,7 @@ class SalesforceConnector:
                     "%s|%s" % (updated_at, object_id),
                     "GET",
                     request_url,
+                    self._event_identity_fields(),
                 )
             )
 
@@ -277,6 +285,7 @@ class SalesforceConnector:
                     "%s|%s" % (deleted_at, object_id),
                     "GET",
                     deleted_url,
+                    self._event_identity_fields(),
                 )
             )
         return records

@@ -128,7 +128,8 @@ class DemonstrationOutputTests(unittest.TestCase):
         output = "\n".join(lines)
         self.assertGreater(len(lines), 15)
         for heading in (
-            "MOCK API INPUT - INITIAL", "MOCK API INPUT - UPDATE", "CREDENTIAL-FREE REQUESTS",
+            "MOCK API INPUT - INITIAL", "MOCK API INPUT - UNCHANGED REREAD",
+            "MOCK API INPUT - UPDATE", "CREDENTIAL-FREE REQUESTS",
             "REQUEST ATTEMPTS", "FAILED RUN", "RECOVERED RUN", "STORED RAW EVENT",
             "STORED HISTORY", "FINAL CHECKPOINT",
         ):

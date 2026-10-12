@@ -119,7 +119,7 @@ python3 projects/01-data-foundation/scripts/demo_synthetic_data.py
 python3 projects/01-data-foundation/scripts/demo_live_ingestion.py
 ```
 
-These commands check the unchanged 23 entities and 31 relationships, 36 approved decisions, required reference artifacts, 87 P1.2–P1.6 scenarios, and all four Globex demonstrations. The P1.6 demo uses scripted API responses; follow its guide for authenticated checks. Add `--verbose` to a demonstration command for complete technical evidence.
+These commands check the unchanged 23 entities and 31 relationships, 36 approved decisions, required reference artifacts, 90 P1.2–P1.6 scenarios, and all four Globex demonstrations. The P1.6 demo uses scripted API responses; follow its guide for authenticated checks. Add `--verbose` to a demonstration command for complete technical evidence.
 
 ## Important Limitations
 

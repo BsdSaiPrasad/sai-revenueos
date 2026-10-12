@@ -244,6 +244,58 @@ class SourceStore:
         result["raw_payload"] = json.loads(result.pop("raw_payload_json"))
         return result
 
+    @staticmethod
+    def _stored_source_event(row: sqlite3.Row) -> SourceEvent:
+        """Rebuild the exact immutable envelope already stored in SQLite."""
+        return SourceEvent(
+            contract_version=row["contract_version"],
+            event_id=row["event_id"],
+            source_system=row["source_system"],
+            source_tenant=row["source_tenant"],
+            source_object_type=row["source_object_type"],
+            source_object_id=row["source_object_id"],
+            event_type=row["event_type"],
+            source_updated_at=row["source_updated_at"],
+            observed_at=row["observed_at"],
+            trace_id=row["trace_id"],
+            extraction_id=row["extraction_id"],
+            stream_name=row["stream_name"],
+            checkpoint_cursor=row["checkpoint_cursor"],
+            checkpoint_high_watermark_at=row["checkpoint_high_watermark_at"],
+            raw_payload_json=row["raw_payload_json"],
+            payload_sha256=row["payload_sha256"],
+            envelope_sha256=row["envelope_sha256"],
+        )
+
+    def events_for_source_version(
+        self,
+        source_system: str,
+        source_tenant: str,
+        source_object_type: str,
+        source_object_id: str,
+        event_type: str,
+        source_updated_at: str,
+    ) -> List[SourceEvent]:
+        """Return stored envelopes that share one vendor version boundary.
+
+        P1.6 uses this lookup to recognize records created before its stable
+        Salesforce event-identity fix. It does not alter or delete history.
+        """
+        rows = self._connection.execute(
+            "SELECT * FROM source_event WHERE source_system=? AND source_tenant=? "
+            "AND source_object_type=? AND source_object_id=? AND event_type=? "
+            "AND source_updated_at=? ORDER BY received_at, event_id",
+            (
+                source_system,
+                source_tenant,
+                source_object_type,
+                source_object_id,
+                event_type,
+                source_updated_at,
+            ),
+        ).fetchall()
+        return [self._stored_source_event(row) for row in rows]
+
     def current_state(self, source_record_id: str) -> Dict[str, Any]:
         """Return the newest source state while retaining all older versions."""
         row = self._connection.execute(

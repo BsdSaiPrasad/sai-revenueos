@@ -28,6 +28,7 @@ from sai_revenueos_connectors import (  # noqa: E402
     SalesforceConnector,
     SalesforceOAuthFile,
     StaticSalesforceToken,
+    VendorRecord,
 )
 from sai_revenueos_identity import IdentityStore  # noqa: E402
 from sai_revenueos_sources import SourceStore, standardize_event  # noqa: E402
@@ -276,10 +277,11 @@ class LiveRunnerTests(unittest.TestCase):
         self.temp.cleanup()
 
     @staticmethod
-    def _initial_replies() -> list[object]:
+    def _initial_replies(last_viewed: str = "2026-10-12T12:00:01Z") -> list[object]:
         payload = {
             "Id": "001A", "Name": "Globex", "Website": "https://globex.invalid",
             "LastModifiedDate": "2026-10-12T12:00:00Z", "IsDeleted": False,
+            "LastViewedDate": last_viewed, "LastReferencedDate": last_viewed,
             "Unmodeled_Field__c": "preserved",
         }
         return [
@@ -300,8 +302,11 @@ class LiveRunnerTests(unittest.TestCase):
         self.assertIsNone(self.identity.active_mapping_for_source(event["source_record_id"]))
 
     def test_14_repeated_sync_is_idempotent(self) -> None:
-        """Repeating the same vendor version creates no second event or observation."""
-        transport = QueueTransport(self._initial_replies() + self._initial_replies())
+        """Repeated initial reads ignore Salesforce view timestamps but keep raw data."""
+        transport = QueueTransport(
+            self._initial_replies("2026-10-12T12:00:01Z")
+            + self._initial_replies("2026-10-12T12:05:01Z")
+        )
         connector = sf_connector(transport)
         runner = LiveIngestionRunner(self.sources, self.identity)
         first = runner.sync(connector, "initial", ("Account",), until="2026-10-12T13:00:00Z")
@@ -310,6 +315,8 @@ class LiveRunnerTests(unittest.TestCase):
         self.assertEqual(1, second.replayed)
         self.assertEqual(1, self.sources.count("source_event"))
         self.assertEqual(1, self.sources.count("source_record_version"))
+        stored = self.sources.get_event(first.streams[0].last_event_id)
+        self.assertEqual("2026-10-12T12:00:01Z", stored["raw_payload"]["LastViewedDate"])
 
     def test_15_api_failure_does_not_advance_checkpoint_and_retry_recovers(self) -> None:
         """A failed API poll leaves the durable cursor intact until a later success."""
@@ -370,6 +377,87 @@ class LiveRunnerTests(unittest.TestCase):
         self.assertEqual("2026-10-12T12:02:00.000000Z", current["source_updated_at"])
         self.assertEqual(1, current["is_deleted"])
         self.assertEqual("2026-10-11T12:00:00Z", event["raw_payload"]["updatedAt"])
+
+    def test_18_overlap_poll_replays_unchanged_salesforce_version(self) -> None:
+        """Incremental overlap can refetch a record without appending read-only changes."""
+        unchanged_two = {
+            "Id": "001A", "Name": "Globex", "Website": "https://globex.invalid",
+            "LastModifiedDate": "2026-10-12T12:00:00Z", "IsDeleted": False,
+            "LastViewedDate": "2026-10-12T12:05:01Z",
+            "LastReferencedDate": "2026-10-12T12:05:01Z",
+            "Unmodeled_Field__c": "preserved",
+        }
+        unchanged_three = {
+            **unchanged_two,
+            "LastViewedDate": "2026-10-12T12:10:01Z",
+            "LastReferencedDate": "2026-10-12T12:10:01Z",
+        }
+        transport = QueueTransport(self._initial_replies() + [
+            response({"ids": ["001A"]}), response(unchanged_two), response({"deletedRecords": []}),
+            response({"ids": ["001A"]}), response(unchanged_three), response({"deletedRecords": []}),
+        ])
+        runner = LiveIngestionRunner(self.sources, self.identity)
+        connector = sf_connector(transport)
+        initial = runner.sync(connector, "initial", ("Account",), until="2026-10-12T12:01:00Z")
+        first_repeat = runner.sync(connector, "incremental", ("Account",), until="2026-10-12T12:06:00Z")
+        second_repeat = runner.sync(connector, "incremental", ("Account",), until="2026-10-12T12:11:00Z")
+        self.assertEqual(1, initial.processed)
+        self.assertEqual((1, 0, 1), (
+            first_repeat.streams[0].fetched, first_repeat.processed, first_repeat.replayed,
+        ))
+        self.assertEqual((1, 0, 1), (
+            second_repeat.streams[0].fetched, second_repeat.processed, second_repeat.replayed,
+        ))
+        self.assertEqual(initial.streams[0].checkpoint_after, second_repeat.streams[0].checkpoint_after)
+        self.assertEqual(1, self.sources.count("source_event"))
+        self.assertEqual(1, self.sources.count("source_record_version"))
+
+    def test_19_stable_business_field_change_is_not_suppressed(self) -> None:
+        """A real payload difference remains a new event even at the same vendor timestamp."""
+        changed = {
+            "Id": "001A", "Name": "Globex Health", "Website": "https://globex.invalid",
+            "LastModifiedDate": "2026-10-12T12:00:00Z", "IsDeleted": False,
+            "LastViewedDate": "2026-10-12T12:05:01Z",
+            "LastReferencedDate": "2026-10-12T12:05:01Z",
+            "Unmodeled_Field__c": "preserved",
+        }
+        transport = QueueTransport(self._initial_replies() + [
+            response({"ids": ["001A"]}), response(changed), response({"deletedRecords": []}),
+        ])
+        runner = LiveIngestionRunner(self.sources, self.identity)
+        connector = sf_connector(transport)
+        runner.sync(connector, "initial", ("Account",), until="2026-10-12T12:01:00Z")
+        changed_run = runner.sync(connector, "incremental", ("Account",), until="2026-10-12T12:06:00Z")
+        self.assertEqual(1, changed_run.processed)
+        self.assertEqual(0, changed_run.replayed)
+        self.assertEqual(2, self.sources.count("source_event"))
+        self.assertEqual(2, self.sources.count("source_record_version"))
+
+    def test_20_pre_fix_event_is_reused_without_rewriting_history(self) -> None:
+        """Existing history made with the old hash remains the replay target."""
+        old_payload = {
+            "Id": "001A", "Name": "Globex", "Website": "https://globex.invalid",
+            "LastModifiedDate": "2026-10-12T12:00:00Z", "IsDeleted": False,
+            "LastViewedDate": "2026-10-12T12:00:01Z",
+            "LastReferencedDate": "2026-10-12T12:00:01Z",
+            "Unmodeled_Field__c": "preserved",
+        }
+        legacy = VendorRecord(
+            "salesforce", "00DTEST", "Account", "001A", "upsert",
+            old_payload["LastModifiedDate"], old_payload,
+            "2026-10-12T12:00:00Z|001A", "GET", "https://example.invalid/001A",
+        ).to_event(old_payload["LastModifiedDate"])
+        self.sources.process_event(legacy, self.identity)
+
+        connector = sf_connector(QueueTransport(self._initial_replies("2026-10-12T12:05:01Z")))
+        replay = LiveIngestionRunner(self.sources, self.identity).sync(
+            connector, "initial", ("Account",), until="2026-10-12T12:06:00Z"
+        )
+        self.assertEqual(0, replay.processed)
+        self.assertEqual(1, replay.replayed)
+        self.assertEqual(legacy.event_id, replay.streams[0].last_event_id)
+        self.assertEqual(1, self.sources.count("source_event"))
+        self.assertEqual(1, self.sources.count("source_record_version"))
 
 
 if __name__ == "__main__":

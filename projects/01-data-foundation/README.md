@@ -82,7 +82,7 @@ Read the repository-wide [beginner walkthrough](../../docs/START_HERE.md) for th
 - Raw API records routed through the existing P1.3 store and P1.2 unresolved identity interface.
 - Bounded retries, exponential backoff, rate-limit handling, deterministic replay, stream isolation, and checkpoint protection.
 - Explicit marker-protected Globex seeding that refuses to modify unmarked records.
-- Seventeen mocked connector scenarios and a concise runnable recovery demonstration.
+- Twenty mocked connector scenarios, including Salesforce read-side timestamp regression coverage, and a concise runnable recovery demonstration.
 - Authenticated Salesforce and HubSpot verification remains pending, so P1.6 is not yet a completed milestone.
 
 The [project state](PROJECT_STATE.md) is the authoritative source for current status.

@@ -7,9 +7,10 @@ from datetime import datetime, timedelta, timezone
 from typing import Iterable, Optional
 
 from sai_revenueos_identity import IdentityStore
-from sai_revenueos_sources import SourceStore
+from sai_revenueos_identity.errors import ConflictError
+from sai_revenueos_sources import SourceEvent, SourceStore
 
-from .models import LiveConnector, StreamSyncResult, SyncRunResult, utc_now
+from .models import LiveConnector, StreamSyncResult, SyncRunResult, VendorRecord, utc_now
 
 
 def _subtract_seconds(timestamp: str, seconds: int) -> str:
@@ -38,6 +39,24 @@ class LiveIngestionRunner:
         self.source_store = source_store
         self.identity_store = identity_store
         self.overlap_seconds = overlap_seconds
+
+    def _stored_equivalent_event(
+        self,
+        record: VendorRecord,
+        event: SourceEvent,
+    ) -> Optional[SourceEvent]:
+        """Find a durable envelope for the same stable vendor version."""
+        for stored_event in self.source_store.events_for_source_version(
+            event.source_system,
+            event.source_tenant,
+            event.source_object_type,
+            event.source_object_id,
+            event.event_type,
+            event.source_updated_at,
+        ):
+            if record.same_source_version(stored_event.payload):
+                return stored_event
+        return None
 
     def sync(
         self,
@@ -87,16 +106,39 @@ class LiveIngestionRunner:
                     # boundary for polling replay. The run itself retains a separate
                     # extraction ID in SyncRunResult for operational diagnostics.
                     event = record.to_event(record.source_updated_at)
+                    # Salesforce read-side fields can change while the vendor's
+                    # actual record version stays fixed. Reuse the first durable
+                    # envelope with the same stable content, including envelopes
+                    # written before the P1.6 identity fix, so raw history does not
+                    # grow merely because RevenueOS polled through its overlap.
+                    stored_event = self._stored_equivalent_event(record, event)
+                    if stored_event is not None:
+                        event = stored_event
                     should_fail = (
                         simulate_failure_after is not None
                         and processed_this_run == simulate_failure_after
                     )
-                    result = self.source_store.process_event(
-                        event,
-                        self.identity_store,
-                        actor_id="p1.6-live-source-processor",
-                        simulate_failure=should_fail,
-                    )
+                    try:
+                        result = self.source_store.process_event(
+                            event,
+                            self.identity_store,
+                            actor_id="p1.6-live-source-processor",
+                            simulate_failure=should_fail,
+                        )
+                    except ConflictError:
+                        # Another worker may have won the first-write race with
+                        # the same stable version but different view timestamps.
+                        # Retry its immutable envelope; unrelated conflicts remain
+                        # visible and still fail the stream.
+                        winner = self._stored_equivalent_event(record, event)
+                        if winner is None or winner.envelope_sha256 == event.envelope_sha256:
+                            raise
+                        result = self.source_store.process_event(
+                            winner,
+                            self.identity_store,
+                            actor_id="p1.6-live-source-processor",
+                            simulate_failure=should_fail,
+                        )
                     processed_this_run += 1
                     stream.processed += int(not result.replayed)
                     stream.replayed += int(result.replayed)
