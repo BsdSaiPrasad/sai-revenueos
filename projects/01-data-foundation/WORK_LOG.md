@@ -334,4 +334,6 @@ GitHub Actions run [38213609446](https://github.com/BsdSaiPrasad/sai-revenueos/a
 
 ### Git commit and CI
 
-The implementation commit and GitHub Actions run are recorded after the verified push.
+Implementation commit: `3c6a9df` (`feat: implement P1.6 live CRM ingestion`). Authored and committed as `BsdSaiPrasad <bsdsaiprasad1@gmail.com>` with no co-author attribution.
+
+GitHub Actions run [38276397965](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38276397965) passed the complete workflow on Python 3.9 and 3.14, including all 87 tests, architecture validation, four demonstrations, and 25-company file generation. This CI evidence is credential-free and does not replace the two pending authenticated account checks.

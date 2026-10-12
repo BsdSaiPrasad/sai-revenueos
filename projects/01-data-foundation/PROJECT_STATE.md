@@ -39,7 +39,7 @@ On 2026-10-12, all 87 scenarios passed locally: 23 P1.2 identity scenarios, 13 P
 
 Architecture validation passed with 23 canonical entities, 31 relationships, 36 accepted decisions, P1.2–P1.6 artifacts, continuity files, generated-data exclusion, and secret-filename checks. Python compilation, all JSON files, local Markdown links, all four concise demonstrations, both P1.5 command modes, and the 2,500-company scale case passed locally.
 
-The last completed phase, P1.5, passed the complete Python 3.9 and 3.14 GitHub Actions matrix on 2026-10-12: [Actions run 38213609446](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38213609446). The P1.6 commit and its new GitHub Actions run are recorded after push.
+The P1.6 mocked implementation passed the complete Python 3.9 and 3.14 GitHub Actions matrix on 2026-10-12: [Actions run 38276397965](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38276397965). The run executed all 87 tests, architecture validation, four demonstrations, and a generated 25-company smoke dataset without vendor credentials.
 
 ### Verified preset counts with seed 42
 
