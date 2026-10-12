@@ -7,6 +7,7 @@
     "Account": {
       "id_path": ["Id"],
       "updated_at_path": ["LastModifiedDate"],
+      "deleted_at_path": ["DeletedDate"],
       "deletion_path": ["IsDeleted"],
       "required_upsert_paths": [["Id"], ["Name"], ["LastModifiedDate"]],
       "fields": {
@@ -23,6 +24,7 @@
     "Lead": {
       "id_path": ["Id"],
       "updated_at_path": ["LastModifiedDate"],
+      "deleted_at_path": ["DeletedDate"],
       "deletion_path": ["IsDeleted"],
       "required_upsert_paths": [["Id"], ["LastName"], ["Company"], ["LastModifiedDate"]],
       "fields": {
@@ -40,6 +42,7 @@
     "Contact": {
       "id_path": ["Id"],
       "updated_at_path": ["LastModifiedDate"],
+      "deleted_at_path": ["DeletedDate"],
       "deletion_path": ["IsDeleted"],
       "required_upsert_paths": [["Id"], ["LastName"], ["LastModifiedDate"]],
       "fields": {
@@ -56,6 +59,7 @@
     "Opportunity": {
       "id_path": ["Id"],
       "updated_at_path": ["LastModifiedDate"],
+      "deleted_at_path": ["DeletedDate"],
       "deletion_path": ["IsDeleted"],
       "required_upsert_paths": [["Id"], ["Name"], ["StageName"], ["CloseDate"], ["LastModifiedDate"]],
       "fields": {

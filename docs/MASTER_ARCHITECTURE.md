@@ -37,7 +37,7 @@ Example: synthetic company Globex Health can appear in Salesforce and HubSpot. P
 
 | Project | What it owns | Current status |
 |---|---|---|
-| **P1 — Data Foundation & Customer Identity** | Canonical entities, source identity, historical relationships, field authority, provenance, shared data contracts, and synthetic fixtures. | P1.0–P1.5 complete |
+| **P1 — Data Foundation & Customer Identity** | Canonical entities, source identity, historical relationships, field authority, provenance, shared data contracts, synthetic fixtures, and CRM ingestion. | P1.0–P1.5 complete; P1.6 mocked implementation awaiting live verification |
 | **P2 — Inbound** | Future inbound demand capture, scoring, and routing. | Planned |
 | **P3 — Outbound** | Future prospecting, sequencing, and outbound engagement. | Planned |
 | **P4 — Revenue Intelligence** | Future pipeline, forecasting, and revenue analytics. | Planned |
@@ -47,7 +47,7 @@ Example: synthetic company Globex Health can appear in Salesforce and HubSpot. P
 
 ## What P1 Publishes
 
-P1 owns the shared logical model in `shared/contracts/canonical-model.v1.json` and the versioned P1.3 source, P1.4 authority, and P1.5 synthetic-manifest contracts under `projects/01-data-foundation/contracts/`. Other projects may map those contracts into warehouse tables, Application Programming Interfaces (APIs), events, or semantic models, but they must not create incompatible definitions inside their own folders.
+P1 owns the shared logical model in `shared/contracts/canonical-model.v1.json` and the versioned P1.3 source, P1.4 authority, P1.5 synthetic-manifest, and P1.6 ingestion-policy contracts under `projects/01-data-foundation/contracts/`. Other projects may map those contracts into warehouse tables, Application Programming Interfaces (APIs), events, or semantic models, but they must not create incompatible definitions inside their own folders.
 
 A breaking change—such as changing what an Account ID means—requires a new major contract version and a review of every downstream project. If work reveals a cross-project change, label it **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
 
@@ -69,6 +69,8 @@ A breaking change—such as changing what an Account ID means—requires a new m
 14. Source-of-truth ownership is assigned to fields, not entire entities.
 15. Conflicting or manually verified values require auditable human review.
 16. Write-back requires explicit authority and approval; P1.4 does not deliver writes.
+17. Live connectors preserve raw responses, use scoped credentials, and never approve identity matches automatically.
+18. API retries are bounded, and a failed stream cannot advance its checkpoint past a gap.
 
 The reasoning is recorded in the [P1 decision index](../projects/01-data-foundation/DECISIONS.md).
 
@@ -84,4 +86,4 @@ Repository validation catches structural drift, but future physical systems will
 
 ## What Comes Next?
 
-P1.5 is complete as a local synthetic-data reference. Review its generator, expected outcomes, and executable demonstration, then approve P1.6 scope before further implementation; P2–P7 stay planned until their own work begins.
+P1.6 connector code and mocked verification are ready. Complete authenticated Salesforce and HubSpot checks before marking P1.6 complete or beginning P1.7; P2–P7 stay planned until their own work begins.

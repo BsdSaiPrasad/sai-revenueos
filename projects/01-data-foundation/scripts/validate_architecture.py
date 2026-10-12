@@ -3,7 +3,7 @@
 
 This script checks the shared JavaScript Object Notation (JSON) contract, canonical
 Entity Relationship Diagram (ERD), Architecture Decision Records (ADRs), required
-P1.2 through P1.5 artifacts, schema enforcement names, continuity documents, and
+P1.2 through P1.6 artifacts, schema enforcement names, continuity documents, and
 secret-like filenames. It validates repository consistency; it does not execute
 runtime tests or claim that a production service is deployed.
 """
@@ -42,7 +42,14 @@ SYNTHETIC_PACKAGE_DIR = PROJECT_DIR / "src/sai_revenueos_synthetic"
 SYNTHETIC_TEST_PATH = PROJECT_DIR / "tests/test_synthetic_data.py"
 SYNTHETIC_DEMO_PATH = PROJECT_DIR / "scripts/demo_synthetic_data.py"
 SYNTHETIC_GENERATOR_PATH = PROJECT_DIR / "scripts/generate_synthetic_gtm_data.py"
-DECISION_COUNT = 30
+LIVE_GUIDE_PATH = PROJECT_DIR / "architecture/LIVE_INGESTION.md"
+LIVE_POLICY_PATH = PROJECT_DIR / "contracts/live-ingestion-policy.v1.json"
+LIVE_PACKAGE_DIR = PROJECT_DIR / "src/sai_revenueos_connectors"
+LIVE_TEST_PATH = PROJECT_DIR / "tests/test_live_connectors.py"
+LIVE_DEMO_PATH = PROJECT_DIR / "scripts/demo_live_ingestion.py"
+LIVE_RUNNER_PATH = PROJECT_DIR / "scripts/run_live_ingestion.py"
+LIVE_AUTH_PATH = PROJECT_DIR / "scripts/configure_live_auth.py"
+DECISION_COUNT = 36
 
 REQUIRED_ENTITIES = {
     "Account",
@@ -455,6 +462,55 @@ def validate_p15_reference(errors: list[str]) -> None:
             fail(errors, "generated P1.5 bulk data must not be tracked in Git")
 
 
+def validate_p16_reference(errors: list[str]) -> None:
+    """Check P1.6 connectors, policy, tests, authentication helper, guide, and demo."""
+    required = (
+        LIVE_GUIDE_PATH,
+        LIVE_POLICY_PATH,
+        LIVE_PACKAGE_DIR / "__init__.py",
+        LIVE_PACKAGE_DIR / "http.py",
+        LIVE_PACKAGE_DIR / "models.py",
+        LIVE_PACKAGE_DIR / "runner.py",
+        LIVE_PACKAGE_DIR / "salesforce.py",
+        LIVE_PACKAGE_DIR / "hubspot.py",
+        LIVE_TEST_PATH,
+        LIVE_DEMO_PATH,
+        LIVE_RUNNER_PATH,
+        LIVE_AUTH_PATH,
+    )
+    missing = [str(path.relative_to(REPO_ROOT)) for path in required if not path.is_file()]
+    if missing:
+        fail(errors, f"missing P1.6 reference artifacts: {', '.join(missing)}")
+        return
+    try:
+        policy = json.loads(LIVE_POLICY_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        fail(errors, f"P1.6 ingestion policy cannot be loaded: {exc}")
+        return
+    if policy.get("contract_version") != "1.0.0":
+        fail(errors, "P1.6 ingestion policy must declare version 1.0.0")
+    connectors = policy.get("connectors", {})
+    if set(connectors) != {"salesforce", "hubspot"}:
+        fail(errors, "P1.6 policy must define Salesforce and HubSpot connectors")
+    if connectors.get("salesforce", {}).get("objects") != ["Account", "Lead", "Contact", "Opportunity"]:
+        fail(errors, "P1.6 Salesforce objects do not match the approved P1.3 boundary")
+    if connectors.get("hubspot", {}).get("objects") != ["Company", "Contact", "Deal"]:
+        fail(errors, "P1.6 HubSpot objects do not match the approved P1.3 boundary")
+    reliability = policy.get("reliability", {})
+    for rule in (
+        "honor_retry_after", "checkpoint_after_durable_processing_only",
+        "deterministic_event_ids", "stop_failed_stream_before_checkpoint_gap",
+    ):
+        if reliability.get(rule) is not True:
+            fail(errors, f"P1.6 reliability rule must remain enabled: {rule}")
+    boundaries = policy.get("boundaries", {})
+    if any(value is not False for value in boundaries.values()):
+        fail(errors, "P1.6 deferred boundaries must remain disabled")
+    gitignore = (REPO_ROOT / ".gitignore").read_text(encoding="utf-8")
+    if "generated-data/" not in gitignore:
+        fail(errors, "P1.6 local credentials and databases are not excluded by generated-data/")
+
+
 def validate_no_tracked_secrets(errors: list[str]) -> None:
     """Flag secret-like filenames among tracked and candidate repository files."""
     try:
@@ -489,6 +545,7 @@ def main() -> int:
     validate_p13_reference(errors)
     validate_p14_reference(contract, errors)
     validate_p15_reference(errors)
+    validate_p16_reference(errors)
     validate_no_tracked_secrets(errors)
 
     if errors:
@@ -502,7 +559,7 @@ def main() -> int:
     print(
         "P1 architecture validation PASSED: "
         f"{entity_count} entities, {relationship_count} relationships, "
-        f"{DECISION_COUNT} decisions, ERD coverage, P1.2–P1.5 reference artifacts, "
+        f"{DECISION_COUNT} decisions, ERD coverage, P1.2–P1.6 reference artifacts, "
         "continuity files, and secret filename checks."
     )
     return 0

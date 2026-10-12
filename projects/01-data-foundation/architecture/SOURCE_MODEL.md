@@ -1,6 +1,6 @@
 # P1.3 Salesforce + HubSpot Source Model
 
-P1.3 is a local Python and SQLite reference built from **synthetic records**. It does not call Salesforce or HubSpot Application Programming Interfaces (APIs), run a connector, or load Snowflake.
+P1.3 is a local Python and SQLite source-storage reference originally proved with **synthetic records**. P1.6 now supplies optional live Salesforce and HubSpot connectors through the same public interfaces. P1.3 itself still owns no authentication, scheduler, or Snowflake load.
 
 ## What It Proves
 
@@ -37,6 +37,7 @@ Unknown standard, custom, and nested payload fields remain in raw history even w
 | P1.2 identity boundary | [`IdentityStore.get_or_create_source_record()`](../src/sai_revenueos_identity/store.py) | Reuses four-part source identity and immutable observations. |
 | Acceptance scenarios | [`test_source_model.py`](../tests/test_source_model.py) | Proves duplicate, update, delete, malformed, late, failure, and replay behavior. |
 | Runnable example | [`demo_source_model.py`](../scripts/demo_source_model.py) | Shows the complete Globex Health flow in a temporary database. |
+| Live adapter | [`sai_revenueos_connectors`](../src/sai_revenueos_connectors/) | Converts vendor API records into this unchanged envelope and store. |
 
 P1.3 calls P1.2 with `SOURCE_WRITER` authority only. New SourceRecords remain unresolved; P1.3 never proposes or approves a crosswalk.
 
@@ -72,7 +73,7 @@ Runs the 13 P1.3 source-model acceptance scenarios.
 python3 -m unittest discover -s projects/01-data-foundation/tests -v
 ```
 
-Runs all P1.2–P1.5 executable scenarios.
+Runs all P1.2–P1.6 executable scenarios, including mocked live-connector behavior.
 
 ## Small Exercise
 
@@ -87,7 +88,7 @@ Before reading the `Next replay` line, predict its start time and explain why re
 ## Boundaries
 
 - Payloads in `examples/p13/` are realistic but fictional.
-- No OAuth, vendor pagination, rate-limit handling, webhook receiver, or live API client exists.
+- OAuth, vendor pagination, and rate-limit handling live in the separate P1.6 connector package; webhook receivers and scheduling remain unimplemented.
 - No production object storage, queue, distributed transaction, scheduler, monitoring, or privacy policy exists.
-- No Snowflake table, dbt model, automatic identity matching, or live connector exists.
+- No Snowflake table, dbt model, automatic identity matching, scheduled connector service, or production deployment exists.
 - P1.4 consumes P1.3 evidence through a separate governed interface; P1.3 itself does not choose canonical field truth.

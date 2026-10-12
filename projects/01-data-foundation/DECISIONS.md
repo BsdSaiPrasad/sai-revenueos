@@ -4,7 +4,7 @@
 
 This is the index of Project 1's approved architecture decisions. An Architecture Decision Record (ADR) explains the problem, alternatives, decision, technical design, and tradeoffs.
 
-All 30 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, D014–D019 define the P1.3 source model, D020–D025 define P1.4 field authority, and D026–D030 define P1.5 synthetic data. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
+All 36 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, D014–D019 define the P1.3 source model, D020–D025 define P1.4 field authority, D026–D030 define P1.5 synthetic data, and D031–D036 define P1.6 live ingestion. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
 
 ## Approved Decisions
 
@@ -40,14 +40,20 @@ All 30 decisions below are **Accepted**. D001–D008 define the canonical model,
 | **D028** | Label deliberate data problems and their expected outcomes. | Keeps duplicates, gaps, conflicts, and ambiguity testable without unsafe automatic merges. | [Make Intentional Data Problems Explicit](architecture/adr/0028-intentional-quality-scenarios.md) |
 | **D029** | Generate historical timelines while keeping later workflows out of scope. | Exercises rebrands, job changes, acquisitions, and late events without implementing P5. | [Generate Historical Timelines Without Building Future Workflows](architecture/adr/0029-historical-synthetic-timelines.md) |
 | **D030** | Publish validated JSON, JSONL, CSV, and manifest outputs. | Serves both automated checks and human review without committing large generated datasets. | [Publish Portable Synthetic Files with Automated Validation](architecture/adr/0030-portable-validated-synthetic-outputs.md) |
+| **D031** | Use controlled live Salesforce Developer Edition and HubSpot Free accounts. | Adds real API evidence while restricting writes to clearly marked fictional records. | [Use Controlled Live CRM Accounts](architecture/adr/0031-use-controlled-live-crm-accounts.md) |
+| **D032** | Authenticate with scoped vendor-supported tokens kept outside Git and logs. | Limits access and prevents credentials from entering repository or diagnostic history. | [Use Scoped Vendor Authentication](architecture/adr/0032-use-scoped-vendor-authentication.md) |
+| **D033** | Run one full sync, then poll incrementally with future webhook and reconciliation boundaries. | Establishes a complete baseline without repeating full extraction forever. | [Run a Full Sync Before Incremental Polling](architecture/adr/0033-poll-full-then-incremental.md) |
+| **D034** | Store live records raw-first through the existing local SQLite reference. | Preserves vendor evidence and proven transactions without prematurely adding cloud infrastructure. | [Store Live Data Raw-First in the Existing Local Reference](architecture/adr/0034-store-live-data-raw-first-locally.md) |
+| **D035** | Bound retries, respect rate limits, isolate errors, and advance checkpoints only after durable work. | Prevents vendor overload, duplicate processing, and silent data gaps. | [Bound Retries and Protect Checkpoints](architecture/adr/0035-bound-retries-and-protect-checkpoints.md) |
+| **D036** | Use mocked connector tests in CI and separate authenticated account verification. | Keeps automation deterministic while requiring real evidence before calling either platform live-verified. | [Verify Connectors with Mocks and Live Accounts](architecture/adr/0036-test-connectors-with-mocks-and-live-accounts.md) |
 
 ## What These Decisions Do Not Implement
 
 The decisions define the architecture. They do not mean the following capabilities are running:
 
-- Live Salesforce or HubSpot API ingestion and scheduled connector execution.
+- Scheduled connector execution, webhook receivers, and production deployment.
 - Complete identity matching or artificial-intelligence scoring.
 - Physical warehouse constraints and reconciliation jobs.
 - Live field synchronization or write-back delivery.
 
-The P1.2 identity, P1.3 source, P1.4 field-authority, and P1.5 synthetic-data mechanics are local references, not deployed services. P1.6 and later work require a separate approved scope.
+The P1.2 identity, P1.3 source, P1.4 field-authority, P1.5 synthetic-data, and P1.6 live-ingestion mechanics are local references, not deployed services. Live P1.6 verification remains platform-specific until authenticated calls succeed. P1.7 and later work require a separate approved scope.

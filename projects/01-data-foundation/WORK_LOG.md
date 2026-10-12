@@ -304,3 +304,34 @@ Implementation commit: `400274d` (`feat: implement P1.4 field authority`). Autho
 Implementation commit: `14474eb` (`feat: implement P1.5 synthetic data generation`). Authored and committed as `BsdSaiPrasad <bsdsaiprasad1@gmail.com>` with no co-author attribution.
 
 GitHub Actions run [38213609446](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38213609446) passed the complete workflow on Python 3.9 and 3.14, including all 68 tests, architecture validation, three demonstrations, and 25-company file generation.
+
+## 2026-10-12 — P1.6 Live Salesforce and HubSpot Ingestion
+
+### Implemented
+
+- Added standard-library Salesforce and HubSpot connectors that translate current vendor API responses into the unchanged P1.3 event envelope and P1.2 source-identity interface.
+- Added Salesforce OAuth 2.0 External Client App browser authorization with PKCE, refresh-token handling, QueryAll pagination, complete active-record reads, and Get Updated/Get Deleted polling.
+- Added HubSpot scoped Service Key or existing private-app token support with the `2026-09` CRM Objects API, pagination, last-modified search, and archived-object deletion polling.
+- Added bounded exponential retries, timeouts, `Retry-After` handling, redacted diagnostics, deterministic source-version events, five-minute overlap, per-stream isolation, and checkpoint protection.
+- Added explicit, marker-protected Globex test seeding and updates that stop on an unmarked Salesforce Website or HubSpot domain collision.
+- Added a versioned ingestion policy, accepted Decisions D031–D036, a live-ingestion guide, 17 mocked connector scenarios, and a 14-line demonstration with complete `--verbose` evidence.
+
+### Verification evidence
+
+- `python3 -m unittest discover -s projects/01-data-foundation/tests -v` — **passed**, 87/87 scenarios.
+- `python3 projects/01-data-foundation/scripts/validate_architecture.py` — **passed**: 23 entities, 31 relationships, 36 decisions, P1.2–P1.6 artifacts, continuity files, generated-data exclusion, and secret-filename checks.
+- Python compilation and all 13 checked-in JSON files passed.
+- The P1.6 default demonstration passed in 14 lines; verbose mode showed credential-free requests, raw input, stored history, duplicate replay, API failure, unchanged checkpoint, and successful recovery.
+- Both local credential files were absent. Salesforce real API status is **unverified**; HubSpot real API status is **unverified**. No live success is claimed.
+
+### Boundaries and progress
+
+- The canonical v1.0.0 contract, 23 entities, 31 relationships, Decisions D001–D030, P1.2 identity behavior, and P1.4 authority behavior remain unchanged.
+- P1.3 source contracts gained optional vendor deletion-time paths so real Salesforce `DeletedDate` and HubSpot `archivedAt` timestamps remain raw and validate as tombstones.
+- No credential, live identity approval, CRM write-back, webhook receiver, scheduler, Snowflake pipeline, downstream workflow, or P1.7 work was added.
+- No **MASTER ARCHITECTURE DECISION NEEDED** change was required.
+- P1.6 remains incomplete until both authenticated test accounts pass. P1 stays at 37.5%, and overall RevenueOS stays at approximately 5.4%.
+
+### Git commit and CI
+
+The implementation commit and GitHub Actions run are recorded after the verified push.

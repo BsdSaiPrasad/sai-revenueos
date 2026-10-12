@@ -268,7 +268,12 @@ def standardize_event(
             if _path_value(payload, path) is _MISSING:
                 raise ValidationError("payload is missing required field: %s" % ".".join(path))
 
-    payload_updated_at = _path_value(payload, spec["updated_at_path"])
+    timestamp_path = spec["updated_at_path"]
+    if event.event_type == "delete" and "deleted_at_path" in spec:
+        deleted_at = _path_value(payload, spec["deleted_at_path"])
+        if deleted_at is not _MISSING:
+            timestamp_path = spec["deleted_at_path"]
+    payload_updated_at = _path_value(payload, timestamp_path)
     if payload_updated_at is not _MISSING:
         if normalize_timestamp("payload source update time", payload_updated_at) != event.source_updated_at:
             raise ValidationError("payload update time does not match the event envelope")

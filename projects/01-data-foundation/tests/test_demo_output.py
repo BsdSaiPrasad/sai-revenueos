@@ -1,4 +1,4 @@
-"""Command-line acceptance tests for the P1.3 and P1.4 demonstrations."""
+"""Command-line acceptance tests for the P1.3 through P1.6 demonstrations."""
 
 from __future__ import annotations
 
@@ -108,6 +108,32 @@ class DemonstrationOutputTests(unittest.TestCase):
             "P1.4 AUTHORITY EVALUATION", "EXPECTED IDENTITY OUTCOMES", "SCENARIO MANIFEST",
         ):
             self.assertIn(heading, output)
+
+    def test_p16_default_is_a_complete_summary_with_at_most_15_lines(self) -> None:
+        """The live-ingestion demo shows requests, raw storage, replay, failure, and recovery."""
+        lines = self.run_demo("demo_live_ingestion.py")
+        output = "\n".join(lines)
+        self.assertGreaterEqual(len(lines), 10)
+        self.assertLessEqual(len(lines), 15)
+        for phrase in (
+            "Input:", "API request:", "Python:", "Before:", "After initial:",
+            "Identity:", "Repeat:", "Simulated API failure:", "Checkpoint on failure:",
+            "Recovery retry:", "Before/after name:", "Final:", "Outcome:",
+        ):
+            self.assertIn(phrase, output)
+
+    def test_p16_verbose_preserves_request_and_storage_evidence(self) -> None:
+        """Verbose mode exposes credential-free requests and the stored raw source history."""
+        lines = self.run_demo("demo_live_ingestion.py", "--verbose")
+        output = "\n".join(lines)
+        self.assertGreater(len(lines), 15)
+        for heading in (
+            "MOCK API INPUT - INITIAL", "MOCK API INPUT - UPDATE", "CREDENTIAL-FREE REQUESTS",
+            "REQUEST ATTEMPTS", "FAILED RUN", "RECOVERED RUN", "STORED RAW EVENT",
+            "STORED HISTORY", "FINAL CHECKPOINT",
+        ):
+            self.assertIn(heading, output)
+        self.assertNotIn("demo-token-never-logged", output)
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@
 
 SAI RevenueOS is a learning and portfolio project that models how an enterprise business can connect its Go-To-Market (GTM) systems. It creates a consistent view of companies, people, sales opportunities, contracts, subscriptions, and customer activity across disconnected tools. The platform is designed around realistic Business-to-Business Software-as-a-Service (B2B SaaS) scenarios, but every company, person, and data example is synthetic.
 
-The repository contains the completed architecture foundation plus tested local references for P1.2 identity control, P1.3 Salesforce/HubSpot source history, P1.4 field authority, and P1.5 deterministic synthetic data. It does not claim to be a deployed production platform.
+The repository contains the completed architecture foundation plus tested local references for P1.2 identity control, P1.3 Salesforce/HubSpot source history, P1.4 field authority, P1.5 deterministic synthetic data, and a P1.6 live-connector implementation. P1.6 passes mocked verification but remains incomplete until both authenticated test accounts pass. This is not a deployed production platform.
 
 ## What Business Problem Are We Solving?
 
@@ -58,11 +58,12 @@ Start with the [beginner walkthrough](docs/START_HERE.md). Use the [glossary](do
 - P1.3 — Versioned Salesforce/HubSpot source contracts, raw history, tombstones, safe replay, checkpoints, and P1.2 integration.
 - P1.4 — Field-level source of truth, conflict review, provenance history, and controlled write-back authorization.
 - P1.5 — Deterministic synthetic GTM ecosystems, deliberate quality scenarios, portable files, and automated validation.
+- P1.6 — Salesforce and HubSpot connector code, safe authentication helpers, polling, retries, and mocked API verification; real-account verification pending.
 - Repository readability and learning-documentation improvement.
 
 **Planned next**
 
-- P1.6 scope review; no P1.6 implementation has started.
+- Authenticate and verify both P1.6 test accounts; do not start P1.7.
 
 See the authoritative [progress tracker](PROGRESS.md) and [P1 project state](projects/01-data-foundation/PROJECT_STATE.md) for exact status and limitations.
 
@@ -81,12 +82,12 @@ See the authoritative [progress tracker](PROGRESS.md) and [P1 project state](pro
     ├── PROJECT_STATE.md           # Current, authoritative status
     ├── DECISIONS.md               # Approved decision index
     ├── WORK_LOG.md                # Chronological evidence log
-    ├── contracts/                 # P1.3–P1.5 versioned contracts
+    ├── contracts/                 # P1.3–P1.6 versioned contracts and policy
     ├── examples/                  # Synthetic P1.3/P1.4 inputs
     ├── architecture/              # Model, ERD, and ADRs
     ├── scripts/                   # Validation and runnable demonstration
-    ├── src/                       # P1.2–P1.5 Python + SQLite references
-    └── tests/                     # P1.2–P1.5 executable acceptance scenarios
+    ├── src/                       # P1.2–P1.6 Python + SQLite references
+    └── tests/                     # P1.2–P1.6 executable acceptance scenarios
 ```
 
 Future project folders are intentionally absent until they contain real work.
@@ -101,8 +102,9 @@ Future project folders are intentionally absent until they contain real work.
 6. [P1.3 Source Model](projects/01-data-foundation/architecture/SOURCE_MODEL.md) — run the synthetic source history and recovery demonstration.
 7. [P1.4 Field Authority](projects/01-data-foundation/architecture/FIELD_AUTHORITY.md) — inspect field ownership, conflicts, reviews, and write-back authorization.
 8. [P1.5 Synthetic Data](projects/01-data-foundation/architecture/SYNTHETIC_DATA.md) — generate reproducible connected fixtures and inspect expected data-quality outcomes.
-9. [Project State](projects/01-data-foundation/PROJECT_STATE.md) — confirm what is actually working and what comes next.
-10. [Progress](PROGRESS.md) — see the milestone-based completion calculation.
+9. [P1.6 Live Ingestion](projects/01-data-foundation/architecture/LIVE_INGESTION.md) — understand connector behavior and securely run real-account verification.
+10. [Project State](projects/01-data-foundation/PROJECT_STATE.md) — confirm what is actually working and what remains unverified.
+11. [Progress](PROGRESS.md) — see the milestone-based completion calculation.
 
 ## How to Verify the Current Implementation
 
@@ -114,14 +116,15 @@ python3 -m unittest discover -s projects/01-data-foundation/tests -v
 python3 projects/01-data-foundation/scripts/demo_source_model.py
 python3 projects/01-data-foundation/scripts/demo_field_authority.py
 python3 projects/01-data-foundation/scripts/demo_synthetic_data.py
+python3 projects/01-data-foundation/scripts/demo_live_ingestion.py
 ```
 
-These commands check the unchanged 23 entities and 31 relationships, 30 approved decisions, required reference artifacts, 68 P1.2–P1.5 scenarios, and all three synthetic Globex demonstrations. Add `--verbose` to a demonstration command for complete technical evidence.
+These commands check the unchanged 23 entities and 31 relationships, 36 approved decisions, required reference artifacts, 87 P1.2–P1.6 scenarios, and all four Globex demonstrations. The P1.6 demo uses scripted API responses; follow its guide for authenticated checks. Add `--verbose` to a demonstration command for complete technical evidence.
 
 ## Important Limitations
 
-- The P1.2–P1.5 runtimes are local reference implementations, not deployed services or a data platform.
-- There is no live connector, write-back delivery, production Snowflake schema, complete identity-matching engine, reverse Extract-Transform-Load (ETL), or workflow service.
+- The P1.2–P1.6 runtimes are local reference implementations, not deployed services or a data platform.
+- Live connector code exists, but both real-account checks remain unverified. There is no scheduler, webhook receiver, write-back delivery, production Snowflake schema, complete identity-matching engine, reverse Extract-Transform-Load (ETL), or workflow service.
 - The shared JSON contract describes intended meaning and relationships; it does not prove that source data has been loaded.
 - P2–P7 are planned boundaries, not implemented capabilities.
 

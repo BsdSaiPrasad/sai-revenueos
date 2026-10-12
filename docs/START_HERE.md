@@ -6,7 +6,7 @@ This walkthrough explains Project 1 through one continuous, synthetic example. N
 
 **Globex Health** appears in both Salesforce and HubSpot. **Sarah Kim** and **John Lee** work there. The company is evaluating a fictional analytics product, signs a contract, and starts a subscription.
 
-The architecture and local references are complete through P1.5. P1.3 uses realistic synthetic source events, P1.4 governs selected field values, and P1.5 creates reproducible connected fixture datasets. Live connector and write-back execution remain later work.
+The architecture and completed milestones are verified through P1.5. P1.6 adds live connector code and mocked verification, but Salesforce and HubSpot remain separately unverified until authenticated calls succeed. Write-back execution remains later work.
 
 ## Step 1 — Preserve the Source Records
 
@@ -14,7 +14,7 @@ Salesforce Account `SF-1001` and HubSpot Company `HS-502` are different system r
 
 **Implemented locally:** the stable four-part source identity, database uniqueness, atomic replay handling, immutable observations, complete raw payload history, standardized source versions, tombstones, and checkpoints.
 
-**Important boundary:** no connector or vendor API runs today. The P1.3 examples simulate what a connector would deliver.
+**Important boundary:** P1.6 can now call the live APIs after local authentication. Checked-in examples and CI still use synthetic or mocked data and no credentials.
 
 ## Step 2 — Give the Company a Canonical Account
 
@@ -102,6 +102,14 @@ P1.5 expands the Globex story into deterministic datasets containing 25, 250, 2,
 
 **Important boundary:** generated matches are expected evidence only. P1.5 never automatically approves a crosswalk or merges an unknown identity.
 
+## Step 11 — Read the Marked Test Records from the Real CRMs
+
+P1.6 connects to Salesforce Developer Edition and HubSpot Free with locally stored, ignored credentials. It performs one full read and later incremental polls, then sends every returned record through the same P1.3 raw-history and P1.2 source-identity interfaces.
+
+**Implemented and mocked locally:** OAuth/token handling, pagination, updates, deletion tombstones, retries, rate limits, deterministic replay, checkpoint protection, and safe Globex seeding.
+
+**Still requires Sai:** authorize both accounts and execute the marked Globex commands. Until each real call passes, that platform remains unverified and P1.6 remains incomplete.
+
 ## Where to Go Next
 
 1. Use the [glossary](GLOSSARY.md) for unfamiliar terms.
@@ -113,3 +121,4 @@ P1.5 expands the Globex story into deterministic datasets containing 25, 250, 2,
 7. Run the [P1.3 source-model guide](../projects/01-data-foundation/architecture/SOURCE_MODEL.md) for raw history, replay, failure, and tombstone behavior.
 8. Run the [P1.4 field-authority guide](../projects/01-data-foundation/architecture/FIELD_AUTHORITY.md) for ownership, conflict, review, and write-back policy.
 9. Run the [P1.5 synthetic-data guide](../projects/01-data-foundation/architecture/SYNTHETIC_DATA.md) to create and inspect a connected fictional ecosystem.
+10. Follow the [P1.6 live-ingestion guide](../projects/01-data-foundation/architecture/LIVE_INGESTION.md) for the mocked demo and secure real-account verification.

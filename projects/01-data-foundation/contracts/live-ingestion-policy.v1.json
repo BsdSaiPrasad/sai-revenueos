@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BsdSaiPrasad/sai-revenueos/live-ingestion-policy.v1.json",
+  "contract_name": "live-ingestion-policy",
+  "contract_version": "1.0.0",
+  "purpose": "Declare the P1.6 live connector boundaries without containing credentials.",
+  "connectors": {
+    "salesforce": {
+      "account_type": "Developer Edition",
+      "authentication": "OAuth 2.0 External Client App with PKCE and refresh token",
+      "api": "Salesforce REST API latest alias; tested mocks model v68.0",
+      "objects": ["Account", "Lead", "Contact", "Opportunity"],
+      "initial_sync": "QueryAll pagination followed by complete sObject reads for active records",
+      "incremental_sync": "sObject Get Updated and Get Deleted polling with overlap",
+      "required_scopes": ["api", "refresh_token", "offline_access"]
+    },
+    "hubspot": {
+      "account_type": "Free account",
+      "authentication": "Scoped Service Key or existing private-app bearer token",
+      "api": "HubSpot CRM Objects API 2026-09",
+      "objects": ["Company", "Contact", "Deal"],
+      "initial_sync": "Active and archived CRM object pagination",
+      "incremental_sync": "CRM Search updated-time polling plus archived-object polling",
+      "required_scopes": [
+        "crm.objects.companies.read",
+        "crm.objects.contacts.read",
+        "crm.objects.deals.read"
+      ],
+      "optional_seed_scope": "crm.objects.companies.write"
+    }
+  },
+  "reliability": {
+    "max_attempts": 4,
+    "base_delay_seconds": 1,
+    "max_delay_seconds": 8,
+    "rate_limit_status": 429,
+    "honor_retry_after": true,
+    "checkpoint_overlap_seconds": 300,
+    "checkpoint_after_durable_processing_only": true,
+    "deterministic_event_ids": true,
+    "stop_failed_stream_before_checkpoint_gap": true
+  },
+  "storage": {
+    "implementation": "existing P1.2 and P1.3 SQLite stores",
+    "raw_first": true,
+    "credentials": "ignored local mode-600 files",
+    "future_boundary": "replace local files with managed secret and object storage without changing source events"
+  },
+  "fictional_seed": {
+    "marker": "SAI_REVENUEOS_P16_TEST_ONLY",
+    "salesforce_website": "https://globex-p16.invalid",
+    "hubspot_domain": "globex-p16.invalid",
+    "explicit_confirmation_required": true,
+    "refuse_unmarked_collision": true
+  },
+  "boundaries": {
+    "live_write_back": false,
+    "automatic_identity_merge": false,
+    "snowflake": false,
+    "webhook_receiver": false,
+    "scheduler": false,
+    "p1_7": false
+  }
+}

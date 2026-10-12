@@ -7,6 +7,7 @@
     "Company": {
       "id_path": ["id"],
       "updated_at_path": ["updatedAt"],
+      "deleted_at_path": ["archivedAt"],
       "deletion_path": ["archived"],
       "required_upsert_paths": [["id"], ["properties", "name"], ["updatedAt"]],
       "fields": {
@@ -23,6 +24,7 @@
     "Contact": {
       "id_path": ["id"],
       "updated_at_path": ["updatedAt"],
+      "deleted_at_path": ["archivedAt"],
       "deletion_path": ["archived"],
       "required_upsert_paths": [["id"], ["properties", "lastname"], ["updatedAt"]],
       "fields": {
@@ -39,6 +41,7 @@
     "Deal": {
       "id_path": ["id"],
       "updated_at_path": ["updatedAt"],
+      "deleted_at_path": ["archivedAt"],
       "deletion_path": ["archived"],
       "required_upsert_paths": [["id"], ["properties", "dealname"], ["properties", "dealstage"], ["updatedAt"]],
       "fields": {

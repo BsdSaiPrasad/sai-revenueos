@@ -75,6 +75,16 @@ Read the repository-wide [beginner walkthrough](../../docs/START_HERE.md) for th
 - Safe expected identity outcomes that never automatically merge unknown records.
 - Eleven executed generator scenarios and a concise runnable Globex demonstration.
 
+### P1.6 — Live Salesforce and HubSpot Ingestion
+
+- Reusable Salesforce OAuth 2.0 and HubSpot scoped-token connectors built with the Python standard library.
+- Initial and incremental polling, pagination, source updates, and vendor-supported deletion detection.
+- Raw API records routed through the existing P1.3 store and P1.2 unresolved identity interface.
+- Bounded retries, exponential backoff, rate-limit handling, deterministic replay, stream isolation, and checkpoint protection.
+- Explicit marker-protected Globex seeding that refuses to modify unmarked records.
+- Seventeen mocked connector scenarios and a concise runnable recovery demonstration.
+- Authenticated Salesforce and HubSpot verification remains pending, so P1.6 is not yet a completed milestone.
+
 The [project state](PROJECT_STATE.md) is the authoritative source for current status.
 
 ## Key Documents
@@ -91,7 +101,9 @@ The [project state](PROJECT_STATE.md) is the authoritative source for current st
 | [P1.4 Authority Policy](contracts/field-authority-policy.v1.json) | Inspect the versioned field matrix and domain ownership rules. |
 | [P1.5 Synthetic Data Guide](architecture/SYNTHETIC_DATA.md) | Generate, validate, and inspect reproducible fictional GTM datasets. |
 | [P1.5 Manifest Contract](contracts/synthetic-dataset-manifest.v1.json) | Inspect the versioned scenario-manifest definition. |
-| [Decision Index](DECISIONS.md) | See all 30 approved decisions and open their ADRs. |
+| [P1.6 Live Ingestion Guide](architecture/LIVE_INGESTION.md) | Configure credentials safely and run mocked or real connector verification. |
+| [P1.6 Ingestion Policy](contracts/live-ingestion-policy.v1.json) | Inspect the versioned authentication, API, reliability, seed, and storage boundary. |
+| [Decision Index](DECISIONS.md) | See all 36 approved decisions and open their ADRs. |
 | [Shared Contract](../../shared/contracts/canonical-model.v1.json) | Inspect the machine-readable technical definition. |
 | [Project State](PROJECT_STATE.md) | Confirm what works, what is deferred, and what comes next. |
 | [Work Log](WORK_LOG.md) | Review chronological implementation and verification evidence. |
@@ -117,22 +129,24 @@ python3 -m unittest discover -s projects/01-data-foundation/tests -v
 python3 projects/01-data-foundation/scripts/demo_source_model.py
 python3 projects/01-data-foundation/scripts/demo_field_authority.py
 python3 projects/01-data-foundation/scripts/demo_synthetic_data.py
+python3 projects/01-data-foundation/scripts/demo_live_ingestion.py
 ```
 
-No credentials, package installation, warehouse, or external service is required.
+No credentials, package installation, warehouse, or external service is required for these checks. Authenticated P1.6 verification is a separate, explicit local step.
 
 ## What Is Not Implemented?
 
-- Live Salesforce/HubSpot API ingestion and a complete identity-matching engine.
+- A deployed or scheduled live-ingestion service and a complete identity-matching engine.
 - A complete enterprise survivorship catalog beyond the selected P1.4 fields.
 - A deployed production identity service or Snowflake publication pipeline.
 - Physical Snowflake tables and dbt transformations.
 - Live write-back, reverse Extract-Transform-Load (ETL), activation, scoring, routing, or forecasting.
 - Production security policies, monitoring, or stewardship interfaces.
 - Distributed or production-scale synthetic data generation.
+- Webhook receivers, managed secret storage, cloud raw storage, and production connector observability.
 
 The future folders for those capabilities are intentionally absent until they contain working deliverables.
 
 ## What Comes Next?
 
-Review the P1.5 generator, expected outcomes, tests, and demonstration before approving any P1.6 scope. No P1.6 work has started.
+Follow the P1.6 live-ingestion guide to authenticate and verify both marked test accounts. Do not begin P1.7 until both platforms have recorded successful evidence.

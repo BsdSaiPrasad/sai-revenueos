@@ -90,7 +90,7 @@ Runs the P1.4 acceptance scenarios.
 python3 -m unittest discover -s projects/01-data-foundation/tests -v
 ```
 
-Runs every P1.2–P1.5 executable scenario.
+Runs every P1.2–P1.6 executable scenario, including mocked live-connector behavior.
 
 ## Small Exercise
 
