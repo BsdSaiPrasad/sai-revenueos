@@ -357,4 +357,6 @@ GitHub Actions run [38276397965](https://github.com/BsdSaiPrasad/sai-revenueos/a
 
 ### Git commit and CI
 
-The repair commit and GitHub Actions run are recorded after the verified push.
+Repair commit: `6c485e5` (`fix: stabilize Salesforce incremental replay`). Authored and committed as `BsdSaiPrasad <bsdsaiprasad1@gmail.com>` with no co-author attribution.
+
+GitHub Actions run [38320413720](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38320413720) passed the complete workflow on Python 3.9 and 3.14, including all 90 tests, architecture validation, four demonstrations, and 25-company file generation.

@@ -40,7 +40,7 @@ On 2026-10-12, all 90 scenarios passed locally: 23 P1.2 identity scenarios, 13 P
 
 Architecture validation passed with 23 canonical entities, 31 relationships, 36 accepted decisions, P1.2–P1.6 artifacts, continuity files, generated-data exclusion, and secret-filename checks. Python compilation, all JSON files, local Markdown links, all four concise demonstrations, both P1.5 command modes, and the 2,500-company scale case passed locally.
 
-The latest recorded P1.6 GitHub Actions evidence is updated with the idempotency-fix commit after its Python 3.9 and 3.14 matrix completes.
+The P1.6 Salesforce idempotency repair passed the complete Python 3.9 and 3.14 GitHub Actions matrix on 2026-10-12: [Actions run 38320413720](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38320413720). The run executed all 90 tests, architecture validation, four demonstrations, and a generated 25-company smoke dataset without vendor credentials.
 
 ### Verified preset counts with seed 42
 
