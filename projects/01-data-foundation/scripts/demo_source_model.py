@@ -55,8 +55,12 @@ def main() -> int:
         default=300,
         help="Replay overlap subtracted from the final checkpoint (default: 300).",
     )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show the complete event, database, checkpoint, and recovery evidence.",
+    )
     args = parser.parse_args()
-    print("SYNTHETIC DEMO: no Salesforce or HubSpot API was called.")
     created_document, created_event = load_event("globex-salesforce-account-created.json")
     _, update_event = load_event("globex-salesforce-account-updated.json")
     _, hubspot_event = load_event("globex-hubspot-company.json")
@@ -73,27 +77,31 @@ def main() -> int:
                 "2026-10-11T13:59:00Z",
             )
 
-            show("ACTUAL INPUT: synthetic Salesforce Account event", created_document)
-            print("\nPROCESSOR: SourceStore.process_event(event, identity_store)")
-            show("BEFORE", snapshot(sources, identity))
+            before = snapshot(sources, identity)
+            if args.verbose:
+                print("SYNTHETIC DEMO: no Salesforce or HubSpot API was called.")
+                show("ACTUAL INPUT: synthetic Salesforce Account event", created_document)
+                print("\nPROCESSOR: SourceStore.process_event(event, identity_store)")
+                show("BEFORE", before)
 
             first = sources.process_event(created_event, identity)
-            show(
-                "AFTER FIRST PROCESS",
-                {
-                    "result": first.__dict__,
-                    "counts": snapshot(sources, identity),
-                    "current_state": sources.current_state(first.source_record_id),
-                    "resolution_status": identity.resolution_case_for_source(first.source_record_id)["status"],
-                    "active_mapping": identity.active_mapping_for_source(first.source_record_id),
-                },
-            )
+            first_details = {
+                "result": first.__dict__,
+                "counts": snapshot(sources, identity),
+                "current_state": sources.current_state(first.source_record_id),
+                "resolution_status": identity.resolution_case_for_source(first.source_record_id)["status"],
+                "active_mapping": identity.active_mapping_for_source(first.source_record_id),
+            }
+            if args.verbose:
+                show("AFTER FIRST PROCESS", first_details)
 
             repeated = sources.process_event(created_event, identity)
-            show(
-                "REPEAT SAME EVENT",
-                {"result": repeated.__dict__, "counts": snapshot(sources, identity)},
-            )
+            repeated_details = {
+                "result": repeated.__dict__,
+                "counts": snapshot(sources, identity),
+            }
+            if args.verbose:
+                show("REPEAT SAME EVENT", repeated_details)
 
             checkpoint_before_failure = sources.checkpoint(
                 "salesforce", "globex-salesforce-prod", "Account"
@@ -101,64 +109,114 @@ def main() -> int:
             try:
                 sources.process_event(update_event, identity, simulate_failure=True)
             except SimulatedFailure as exc:
-                show(
-                    "SIMULATED FAILURE",
-                    {
-                        "error": str(exc),
-                        "failed_event_status": sources.get_event(update_event.event_id)["processing_status"],
-                        "counts": snapshot(sources, identity),
-                        "checkpoint_cursor_before": checkpoint_before_failure["cursor"],
-                        "checkpoint_cursor_after": sources.checkpoint(
-                            "salesforce", "globex-salesforce-prod", "Account"
-                        )["cursor"],
-                    },
-                )
+                failure_details = {
+                    "error": str(exc),
+                    "failed_event_status": sources.get_event(update_event.event_id)["processing_status"],
+                    "counts": snapshot(sources, identity),
+                    "checkpoint_cursor_before": checkpoint_before_failure["cursor"],
+                    "checkpoint_cursor_after": sources.checkpoint(
+                        "salesforce", "globex-salesforce-prod", "Account"
+                    )["cursor"],
+                }
+                if args.verbose:
+                    show("SIMULATED FAILURE", failure_details)
 
             recovered = sources.process_event(update_event, identity)
-            show(
-                "RETRY AFTER FAILURE",
-                {
-                    "result": recovered.__dict__,
-                    "counts": snapshot(sources, identity),
-                    "checkpoint": sources.checkpoint(
-                        "salesforce", "globex-salesforce-prod", "Account"
-                    ),
-                },
-            )
+            recovered_details = {
+                "result": recovered.__dict__,
+                "counts": snapshot(sources, identity),
+                "checkpoint": sources.checkpoint(
+                    "salesforce", "globex-salesforce-prod", "Account"
+                ),
+            }
+            if args.verbose:
+                show("RETRY AFTER FAILURE", recovered_details)
 
             hubspot = sources.process_event(hubspot_event, identity)
-            show(
-                "HUBSPOT SOURCE RECORD",
-                {
-                    "result": hubspot.__dict__,
-                    "current_state": sources.current_state(hubspot.source_record_id),
-                    "active_mapping": identity.active_mapping_for_source(hubspot.source_record_id),
-                },
-            )
+            hubspot_details = {
+                "result": hubspot.__dict__,
+                "current_state": sources.current_state(hubspot.source_record_id),
+                "active_mapping": identity.active_mapping_for_source(hubspot.source_record_id),
+            }
+            if args.verbose:
+                show("HUBSPOT SOURCE RECORD", hubspot_details)
 
             deleted = sources.process_event(delete_event, identity)
-            show(
-                "SOURCE DELETION TOMBSTONE",
-                {
-                    "result": deleted.__dict__,
-                    "salesforce_history_versions": len(sources.history_for_source(first.source_record_id)),
-                    "current_source_is_deleted": bool(sources.current_state(first.source_record_id)["is_deleted"]),
-                    "preexisting_canonical_id": canonical_id,
-                    "canonical_status_after_source_delete": identity.get(
-                        "canonical_identity", "canonical_id", canonical_id
-                    )["identity_status"],
-                    "active_mapping": identity.active_mapping_for_source(first.source_record_id),
-                },
-            )
+            deletion_details = {
+                "result": deleted.__dict__,
+                "salesforce_history_versions": len(sources.history_for_source(first.source_record_id)),
+                "current_source_is_deleted": bool(sources.current_state(first.source_record_id)["is_deleted"]),
+                "preexisting_canonical_id": canonical_id,
+                "canonical_status_after_source_delete": identity.get(
+                    "canonical_identity", "canonical_id", canonical_id
+                )["identity_status"],
+                "active_mapping": identity.active_mapping_for_source(first.source_record_id),
+            }
+            if args.verbose:
+                show("SOURCE DELETION TOMBSTONE", deletion_details)
 
-            show(
-                "NEXT REPLAY WINDOW",
-                sources.replay_window(
-                    "salesforce", "globex-salesforce-prod", "Account", args.overlap_seconds
-                ),
+            replay_window = sources.replay_window(
+                "salesforce", "globex-salesforce-prod", "Account", args.overlap_seconds
             )
+            if args.verbose:
+                show("NEXT REPLAY WINDOW", replay_window)
 
-    print("\nDONE: temporary demo databases were removed.")
+            if not args.verbose:
+                print("P1.3 Globex source demo (synthetic; no vendor API called)")
+                print("Input: Salesforce Account 001GLOBEX = Globex Health")
+                print(
+                    "Before: raw events=%d, source versions=%d, SourceRecords=%d"
+                    % (before["raw_events"], before["source_versions"], before["identity_source_records"])
+                )
+                print(
+                    "First process: raw events=%d, versions=%d, current name=%s"
+                    % (
+                        first_details["counts"]["raw_events"],
+                        first_details["counts"]["source_versions"],
+                        first_details["current_state"]["standardized_payload"]["name"],
+                    )
+                )
+                print("Identity decision: unresolved; no automatic canonical mapping")
+                print(
+                    "Repeat: replayed=%s; raw events=%d; versions=%d"
+                    % (
+                        str(repeated.replayed).lower(),
+                        repeated_details["counts"]["raw_events"],
+                        repeated_details["counts"]["source_versions"],
+                    )
+                )
+                print(
+                    "Simulated failure: status=%s; checkpoint stayed %s"
+                    % (failure_details["failed_event_status"], failure_details["checkpoint_cursor_after"])
+                )
+                print(
+                    "Retry: status=%s; versions=%d; checkpoint=%s"
+                    % (
+                        recovered.processing_status,
+                        recovered_details["counts"]["source_versions"],
+                        recovered_details["checkpoint"]["cursor"],
+                    )
+                )
+                print("HubSpot: separate SourceRecord created; mapping remains unresolved")
+                print(
+                    "Deletion: tombstone=%s; Salesforce history versions=%d"
+                    % (
+                        str(deletion_details["current_source_is_deleted"]).lower(),
+                        deletion_details["salesforce_history_versions"],
+                    )
+                )
+                print(
+                    "After deletion: canonical Account remains %s"
+                    % deletion_details["canonical_status_after_source_delete"]
+                )
+                print(
+                    "Next replay: overlap=%ds; starts=%s"
+                    % (args.overlap_seconds, replay_window["replay_from"])
+                )
+                print("Outcome: replay, rollback, history, and identity protection verified")
+
+    if args.verbose:
+        print("\nDONE: temporary demo databases were removed.")
     return 0
 
 

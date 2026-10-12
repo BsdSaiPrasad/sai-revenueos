@@ -48,7 +48,13 @@ From the repository root:
 python3 projects/01-data-foundation/scripts/demo_source_model.py
 ```
 
-Runs the synthetic Globex demonstration and removes its temporary databases afterward.
+Runs the synthetic Globex demonstration as a 13-line summary and removes its temporary databases afterward.
+
+```bash
+python3 projects/01-data-foundation/scripts/demo_source_model.py --verbose
+```
+
+Shows the complete synthetic input, stored records, checkpoints, failure evidence, and replay window.
 
 ```bash
 PYTHONPATH=projects/01-data-foundation/src python3 -c "import inspect; from sai_revenueos_sources import SourceStore; print(inspect.getsource(SourceStore.process_event))"
@@ -76,7 +82,7 @@ Run the demonstration with a two-minute overlap:
 python3 projects/01-data-foundation/scripts/demo_source_model.py --overlap-seconds 120
 ```
 
-Before reading `NEXT REPLAY WINDOW`, predict its `replay_from` value and explain why replaying from that time cannot create duplicate history.
+Before reading the `Next replay` line, predict its start time and explain why replaying from that time cannot create duplicate history. Add `--verbose` if you want to inspect the complete replay-window record.
 
 ## Boundaries
 

@@ -113,7 +113,7 @@ python3 projects/01-data-foundation/scripts/demo_source_model.py
 python3 projects/01-data-foundation/scripts/demo_field_authority.py
 ```
 
-These commands check the unchanged 23 entities and 31 relationships, 25 approved decisions, required reference artifacts, 51 P1.2–P1.4 scenarios, and both synthetic Globex demonstrations.
+These commands check the unchanged 23 entities and 31 relationships, 25 approved decisions, required reference artifacts, 55 P1.2–P1.4 scenarios, and both synthetic Globex demonstrations. Add `--verbose` to either demonstration command for complete technical evidence.
 
 ## Important Limitations
 

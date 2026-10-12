@@ -255,3 +255,17 @@ CI workflow commit: `12182ed` (`ci: add continuous integration workflow`). Autho
 ### Git commit
 
 Implementation commit: `400274d` (`feat: implement P1.4 field authority`). Authored and committed as `BsdSaiPrasad <bsdsaiprasad1@gmail.com>` with no co-author attribution.
+
+## 2026-10-12 — Concise P1.3 and P1.4 Demonstrations
+
+### Improved
+
+- Changed both synthetic Globex demonstrations to show beginner-friendly 13–14 line summaries by default.
+- Added `--verbose` to retain the complete P1.3 event, replay, failure, checkpoint, and tombstone evidence and the complete P1.4 policy, conflict, review, history, and audit evidence.
+- Added four command-line output scenarios that enforce the summary limit and verify the detailed paths, including the existing overlap and alternate review-decision options.
+
+### Verification and boundaries
+
+- Local verification passed all 55 tests, architecture validation, Python compilation, JSON parsing, both default summaries, and both verbose demonstrations.
+- Processing sequences, scenarios, business logic, database schemas, contracts, the 23 entities, 31 relationships, and 25 accepted decisions remain unchanged.
+- P1 stays at 31.25%, overall RevenueOS stays at approximately 4.5%, and P1.5 has not started.

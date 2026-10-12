@@ -66,7 +66,13 @@ From the repository root:
 python3 projects/01-data-foundation/scripts/demo_field_authority.py
 ```
 
-Runs the synthetic Globex demonstration and removes its temporary databases afterward.
+Runs the synthetic Globex demonstration as a 14-line summary and removes its temporary databases afterward.
+
+```bash
+python3 projects/01-data-foundation/scripts/demo_field_authority.py --verbose
+```
+
+Shows the complete synthetic input, policy evaluations, conflicts, review history, and audit evidence.
 
 ```bash
 PYTHONPATH=projects/01-data-foundation/src python3 -c "import inspect; from sai_revenueos_authority import AuthorityStore; print(inspect.getsource(AuthorityStore.apply_change))"
@@ -94,7 +100,7 @@ Run the demo while keeping the manually verified Salesforce value:
 python3 projects/01-data-foundation/scripts/demo_field_authority.py --salesforce-decision keep_current
 ```
 
-Before reading `AFTER`, predict the final `lifecycle_status` and the last `field_value_history.action`. Then compare your answer with the output.
+Before reading the `Review decision` and `After` lines, predict the final `lifecycle_status`. Add `--verbose` to inspect the last `field_value_history.action` and full review history.
 
 ## Future Extension Points
 

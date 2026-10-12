@@ -30,11 +30,12 @@ All P1.3/P1.4 payloads and decisions are realistic synthetic examples. No vendor
 - Human-owned conflicts with evidence, assignment, escalation, approval or rejection, and append-only review/audit history.
 - Authorization-only write-back decisions that require trusted current state, an approved target, data-steward authority, and resolved review evidence.
 - A runnable P1.4 Globex Health demonstration showing conflict preservation, review decisions, and denied/authorized write-back with no delivery.
+- Beginner summaries are the default for both demonstrations; `--verbose` preserves their complete technical evidence.
 - GitHub Actions continuous integration on pushes to `main`, pull requests targeting `main`, and manual runs. Python 3.9 and 3.14 each run the complete test suite, architecture validation, syntax and JSON checks, and both synthetic Globex demonstrations.
 
 ### Verification status
 
-On 2026-10-12, all 51 scenarios passed locally: 23 P1.2 identity scenarios, 13 P1.3 source-model scenarios, and 15 P1.4 field-authority scenarios. P1.4 covers policy validation, field ownership, provenance, idempotency, conflicting values, manual protection, denied writes, assignment, escalation, approvals, rejections, stale-review protection, retired identities, and audit history.
+On 2026-10-12, all 55 scenarios passed locally: 23 P1.2 identity scenarios, 13 P1.3 source-model scenarios, 15 P1.4 field-authority scenarios, and 4 demonstration-output scenarios. P1.4 covers policy validation, field ownership, provenance, idempotency, conflicting values, manual protection, denied writes, assignment, escalation, approvals, rejections, stale-review protection, retired identities, and audit history.
 
 Architecture validation passed with 23 canonical entities, 31 relationships, 25 accepted decisions, P1.2–P1.4 artifacts, continuity files, and secret-filename checks. Both synthetic demonstrations completed successfully.
 
@@ -72,6 +73,7 @@ Review the P1.4 policy, evaluator, conflict workflow, tests, and runnable Globex
 - `projects/01-data-foundation/examples/p14/`
 - `projects/01-data-foundation/src/sai_revenueos_authority/`
 - `projects/01-data-foundation/tests/test_field_authority.py`
+- `projects/01-data-foundation/tests/test_demo_output.py`
 - `projects/01-data-foundation/scripts/demo_field_authority.py`
 - `projects/01-data-foundation/architecture/FIELD_AUTHORITY.md`
 - `projects/01-data-foundation/src/sai_revenueos_identity/`
