@@ -84,6 +84,31 @@ class DemonstrationOutputTests(unittest.TestCase):
         self.assertIn('"proposed_value": "customer"', output)
         self.assertIn('"value": "prospect"', output)
 
+    def test_p15_default_is_a_complete_summary_with_at_most_15_lines(self) -> None:
+        """The data demo summarizes counts, relationships, issues, decisions, and outcomes."""
+        lines = self.run_demo("demo_synthetic_data.py")
+        output = "\n".join(lines)
+        self.assertGreaterEqual(len(lines), 10)
+        self.assertLessEqual(len(lines), 15)
+        for phrase in (
+            "Generated:", "Source events:", "Relationships:", "History:",
+            "Quality issues:", "Identity decision:", "Field conflict:",
+            "Authority outcome:", "Expected identity:", "Outcome:",
+        ):
+            self.assertIn(phrase, output)
+
+    def test_p15_verbose_preserves_records_and_contract_evidence(self) -> None:
+        """Verbose mode exposes generated inputs, standardized values, and expected outcomes."""
+        lines = self.run_demo("demo_synthetic_data.py", "--companies", "3", "--seed", "7", "--verbose")
+        output = "\n".join(lines)
+        self.assertGreater(len(lines), 15)
+        for heading in (
+            "GENERATED FILES", "GLOBEX CANONICAL FIXTURE", "SALESFORCE INPUT",
+            "HUBSPOT INPUT", "STANDARDIZED SOURCE VALUES", "P1.2 IDENTITY CASES",
+            "P1.4 AUTHORITY EVALUATION", "EXPECTED IDENTITY OUTCOMES", "SCENARIO MANIFEST",
+        ):
+            self.assertIn(heading, output)
+
 
 if __name__ == "__main__":
     unittest.main()

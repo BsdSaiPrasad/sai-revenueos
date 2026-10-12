@@ -90,7 +90,7 @@ Runs the P1.4 acceptance scenarios.
 python3 -m unittest discover -s projects/01-data-foundation/tests -v
 ```
 
-Runs every P1.2–P1.4 executable scenario.
+Runs every P1.2–P1.5 executable scenario.
 
 ## Small Exercise
 
@@ -116,4 +116,4 @@ No **MASTER ARCHITECTURE DECISION NEEDED** change was required for P1.4. The 23 
 - All example companies, people, events, approvals, and outputs are synthetic.
 - No live Salesforce, HubSpot, Clay, Apollo, Stripe, ERP, billing, product, Customer Success, or consent integration exists.
 - SQLite is an executable specification, not a deployed production database.
-- No P1.5 or P4–P6 workflow was implemented.
+- P1.4 itself does not implement P1.5 generation or any P4–P6 workflow.

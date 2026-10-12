@@ -72,7 +72,7 @@ Runs the 13 P1.3 source-model acceptance scenarios.
 python3 -m unittest discover -s projects/01-data-foundation/tests -v
 ```
 
-Runs all P1.2–P1.4 executable scenarios.
+Runs all P1.2–P1.5 executable scenarios.
 
 ## Small Exercise
 

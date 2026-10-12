@@ -269,3 +269,36 @@ Implementation commit: `400274d` (`feat: implement P1.4 field authority`). Autho
 - Local verification passed all 55 tests, architecture validation, Python compilation, JSON parsing, both default summaries, and both verbose demonstrations.
 - Processing sequences, scenarios, business logic, database schemas, contracts, the 23 entities, 31 relationships, and 25 accepted decisions remain unchanged.
 - P1 stays at 31.25%, overall RevenueOS stays at approximately 4.5%, and P1.5 has not started.
+
+## 2026-10-12 — P1.5 Synthetic GTM Data Generation
+
+### Implemented
+
+- Added a deterministic standard-library generator for connected fictional companies, hierarchy and acquisition relationships, people, employment history, Salesforce Leads and Contacts, HubSpot Contacts, Opportunities, Deals, and canonical Activity fixtures.
+- Added 25, 250, and 2,500 company presets plus custom company counts and integer seeds. Identical parameters produce identical records, files, and SHA-256 fingerprints.
+- Added deliberate duplicate records and event replays, missing optional values, source conflicts, a rebrand, an employee job change, ambiguous identity evidence, and late/out-of-order history.
+- Added expected outcomes that keep unknown identities unresolved, preserve acquired Accounts separately, and never enable automatic identity merging.
+- Added deterministic JSON, JSONL, CSV, and versioned scenario-manifest output while ignoring generated bulk data in Git.
+- Reused P1.2 identifier and identity interfaces, every existing P1.3 Salesforce/HubSpot contract, and the P1.4 field-authority policy.
+- Added accepted Decisions D026–D030, a concise synthetic-data guide, 11 generator scenarios, and a 13-line Globex demonstration with complete `--verbose` evidence.
+
+### Verification evidence
+
+- `python3 -m unittest discover -s projects/01-data-foundation/tests -v` — **passed**, 68/68 scenarios.
+- `python3 projects/01-data-foundation/scripts/validate_architecture.py` — **passed**: 23 entities, 31 relationships, 30 decisions, P1.2–P1.5 artifacts, continuity files, generated-data exclusion, and secret-filename checks.
+- Python compilation and all 12 checked-in JSON files passed.
+- All 112 local Markdown links resolved, and Mermaid CLI 11.12.0 rendered the five new ADR diagrams plus the P1.5 guide diagram.
+- The 25-company seed-42 dataset produced 50 people, 25 Opportunities, 50 Activities, 104 Salesforce events, and 101 HubSpot events.
+- The 250- and 2,500-company scale scenarios generated and validated successfully; the largest contained 20,005 source events.
+- All three concise demonstrations and the P1.5 verbose path passed. The P1.5 default output contains 13 lines.
+
+### Boundaries and progress
+
+- The canonical v1.0.0 contract, 23 entities, 31 relationships, Decisions D001–D025, P1.2–P1.4 behavior, and all database schemas remain unchanged.
+- No live API, automatic identity approval, external write, warehouse pipeline, distributed generator, P5 workflow, or P1.6 work was added.
+- No **MASTER ARCHITECTURE DECISION NEEDED** change was required.
+- P1 is now 37.5% complete (6 of 16 milestones); overall RevenueOS completion is approximately 5.4%.
+
+### Git commit
+
+Pending the verified implementation commit. The final hash is reported in the task handoff rather than written here to avoid a self-referential commit.

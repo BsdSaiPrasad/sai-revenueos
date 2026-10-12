@@ -6,7 +6,7 @@ This walkthrough explains Project 1 through one continuous, synthetic example. N
 
 **Globex Health** appears in both Salesforce and HubSpot. **Sarah Kim** and **John Lee** work there. The company is evaluating a fictional analytics product, signs a contract, and starts a subscription.
 
-The architecture and local references are complete through P1.4. P1.3 uses realistic synthetic source events, and P1.4 governs selected field values. Live connector and write-back execution remain later work.
+The architecture and local references are complete through P1.5. P1.3 uses realistic synthetic source events, P1.4 governs selected field values, and P1.5 creates reproducible connected fixture datasets. Live connector and write-back execution remain later work.
 
 ## Step 1 — Preserve the Source Records
 
@@ -94,6 +94,14 @@ If an identity mapping is wrong, the prior crosswalk row remains in history and 
 
 **Implemented locally:** SQLite constraints and reconciliation prove these rules. A deployed database, scheduled jobs, and stewardship user interface remain later work.
 
+## Step 10 — Generate a Complete Practice Dataset
+
+P1.5 expands the Globex story into deterministic datasets containing 25, 250, 2,500, or a custom number of companies. The files include connected people, Leads, Contacts, Opportunities, Deals, Activities, hierarchy, rebrands, job changes, duplicates, missing values, conflicts, and late events.
+
+**Implemented locally:** JSON, JSON Lines (JSONL), Comma-Separated Values (CSV), a scenario manifest, automated validation, and a concise runnable demonstration.
+
+**Important boundary:** generated matches are expected evidence only. P1.5 never automatically approves a crosswalk or merges an unknown identity.
+
 ## Where to Go Next
 
 1. Use the [glossary](GLOSSARY.md) for unfamiliar terms.
@@ -104,3 +112,4 @@ If an identity mapping is wrong, the prior crosswalk row remains in history and 
 6. Read the [P1.2 identity-control guide](../projects/01-data-foundation/architecture/IDENTITY_CONTROL.md) for the executable workflow.
 7. Run the [P1.3 source-model guide](../projects/01-data-foundation/architecture/SOURCE_MODEL.md) for raw history, replay, failure, and tombstone behavior.
 8. Run the [P1.4 field-authority guide](../projects/01-data-foundation/architecture/FIELD_AUTHORITY.md) for ownership, conflict, review, and write-back policy.
+9. Run the [P1.5 synthetic-data guide](../projects/01-data-foundation/architecture/SYNTHETIC_DATA.md) to create and inspect a connected fictional ecosystem.

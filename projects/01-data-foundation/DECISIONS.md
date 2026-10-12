@@ -4,7 +4,7 @@
 
 This is the index of Project 1's approved architecture decisions. An Architecture Decision Record (ADR) explains the problem, alternatives, decision, technical design, and tradeoffs.
 
-All 25 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, D014–D019 define the P1.3 source model, and D020–D025 define P1.4 field authority. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
+All 30 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, D014–D019 define the P1.3 source model, D020–D025 define P1.4 field authority, and D026–D030 define P1.5 synthetic data. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
 
 ## Approved Decisions
 
@@ -35,6 +35,11 @@ All 25 decisions below are **Accepted**. D001–D008 define the canonical model,
 | **D023** | Require explicit, auditable authorization before future write-back. | Prevents unrestricted synchronization loops and excessive automated authority. | [Authorize Write-Back Explicitly and Audit Every Decision](architecture/adr/0023-controlled-auditable-write-back.md) |
 | **D024** | Assign human owners to conflicts and preserve their review history. | Makes escalation and final decisions accountable and explainable. | [Make People Accountable for Conflict Resolution](architecture/adr/0024-human-owned-conflict-resolution.md) |
 | **D025** | Reserve future domain boundaries without implementing later projects. | Lets P4–P6 consume governed truth without redefining ownership or expanding P1.4 scope. | [Reserve Future Authority Boundaries Without Building Future Products](architecture/adr/0025-future-compatible-authority-boundaries.md) |
+| **D026** | Generate one connected fictional business ecosystem. | Tests real relationships without using customer data. | [Generate One Connected Fictional Business Ecosystem](architecture/adr/0026-connected-synthetic-business-ecosystem.md) |
+| **D027** | Make generation deterministic and configurable by count and seed. | Reproduces failures and supports small or larger datasets from one implementation. | [Make Synthetic Generation Deterministic and Configurable](architecture/adr/0027-deterministic-configurable-generation.md) |
+| **D028** | Label deliberate data problems and their expected outcomes. | Keeps duplicates, gaps, conflicts, and ambiguity testable without unsafe automatic merges. | [Make Intentional Data Problems Explicit](architecture/adr/0028-intentional-quality-scenarios.md) |
+| **D029** | Generate historical timelines while keeping later workflows out of scope. | Exercises rebrands, job changes, acquisitions, and late events without implementing P5. | [Generate Historical Timelines Without Building Future Workflows](architecture/adr/0029-historical-synthetic-timelines.md) |
+| **D030** | Publish validated JSON, JSONL, CSV, and manifest outputs. | Serves both automated checks and human review without committing large generated datasets. | [Publish Portable Synthetic Files with Automated Validation](architecture/adr/0030-portable-validated-synthetic-outputs.md) |
 
 ## What These Decisions Do Not Implement
 
@@ -45,4 +50,4 @@ The decisions define the architecture. They do not mean the following capabiliti
 - Physical warehouse constraints and reconciliation jobs.
 - Live field synchronization or write-back delivery.
 
-The P1.2 identity, P1.3 source, and P1.4 field-authority mechanics are local references, not deployed services. P1.5 and later work require a separate approved scope.
+The P1.2 identity, P1.3 source, P1.4 field-authority, and P1.5 synthetic-data mechanics are local references, not deployed services. P1.6 and later work require a separate approved scope.

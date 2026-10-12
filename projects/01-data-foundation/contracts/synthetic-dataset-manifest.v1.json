@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BsdSaiPrasad/sai-revenueos/synthetic-dataset-manifest.v1.json",
+  "title": "SAI RevenueOS Synthetic GTM Scenario Manifest v1",
+  "description": "The deterministic manifest for fictional P1.5 datasets and their expected data-quality and identity outcomes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_name",
+    "contract_version",
+    "synthetic",
+    "scenario_name",
+    "generator",
+    "dataset_fingerprint_sha256",
+    "counts",
+    "quality_issue_counts",
+    "quality_issues",
+    "identity_policy",
+    "expected_identity_outcomes",
+    "authority_expectations",
+    "boundaries",
+    "files"
+  ],
+  "properties": {
+    "contract_name": {"const": "synthetic-gtm-scenario-manifest"},
+    "contract_version": {"const": "1.0.0"},
+    "synthetic": {"const": true},
+    "scenario_name": {"type": "string", "minLength": 1},
+    "generator": {
+      "type": "object",
+      "required": ["company_count", "seed", "people_per_company", "deterministic"],
+      "additionalProperties": false,
+      "properties": {
+        "company_count": {"type": "integer", "minimum": 3},
+        "seed": {"type": "integer"},
+        "people_per_company": {"const": 2},
+        "deterministic": {"const": true}
+      }
+    },
+    "dataset_fingerprint_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "counts": {"type": "object"},
+    "quality_issue_counts": {"type": "object"},
+    "quality_issues": {"type": "array"},
+    "identity_policy": {"type": "object"},
+    "expected_identity_outcomes": {"type": "array"},
+    "authority_expectations": {"type": "object"},
+    "boundaries": {"type": "object"},
+    "files": {"type": "array", "items": {"type": "string"}}
+  }
+}

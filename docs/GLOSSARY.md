@@ -22,6 +22,7 @@ This glossary explains terms used in the repository. Definitions are specific to
 | **FK — Foreign Key** | A field that refers to the primary key of another entity. | `Opportunity.primary_account_id` refers to `Account.account_id`. |
 | **GTM — Go-To-Market** | The systems and processes used to attract, sell to, serve, and retain customers. | Marketing, sales, billing, product, and support are part of GTM. |
 | **Idempotency** | Repeating the same operation produces the same result instead of a duplicate. | Reprocessing `SF-1001` must not create another SourceRecord. |
+| **JSONL — JavaScript Object Notation Lines** | A text format containing one complete JSON record per line. | P1.5 writes one Salesforce or HubSpot source-event envelope per line. |
 | **Identity resolution** | The process of deciding which source records represent the same real-world entity. | Determining whether Salesforce and HubSpot records both describe Globex Health. |
 | **Many-to-many relationship** | Each side can relate to many records on the other side. A relationship table usually represents it. | Persons and Opportunities connect through OpportunityPersonRole. |
 | **Overlap window** | A small period reread before a saved checkpoint to catch late source changes. | P1.3 starts a default replay five minutes before the saved high watermark. |
@@ -41,6 +42,9 @@ This glossary explains terms used in the repository. Definitions are specific to
 | **Source event envelope** | Standard metadata wrapped around a vendor payload for identity, time, tracing, event type, and replay. | Salesforce and HubSpot payloads use the same P1.3 envelope. |
 | **Survivorship** | Rules that choose which source value becomes the preferred canonical value. | P1.4 implements approved ownership and human review for selected fields; a complete enterprise ruleset remains later work. |
 | **Synthetic data** | Fictional data created for learning or testing. | Globex Health and Sarah Kim are synthetic examples. |
+| **Dataset fingerprint** | A repeatable hash that changes when generated dataset content changes. | Two P1.5 runs with the same count and seed have the same SHA-256 fingerprint. |
+| **Random seed** | A starting number that makes pseudo-random generation repeatable. | Seed `42` recreates the same fictional P1.5 records. |
+| **Scenario manifest** | A file that lists generated counts, deliberate problems, boundaries, and expected outcomes. | The P1.5 manifest explains why a duplicate Globex record must remain unresolved. |
 | **Tombstone** | A retained marker that says a source record was deleted without erasing prior versions. | Deleting the synthetic Salesforce Globex Account appends a tombstone and leaves its canonical Account untouched. |
 | **Transaction** | A group of changes that either all succeed or all fail. | Creating a canonical ID and its active mapping should be atomic. |
 | **Upsert** | Insert a record if it does not exist, otherwise return or update the existing record. | Reprocessing a source identity should return its existing SourceRecord. |

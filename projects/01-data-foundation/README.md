@@ -66,6 +66,15 @@ Read the repository-wide [beginner walkthrough](../../docs/START_HERE.md) for th
 - Controlled write-back authorization with no external delivery.
 - Fifteen executed authority scenarios and a runnable synthetic Globex demonstration.
 
+### P1.5 — Synthetic GTM Data Generation
+
+- One connected fictional B2B SaaS ecosystem with parent/subsidiary Accounts, acquisitions, people, Leads, Contacts, Opportunities, Deals, and Activities.
+- Deterministic presets for 25, 250, and 2,500 companies plus custom size and seed support.
+- Discoverable duplicates, missing optional fields, conflicting values, rebrands, job changes, ambiguity, and late events.
+- P1.3-compatible Salesforce and HubSpot events plus JSON, JSONL, CSV, and versioned scenario-manifest output.
+- Safe expected identity outcomes that never automatically merge unknown records.
+- Eleven executed generator scenarios and a concise runnable Globex demonstration.
+
 The [project state](PROJECT_STATE.md) is the authoritative source for current status.
 
 ## Key Documents
@@ -80,7 +89,9 @@ The [project state](PROJECT_STATE.md) is the authoritative source for current st
 | [P1.3 Source Contracts](contracts/) | Inspect the versioned envelope, checkpoint, Salesforce, and HubSpot definitions. |
 | [P1.4 Field Authority Guide](architecture/FIELD_AUTHORITY.md) | Run and understand ownership, conflicts, review, provenance, and write-back authorization. |
 | [P1.4 Authority Policy](contracts/field-authority-policy.v1.json) | Inspect the versioned field matrix and domain ownership rules. |
-| [Decision Index](DECISIONS.md) | See all 25 approved decisions and open their ADRs. |
+| [P1.5 Synthetic Data Guide](architecture/SYNTHETIC_DATA.md) | Generate, validate, and inspect reproducible fictional GTM datasets. |
+| [P1.5 Manifest Contract](contracts/synthetic-dataset-manifest.v1.json) | Inspect the versioned scenario-manifest definition. |
+| [Decision Index](DECISIONS.md) | See all 30 approved decisions and open their ADRs. |
 | [Shared Contract](../../shared/contracts/canonical-model.v1.json) | Inspect the machine-readable technical definition. |
 | [Project State](PROJECT_STATE.md) | Confirm what works, what is deferred, and what comes next. |
 | [Work Log](WORK_LOG.md) | Review chronological implementation and verification evidence. |
@@ -105,6 +116,7 @@ python3 projects/01-data-foundation/scripts/validate_architecture.py
 python3 -m unittest discover -s projects/01-data-foundation/tests -v
 python3 projects/01-data-foundation/scripts/demo_source_model.py
 python3 projects/01-data-foundation/scripts/demo_field_authority.py
+python3 projects/01-data-foundation/scripts/demo_synthetic_data.py
 ```
 
 No credentials, package installation, warehouse, or external service is required.
@@ -117,9 +129,10 @@ No credentials, package installation, warehouse, or external service is required
 - Physical Snowflake tables and dbt transformations.
 - Live write-back, reverse Extract-Transform-Load (ETL), activation, scoring, routing, or forecasting.
 - Production security policies, monitoring, or stewardship interfaces.
+- Distributed or production-scale synthetic data generation.
 
 The future folders for those capabilities are intentionally absent until they contain working deliverables.
 
 ## What Comes Next?
 
-Review the P1.4 policy, implementation, tests, and demonstration before approving any P1.5 scope. No P1.5 work has started.
+Review the P1.5 generator, expected outcomes, tests, and demonstration before approving any P1.6 scope. No P1.6 work has started.

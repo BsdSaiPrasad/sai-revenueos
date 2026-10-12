@@ -3,7 +3,7 @@
 
 This script checks the shared JavaScript Object Notation (JSON) contract, canonical
 Entity Relationship Diagram (ERD), Architecture Decision Records (ADRs), required
-P1.2, P1.3, and P1.4 artifacts, schema enforcement names, continuity documents, and
+P1.2 through P1.5 artifacts, schema enforcement names, continuity documents, and
 secret-like filenames. It validates repository consistency; it does not execute
 runtime tests or claim that a production service is deployed.
 """
@@ -36,7 +36,13 @@ AUTHORITY_TEST_PATH = PROJECT_DIR / "tests/test_field_authority.py"
 AUTHORITY_DEMO_PATH = PROJECT_DIR / "scripts/demo_field_authority.py"
 AUTHORITY_POLICY_PATH = PROJECT_DIR / "contracts/field-authority-policy.v1.json"
 AUTHORITY_EXAMPLE_PATH = PROJECT_DIR / "examples/p14/globex-field-authority-demo.v1.json"
-DECISION_COUNT = 25
+SYNTHETIC_GUIDE_PATH = PROJECT_DIR / "architecture/SYNTHETIC_DATA.md"
+SYNTHETIC_CONTRACT_PATH = PROJECT_DIR / "contracts/synthetic-dataset-manifest.v1.json"
+SYNTHETIC_PACKAGE_DIR = PROJECT_DIR / "src/sai_revenueos_synthetic"
+SYNTHETIC_TEST_PATH = PROJECT_DIR / "tests/test_synthetic_data.py"
+SYNTHETIC_DEMO_PATH = PROJECT_DIR / "scripts/demo_synthetic_data.py"
+SYNTHETIC_GENERATOR_PATH = PROJECT_DIR / "scripts/generate_synthetic_gtm_data.py"
+DECISION_COUNT = 30
 
 REQUIRED_ENTITIES = {
     "Account",
@@ -398,6 +404,57 @@ def validate_p14_reference(contract: dict, errors: list[str]) -> None:
             fail(errors, f"P1.4 schema is missing enforcement rule {enforcement}")
 
 
+def validate_p15_reference(errors: list[str]) -> None:
+    """Check P1.5 generator, manifest contract, validation, tests, guide, and demo."""
+    required = (
+        SYNTHETIC_GUIDE_PATH,
+        SYNTHETIC_CONTRACT_PATH,
+        SYNTHETIC_PACKAGE_DIR / "__init__.py",
+        SYNTHETIC_PACKAGE_DIR / "generator.py",
+        SYNTHETIC_PACKAGE_DIR / "validation.py",
+        SYNTHETIC_PACKAGE_DIR / "writer.py",
+        SYNTHETIC_TEST_PATH,
+        SYNTHETIC_DEMO_PATH,
+        SYNTHETIC_GENERATOR_PATH,
+    )
+    missing = [str(path.relative_to(REPO_ROOT)) for path in required if not path.is_file()]
+    if missing:
+        fail(errors, f"missing P1.5 reference artifacts: {', '.join(missing)}")
+        return
+
+    try:
+        contract = json.loads(SYNTHETIC_CONTRACT_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        fail(errors, f"P1.5 manifest contract cannot be loaded: {exc}")
+        return
+    if contract.get("properties", {}).get("contract_version", {}).get("const") != "1.0.0":
+        fail(errors, "P1.5 scenario manifest must declare version 1.0.0")
+    required_manifest_fields = {
+        "contract_name", "contract_version", "synthetic", "scenario_name", "generator",
+        "dataset_fingerprint_sha256", "counts", "quality_issue_counts", "quality_issues",
+        "identity_policy", "expected_identity_outcomes", "authority_expectations",
+        "boundaries", "files",
+    }
+    if set(contract.get("required", [])) != required_manifest_fields:
+        fail(errors, "P1.5 manifest contract does not require the approved version 1 fields")
+    gitignore = (REPO_ROOT / ".gitignore").read_text(encoding="utf-8")
+    if "generated-data/" not in gitignore:
+        fail(errors, "P1.5 generated-data output directory is not ignored")
+    try:
+        tracked = subprocess.run(
+            ["git", "ls-files", "generated-data"],
+            cwd=REPO_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as exc:
+        fail(errors, f"cannot inspect generated P1.5 files: {exc}")
+    else:
+        if tracked:
+            fail(errors, "generated P1.5 bulk data must not be tracked in Git")
+
+
 def validate_no_tracked_secrets(errors: list[str]) -> None:
     """Flag secret-like filenames among tracked and candidate repository files."""
     try:
@@ -431,6 +488,7 @@ def main() -> int:
     validate_p12_reference(errors)
     validate_p13_reference(errors)
     validate_p14_reference(contract, errors)
+    validate_p15_reference(errors)
     validate_no_tracked_secrets(errors)
 
     if errors:
@@ -444,7 +502,7 @@ def main() -> int:
     print(
         "P1 architecture validation PASSED: "
         f"{entity_count} entities, {relationship_count} relationships, "
-        f"{DECISION_COUNT} decisions, ERD coverage, P1.2/P1.3/P1.4 reference artifacts, "
+        f"{DECISION_COUNT} decisions, ERD coverage, P1.2–P1.5 reference artifacts, "
         "continuity files, and secret filename checks."
     )
     return 0

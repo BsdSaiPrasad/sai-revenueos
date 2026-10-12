@@ -72,3 +72,13 @@ jobs:
 
       - name: Run the synthetic Globex field-authority demonstration
         run: python projects/01-data-foundation/scripts/demo_field_authority.py
+
+      - name: Run the synthetic GTM data demonstration
+        run: python projects/01-data-foundation/scripts/demo_synthetic_data.py
+
+      - name: Generate and validate a small synthetic dataset
+        run: >-
+          python projects/01-data-foundation/scripts/generate_synthetic_gtm_data.py
+          --companies 25
+          --seed 42
+          --output "${RUNNER_TEMP}/sai-revenueos-p15"

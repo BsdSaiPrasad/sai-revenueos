@@ -1,13 +1,13 @@
 # SAI RevenueOS
 
-[![Project status: P1.0 through P1.4 complete](https://img.shields.io/badge/status-P1.0%E2%80%93P1.4%20complete-2f855a)](projects/01-data-foundation/PROJECT_STATE.md)
+[![Project status: P1.0 through P1.5 complete](https://img.shields.io/badge/status-P1.0%E2%80%93P1.5%20complete-2f855a)](projects/01-data-foundation/PROJECT_STATE.md)
 [![CI](https://github.com/BsdSaiPrasad/sai-revenueos/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BsdSaiPrasad/sai-revenueos/actions/workflows/ci.yml)
 
 ## What Is SAI RevenueOS?
 
 SAI RevenueOS is a learning and portfolio project that models how an enterprise business can connect its Go-To-Market (GTM) systems. It creates a consistent view of companies, people, sales opportunities, contracts, subscriptions, and customer activity across disconnected tools. The platform is designed around realistic Business-to-Business Software-as-a-Service (B2B SaaS) scenarios, but every company, person, and data example is synthetic.
 
-The repository contains the completed architecture foundation plus tested local references for P1.2 identity control, P1.3 Salesforce/HubSpot source history, and P1.4 field authority. It does not claim to be a deployed production platform.
+The repository contains the completed architecture foundation plus tested local references for P1.2 identity control, P1.3 Salesforce/HubSpot source history, P1.4 field authority, and P1.5 deterministic synthetic data. It does not claim to be a deployed production platform.
 
 ## What Business Problem Are We Solving?
 
@@ -40,7 +40,7 @@ Start with the [beginner walkthrough](docs/START_HERE.md). Use the [glossary](do
 
 | Project | Purpose | Status |
 |---|---|---|
-| **P1 — Data Foundation & Customer Identity** | Build shared identities, source mappings, and historical business relationships. | P1.0–P1.4 complete |
+| **P1 — Data Foundation & Customer Identity** | Build shared identities, source mappings, and historical business relationships. | P1.0–P1.5 complete |
 | **P2 — Inbound** | Connect future marketing demand, scoring, and routing processes. | Planned |
 | **P3 — Outbound** | Support future prospecting and outbound engagement workflows. | Planned |
 | **P4 — Revenue Intelligence** | Support future pipeline, forecasting, and revenue analysis. | Planned |
@@ -57,11 +57,12 @@ Start with the [beginner walkthrough](docs/START_HERE.md). Use the [glossary](do
 - P1.2 — Prefixed UUIDv7 IDs, source idempotency, governed crosswalk lifecycle, reversible merge/unmerge, transactions, recovery, and reconciliation.
 - P1.3 — Versioned Salesforce/HubSpot source contracts, raw history, tombstones, safe replay, checkpoints, and P1.2 integration.
 - P1.4 — Field-level source of truth, conflict review, provenance history, and controlled write-back authorization.
+- P1.5 — Deterministic synthetic GTM ecosystems, deliberate quality scenarios, portable files, and automated validation.
 - Repository readability and learning-documentation improvement.
 
 **Planned next**
 
-- P1.5 scope review; no P1.5 implementation has started.
+- P1.6 scope review; no P1.6 implementation has started.
 
 See the authoritative [progress tracker](PROGRESS.md) and [P1 project state](projects/01-data-foundation/PROJECT_STATE.md) for exact status and limitations.
 
@@ -80,12 +81,12 @@ See the authoritative [progress tracker](PROGRESS.md) and [P1 project state](pro
     ├── PROJECT_STATE.md           # Current, authoritative status
     ├── DECISIONS.md               # Approved decision index
     ├── WORK_LOG.md                # Chronological evidence log
-    ├── contracts/                 # P1.3 source and P1.4 authority contracts
+    ├── contracts/                 # P1.3–P1.5 versioned contracts
     ├── examples/                  # Synthetic P1.3/P1.4 inputs
     ├── architecture/              # Model, ERD, and ADRs
     ├── scripts/                   # Validation and runnable demonstration
-    ├── src/                       # P1.2–P1.4 Python + SQLite references
-    └── tests/                     # P1.2–P1.4 executable acceptance scenarios
+    ├── src/                       # P1.2–P1.5 Python + SQLite references
+    └── tests/                     # P1.2–P1.5 executable acceptance scenarios
 ```
 
 Future project folders are intentionally absent until they contain real work.
@@ -99,8 +100,9 @@ Future project folders are intentionally absent until they contain real work.
 5. [Shared Contract](shared/contracts/canonical-model.v1.json) — inspect the machine-readable technical definition.
 6. [P1.3 Source Model](projects/01-data-foundation/architecture/SOURCE_MODEL.md) — run the synthetic source history and recovery demonstration.
 7. [P1.4 Field Authority](projects/01-data-foundation/architecture/FIELD_AUTHORITY.md) — inspect field ownership, conflicts, reviews, and write-back authorization.
-8. [Project State](projects/01-data-foundation/PROJECT_STATE.md) — confirm what is actually working and what comes next.
-9. [Progress](PROGRESS.md) — see the milestone-based completion calculation.
+8. [P1.5 Synthetic Data](projects/01-data-foundation/architecture/SYNTHETIC_DATA.md) — generate reproducible connected fixtures and inspect expected data-quality outcomes.
+9. [Project State](projects/01-data-foundation/PROJECT_STATE.md) — confirm what is actually working and what comes next.
+10. [Progress](PROGRESS.md) — see the milestone-based completion calculation.
 
 ## How to Verify the Current Implementation
 
@@ -111,13 +113,14 @@ python3 projects/01-data-foundation/scripts/validate_architecture.py
 python3 -m unittest discover -s projects/01-data-foundation/tests -v
 python3 projects/01-data-foundation/scripts/demo_source_model.py
 python3 projects/01-data-foundation/scripts/demo_field_authority.py
+python3 projects/01-data-foundation/scripts/demo_synthetic_data.py
 ```
 
-These commands check the unchanged 23 entities and 31 relationships, 25 approved decisions, required reference artifacts, 55 P1.2–P1.4 scenarios, and both synthetic Globex demonstrations. Add `--verbose` to either demonstration command for complete technical evidence.
+These commands check the unchanged 23 entities and 31 relationships, 30 approved decisions, required reference artifacts, 68 P1.2–P1.5 scenarios, and all three synthetic Globex demonstrations. Add `--verbose` to a demonstration command for complete technical evidence.
 
 ## Important Limitations
 
-- The P1.2–P1.4 runtimes are local reference implementations, not deployed services or a data platform.
+- The P1.2–P1.5 runtimes are local reference implementations, not deployed services or a data platform.
 - There is no live connector, write-back delivery, production Snowflake schema, complete identity-matching engine, reverse Extract-Transform-Load (ETL), or workflow service.
 - The shared JSON contract describes intended meaning and relationships; it does not prove that source data has been loaded.
 - P2–P7 are planned boundaries, not implemented capabilities.
