@@ -360,3 +360,30 @@ GitHub Actions run [38276397965](https://github.com/BsdSaiPrasad/sai-revenueos/a
 Repair commit: `6c485e5` (`fix: stabilize Salesforce incremental replay`). Authored and committed as `BsdSaiPrasad <bsdsaiprasad1@gmail.com>` with no co-author attribution.
 
 GitHub Actions run [38320413720](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38320413720) passed the complete workflow on Python 3.9 and 3.14, including all 90 tests, architecture validation, four demonstrations, and 25-company file generation.
+
+## 2026-10-12 — P1.6 Final Acceptance
+
+### Authenticated evidence
+
+- Salesforce initial and incremental checks passed against the explicitly marked fictional Account. Raw versions preserved the real phone change to `202-555-0186`; repeated initial and overlap polls replayed existing versions without adding rows, and the checkpoint stayed stable when Salesforce reported no business change.
+- HubSpot preserved three raw versions of marked Company `351778399989`. The final `PATCH` returned HTTP 200, incremental ingestion reported `fetched=1, processed=1, failures=0`, and the stored name changed from `[SAI TEST] Globex Health` to `[SAI TEST] Globex Health - Incremental Update`.
+- Before the HubSpot field update, two authenticated no-change polls each reported `processed=0, replayed=1`; HubSpot event and version counts stayed at three across those polls. After the real change, the durable Company checkpoint advanced to `2026-10-12T23:14:40.388000Z` and referenced the new stored event.
+- The marked Salesforce and HubSpot source identities remain `unresolved` with no active canonical crosswalk. Ingestion did not approve or merge either record.
+
+### Complete acceptance checklist
+
+- **Raw history:** passed for both platforms; original vendor payloads and immutable source versions remain stored locally.
+- **Incremental updates:** passed with a Salesforce phone change and HubSpot Company-name change.
+- **Duplicate prevention:** passed for repeated Salesforce initial/incremental polls and repeated HubSpot incremental polls.
+- **Checkpoints:** passed; unchanged replays did not advance data watermarks, and the HubSpot checkpoint advanced only after the new version was durably processed.
+- **Unresolved identities:** passed; no automatic mapping or merge occurred.
+- **Failure recovery:** passed through mocked API and durable-processing failure scenarios, including unchanged checkpoints and successful retry.
+- `python3 -m unittest discover -s projects/01-data-foundation/tests -v` — **passed**, 90/90 scenarios.
+- `python3 projects/01-data-foundation/scripts/validate_architecture.py` — **passed**: 23 entities, 31 relationships, 36 accepted decisions, ERD coverage, continuity files, and P1.2–P1.6 artifacts.
+- Python compilation and all 13 checked-in JSON files passed. No credential or generated live evidence entered Git.
+
+### Status and progress
+
+- P1.6 is complete. P1 is now 43.75% complete (7 of 16 milestones), and overall RevenueOS completion is 6.25%.
+- P1.2–P1.6 contracts, the 23 canonical entities, 31 relationships, and 36 approved decisions remain unchanged in meaning.
+- P1.7 was not started. No **MASTER ARCHITECTURE DECISION NEEDED** change was required.

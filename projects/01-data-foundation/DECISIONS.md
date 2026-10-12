@@ -56,4 +56,4 @@ The decisions define the architecture. They do not mean the following capabiliti
 - Physical warehouse constraints and reconciliation jobs.
 - Live field synchronization or write-back delivery.
 
-The P1.2 identity, P1.3 source, P1.4 field-authority, P1.5 synthetic-data, and P1.6 live-ingestion mechanics are local references, not deployed services. Live P1.6 verification remains platform-specific until authenticated calls succeed. P1.7 and later work require a separate approved scope.
+The P1.2 identity, P1.3 source, P1.4 field-authority, P1.5 synthetic-data, and P1.6 live-ingestion mechanics are local references, not deployed services. Authenticated P1.6 acceptance passed separately for controlled Salesforce and HubSpot test records; CI remains credential-free. P1.7 and later work require a separate approved scope.

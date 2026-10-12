@@ -37,7 +37,7 @@ Example: synthetic company Globex Health can appear in Salesforce and HubSpot. P
 
 | Project | What it owns | Current status |
 |---|---|---|
-| **P1 — Data Foundation & Customer Identity** | Canonical entities, source identity, historical relationships, field authority, provenance, shared data contracts, synthetic fixtures, and CRM ingestion. | P1.0–P1.5 complete; P1.6 mocked implementation awaiting live verification |
+| **P1 — Data Foundation & Customer Identity** | Canonical entities, source identity, historical relationships, field authority, provenance, shared data contracts, synthetic fixtures, and CRM ingestion. | P1.0–P1.6 complete |
 | **P2 — Inbound** | Future inbound demand capture, scoring, and routing. | Planned |
 | **P3 — Outbound** | Future prospecting, sequencing, and outbound engagement. | Planned |
 | **P4 — Revenue Intelligence** | Future pipeline, forecasting, and revenue analytics. | Planned |
@@ -86,4 +86,4 @@ Repository validation catches structural drift, but future physical systems will
 
 ## What Comes Next?
 
-P1.6 connector code and mocked verification are ready. Complete authenticated Salesforce and HubSpot checks before marking P1.6 complete or beginning P1.7; P2–P7 stay planned until their own work begins.
+P1.6 connector code, mocked recovery coverage, and authenticated Salesforce and HubSpot acceptance checks are complete. P1.7 has not started and requires a separate approved scope; P2–P7 stay planned until their own work begins.

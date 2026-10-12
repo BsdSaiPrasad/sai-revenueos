@@ -83,7 +83,7 @@ Read the repository-wide [beginner walkthrough](../../docs/START_HERE.md) for th
 - Bounded retries, exponential backoff, rate-limit handling, deterministic replay, stream isolation, and checkpoint protection.
 - Explicit marker-protected Globex seeding that refuses to modify unmarked records.
 - Twenty mocked connector scenarios, including Salesforce read-side timestamp regression coverage, and a concise runnable recovery demonstration.
-- Authenticated Salesforce and HubSpot verification remains pending, so P1.6 is not yet a completed milestone.
+- Authenticated Salesforce and HubSpot acceptance passed for the controlled marked Globex records, including raw history, real updates, incremental polling, replay, checkpoints, and unresolved identities.
 
 The [project state](PROJECT_STATE.md) is the authoritative source for current status.
 
@@ -132,7 +132,7 @@ python3 projects/01-data-foundation/scripts/demo_synthetic_data.py
 python3 projects/01-data-foundation/scripts/demo_live_ingestion.py
 ```
 
-No credentials, package installation, warehouse, or external service is required for these checks. Authenticated P1.6 verification is a separate, explicit local step.
+No credentials, package installation, warehouse, or external service is required for these checks. The completed authenticated P1.6 evidence remains local and ignored; CI stays credential-free.
 
 ## What Is Not Implemented?
 
@@ -149,4 +149,4 @@ The future folders for those capabilities are intentionally absent until they co
 
 ## What Comes Next?
 
-Follow the P1.6 live-ingestion guide to authenticate and verify both marked test accounts. Do not begin P1.7 until both platforms have recorded successful evidence.
+P1.6 is complete. P1.7 has not started and requires a separate architecture discussion and approved scope.

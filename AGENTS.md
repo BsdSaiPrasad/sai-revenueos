@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository contains the SAI RevenueOS architecture, completed implementation through P1.5, and a P1.6 connector implementation awaiting authenticated verification. Keep the root focused on project metadata and navigation. Shared cross-project definitions belong in `shared/contracts/`; project-specific work belongs under `projects/<project-name>/`; repository-wide learning and architecture guides belong in `docs/`.
+This repository contains the SAI RevenueOS architecture and completed implementation through P1.6, including authenticated acceptance evidence for controlled Salesforce and HubSpot test records. P1.7 has not started. Keep the root focused on project metadata and navigation. Shared cross-project definitions belong in `shared/contracts/`; project-specific work belongs under `projects/<project-name>/`; repository-wide learning and architecture guides belong in `docs/`.
 
 When application code is introduced, use clear project-local `src/` and `tests/` directories and mirror source paths in tests where practical. Do not create empty folders for future projects or phases.
 

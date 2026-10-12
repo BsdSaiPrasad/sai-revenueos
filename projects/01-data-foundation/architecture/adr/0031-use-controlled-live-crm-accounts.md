@@ -1,7 +1,7 @@
 # ADR-0031: Use Controlled Live CRM Accounts
 
 - **Decision ID:** D031 (P1.6 Decision A)
-- **Status:** Accepted; connector implemented, real-account verification pending
+- **Status:** Accepted; connector and controlled real-account verification complete
 - **Scope:** P1.6 Salesforce and HubSpot verification
 
 ## The Problem

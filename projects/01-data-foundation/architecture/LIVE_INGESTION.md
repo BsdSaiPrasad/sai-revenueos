@@ -135,7 +135,7 @@ After the HubSpot initial verification passes, edit the marked Globex Company's 
 
 ## Boundaries and Limitations
 
-- Mocked behavior is verified in CI; Salesforce and HubSpot live status must be reported separately after authenticated calls.
+- Mocked behavior is verified in credential-free CI. Authenticated acceptance passed separately on 2026-10-12 for the explicitly marked Salesforce Account and HubSpot Company.
 - No credential is committed or sent to GitHub Actions.
 - No automatic identity approval, merge, survivorship decision, or P1.4 write-back delivery occurs.
 - Seeding and updates require explicit flags and stop on any unmarked-domain collision.

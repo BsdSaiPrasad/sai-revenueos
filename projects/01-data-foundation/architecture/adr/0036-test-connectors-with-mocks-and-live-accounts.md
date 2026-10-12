@@ -1,7 +1,7 @@
 # ADR-0036: Verify Connectors with Mocks and Live Accounts
 
 - **Decision ID:** D036 (P1.6 Decision F)
-- **Status:** Accepted; mocked CI verification implemented, authenticated verification pending
+- **Status:** Accepted; mocked CI and authenticated verification complete
 - **Scope:** P1.6 verification
 
 ## The Problem

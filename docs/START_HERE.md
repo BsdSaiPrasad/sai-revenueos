@@ -6,7 +6,7 @@ This walkthrough explains Project 1 through one continuous, synthetic example. N
 
 **Globex Health** appears in both Salesforce and HubSpot. **Sarah Kim** and **John Lee** work there. The company is evaluating a fictional analytics product, signs a contract, and starts a subscription.
 
-The architecture and completed milestones are verified through P1.5. P1.6 adds live connector code and mocked verification, but Salesforce and HubSpot remain separately unverified until authenticated calls succeed. Write-back execution remains later work.
+The architecture and completed milestones are verified through P1.6. The live connectors passed both mocked recovery checks and authenticated acceptance checks against explicitly marked fictional Salesforce and HubSpot records. Write-back execution remains later work.
 
 ## Step 1 — Preserve the Source Records
 
@@ -106,9 +106,9 @@ P1.5 expands the Globex story into deterministic datasets containing 25, 250, 2,
 
 P1.6 connects to Salesforce Developer Edition and HubSpot Free with locally stored, ignored credentials. It performs one full read and later incremental polls, then sends every returned record through the same P1.3 raw-history and P1.2 source-identity interfaces.
 
-**Implemented and mocked locally:** OAuth/token handling, pagination, updates, deletion tombstones, retries, rate limits, deterministic replay, checkpoint protection, and safe Globex seeding.
+**Implemented and verified:** OAuth/token handling, pagination, updates, deletion tombstones, retries, rate limits, deterministic replay, checkpoint protection, and safe Globex seeding.
 
-**Still requires Sai:** authorize both accounts and execute the marked Globex commands. Until each real call passes, that platform remains unverified and P1.6 remains incomplete.
+**Authenticated acceptance passed:** both marked Globex records were retrieved and stored raw-first; Salesforce and HubSpot changes were captured incrementally; unchanged versions replayed without duplicates; checkpoints advanced only after durable processing; and both source identities remained unresolved.
 
 ## Where to Go Next
 

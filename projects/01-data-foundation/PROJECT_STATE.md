@@ -2,15 +2,15 @@
 
 **As of:** 2026-10-12
 
-**Current phase:** P1.6 implemented; mocked APIs and authenticated Salesforce polling pass, while the complete two-platform live checklist remains pending
+**Current phase:** P1.6 complete; mocked verification and authenticated Salesforce and HubSpot acceptance checks pass
 
-**Completed phases:** P1.0 Engineering Foundation; P1.1 Canonical Business Model and Entity Relationship Diagram (ERD); P1.2 Canonical ID and Crosswalk Control; P1.3 Salesforce + HubSpot Source Model; P1.4 Source of Truth and Write Authority; P1.5 Synthetic GTM Data Generation
+**Completed phases:** P1.0 Engineering Foundation; P1.1 Canonical Business Model and Entity Relationship Diagram (ERD); P1.2 Canonical ID and Crosswalk Control; P1.3 Salesforce + HubSpot Source Model; P1.4 Source of Truth and Write Authority; P1.5 Synthetic GTM Data Generation; P1.6 Live Salesforce and HubSpot Ingestion
 
 ## Current implementation status
 
 P1 retains the unchanged canonical v1.0.0 architecture: 23 entities, 31 declared relationships, and its canonical ERD. Decisions D001–D030 remain unchanged. P1.6 adds accepted Decisions D031–D036 plus standard-library Python connectors that feed the existing P1.2/P1.3 interfaces.
 
-All checked-in examples and automated test records are synthetic. Authenticated Salesforce reads were executed against the explicitly marked fictional records to verify the P1.6 idempotency repair. No external write-back, automatic identity merge, or downstream workflow runs, and this check does not by itself complete the full Salesforce and HubSpot live checklist.
+All checked-in examples and automated test records are synthetic. Authenticated acceptance used only explicitly marked fictional records in Salesforce Developer Edition and HubSpot Free; credentials and local raw evidence remain ignored. No external write-back, automatic identity merge, or downstream workflow runs.
 
 ### What is working
 
@@ -33,6 +33,7 @@ All checked-in examples and automated test records are synthetic. Authenticated 
 - Ignored mode-600 local credential storage plus a browser-based Salesforce PKCE helper and hidden HubSpot token entry.
 - A 14-line credential-free P1.6 demonstration with complete `--verbose` request, raw-storage, replay, failure, checkpoint, and recovery evidence.
 - Stable Salesforce event identity that preserves `LastViewedDate` and `LastReferencedDate` in raw evidence without treating their read-side changes as new business versions.
+- Complete authenticated acceptance for the marked Salesforce Account and HubSpot Company: initial retrieval, raw storage, real field updates, incremental capture, unchanged-version replay, durable checkpoints, and unresolved source identities.
 
 ### Verification status
 
@@ -41,6 +42,8 @@ On 2026-10-12, all 90 scenarios passed locally: 23 P1.2 identity scenarios, 13 P
 Architecture validation passed with 23 canonical entities, 31 relationships, 36 accepted decisions, P1.2–P1.6 artifacts, continuity files, generated-data exclusion, and secret-filename checks. Python compilation, all JSON files, local Markdown links, all four concise demonstrations, both P1.5 command modes, and the 2,500-company scale case passed locally.
 
 The P1.6 Salesforce idempotency repair passed the complete Python 3.9 and 3.14 GitHub Actions matrix on 2026-10-12: [Actions run 38320413720](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38320413720). The run executed all 90 tests, architecture validation, four demonstrations, and a generated 25-company smoke dataset without vendor credentials.
+
+Authenticated acceptance also passed on 2026-10-12. Salesforce preserved the marked Account's raw versions, captured its phone update, replayed repeated initial and overlap polls without row growth, and kept its checkpoint stable on unchanged data. HubSpot preserved three marked Company versions, changed the name from `[SAI TEST] Globex Health` to `[SAI TEST] Globex Health - Incremental Update`, processed that incremental event once, and advanced the Company checkpoint to `2026-10-12T23:14:40.388000Z`. Both source identities remain unresolved with no active canonical crosswalk.
 
 ### Verified preset counts with seed 42
 
@@ -52,7 +55,6 @@ The P1.6 Salesforce idempotency repair passed the complete Python 3.9 and 3.14 G
 
 ## Intentionally deferred
 
-- Completion of the complete authenticated Salesforce and HubSpot verification checklist; this repair verified Salesforce initial and incremental polling only.
 - Webhook receivers, periodic scheduling, production reconciliation orchestration, and managed secret rotation.
 - A complete automatic identity matcher, automatic candidate approval, or unrestricted survivorship.
 - Production object storage, message queues, distributed execution, observability, privacy controls, and retention enforcement.
@@ -65,11 +67,11 @@ The P1.6 Salesforce idempotency repair passed the complete Python 3.9 and 3.14 G
 
 No **MASTER ARCHITECTURE DECISION NEEDED** item was introduced. P1.6 reuses the existing canonical model, P1.2 unresolved identity behavior, P1.3 raw-history/checkpoint storage, and P1.4 no-write-back boundary.
 
-P1.6 cannot be marked fully complete until both real platforms pass authenticated creation/confirmation, initial retrieval, raw storage, update, incremental retrieval, idempotent repeat, and checkpoint checks. Salesforce authenticated initial and incremental reads now pass repeated-poll idempotency; HubSpot and the remaining end-to-end evidence are not reclassified by this repair. P1 progress therefore remains 6 of 16 milestones (37.5%), and overall RevenueOS progress remains approximately 5.4%.
+The complete P1.6 checklist passed without changing the approved architecture. P1 progress is now 7 of 16 milestones (43.75%), and overall RevenueOS progress is 6.25%.
 
 ## Next immediate step
 
-Configure the two ignored local credential files using `configure_live_auth.py`, then follow `LIVE_INGESTION.md` to run the marked Globex verification for Salesforce and HubSpot. Do not begin P1.7 until both results are recorded.
+Pause before P1.7. It has not started and requires a separate architecture discussion and approved scope.
 
 ## Relevant paths
 

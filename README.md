@@ -1,13 +1,13 @@
 # SAI RevenueOS
 
-[![Project status: P1.0 through P1.5 complete](https://img.shields.io/badge/status-P1.0%E2%80%93P1.5%20complete-2f855a)](projects/01-data-foundation/PROJECT_STATE.md)
+[![Project status: P1.0 through P1.6 complete](https://img.shields.io/badge/status-P1.0%E2%80%93P1.6%20complete-2f855a)](projects/01-data-foundation/PROJECT_STATE.md)
 [![CI](https://github.com/BsdSaiPrasad/sai-revenueos/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BsdSaiPrasad/sai-revenueos/actions/workflows/ci.yml)
 
 ## What Is SAI RevenueOS?
 
 SAI RevenueOS is a learning and portfolio project that models how an enterprise business can connect its Go-To-Market (GTM) systems. It creates a consistent view of companies, people, sales opportunities, contracts, subscriptions, and customer activity across disconnected tools. The platform is designed around realistic Business-to-Business Software-as-a-Service (B2B SaaS) scenarios, but every company, person, and data example is synthetic.
 
-The repository contains the completed architecture foundation plus tested local references for P1.2 identity control, P1.3 Salesforce/HubSpot source history, P1.4 field authority, P1.5 deterministic synthetic data, and a P1.6 live-connector implementation. P1.6 passes mocked verification but remains incomplete until both authenticated test accounts pass. This is not a deployed production platform.
+The repository contains the completed architecture foundation plus tested local references for P1.2 identity control, P1.3 Salesforce/HubSpot source history, P1.4 field authority, P1.5 deterministic synthetic data, and P1.6 live ingestion. P1.6 passed mocked verification and the complete authenticated acceptance checklist for the marked fictional records in both test accounts. This is not a deployed production platform.
 
 ## What Business Problem Are We Solving?
 
@@ -40,7 +40,7 @@ Start with the [beginner walkthrough](docs/START_HERE.md). Use the [glossary](do
 
 | Project | Purpose | Status |
 |---|---|---|
-| **P1 — Data Foundation & Customer Identity** | Build shared identities, source mappings, and historical business relationships. | P1.0–P1.5 complete |
+| **P1 — Data Foundation & Customer Identity** | Build shared identities, source mappings, and historical business relationships. | P1.0–P1.6 complete |
 | **P2 — Inbound** | Connect future marketing demand, scoring, and routing processes. | Planned |
 | **P3 — Outbound** | Support future prospecting and outbound engagement workflows. | Planned |
 | **P4 — Revenue Intelligence** | Support future pipeline, forecasting, and revenue analysis. | Planned |
@@ -58,12 +58,12 @@ Start with the [beginner walkthrough](docs/START_HERE.md). Use the [glossary](do
 - P1.3 — Versioned Salesforce/HubSpot source contracts, raw history, tombstones, safe replay, checkpoints, and P1.2 integration.
 - P1.4 — Field-level source of truth, conflict review, provenance history, and controlled write-back authorization.
 - P1.5 — Deterministic synthetic GTM ecosystems, deliberate quality scenarios, portable files, and automated validation.
-- P1.6 — Salesforce and HubSpot connector code, safe authentication helpers, polling, retries, and mocked API verification; real-account verification pending.
+- P1.6 — Salesforce and HubSpot connectors, safe authentication, raw-first initial and incremental polling, retries, replay, checkpoints, mocked recovery tests, and authenticated acceptance verification.
 - Repository readability and learning-documentation improvement.
 
 **Planned next**
 
-- Authenticate and verify both P1.6 test accounts; do not start P1.7.
+- P1.7 has not started; its scope requires a separate architecture discussion and approval.
 
 See the authoritative [progress tracker](PROGRESS.md) and [P1 project state](projects/01-data-foundation/PROJECT_STATE.md) for exact status and limitations.
 
@@ -124,7 +124,7 @@ These commands check the unchanged 23 entities and 31 relationships, 36 approved
 ## Important Limitations
 
 - The P1.2–P1.6 runtimes are local reference implementations, not deployed services or a data platform.
-- Live connector code exists, but both real-account checks remain unverified. There is no scheduler, webhook receiver, write-back delivery, production Snowflake schema, complete identity-matching engine, reverse Extract-Transform-Load (ETL), or workflow service.
+- Live connector acceptance is verified only for the controlled marked records in the two local test accounts. There is no scheduler, webhook receiver, write-back delivery, production Snowflake schema, complete identity-matching engine, reverse Extract-Transform-Load (ETL), or workflow service.
 - The shared JSON contract describes intended meaning and relationships; it does not prove that source data has been loaded.
 - P2–P7 are planned boundaries, not implemented capabilities.
 
