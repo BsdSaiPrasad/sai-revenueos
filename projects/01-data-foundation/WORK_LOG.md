@@ -206,3 +206,22 @@ Pending the documentation commit. The final hash is reported in the task handoff
 ### Git commit
 
 Pending the implementation commit. The final hash is reported in the task handoff rather than written here to avoid a self-referential commit.
+
+## 2026-10-11 — GitHub Actions Continuous Integration
+
+### Implemented
+
+- Added a least-privilege GitHub Actions workflow for pushes to `main`, pull requests targeting `main`, and manual runs.
+- Added Python 3.9 and 3.14 jobs that independently run all 36 tests, architecture validation, Python syntax checks, all nine JSON contracts/examples, and the synthetic Globex demonstration.
+- Added a README status badge only after the first GitHub-hosted run completed successfully.
+
+### Verification and boundaries
+
+- Local verification passed: 36/36 tests, 23 entities, 31 relationships, 19 decisions, nine JSON files, Python compilation, and the synthetic demonstration.
+- GitHub Actions run [38188026670](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38188026670) passed for both supported Python versions.
+- The workflow uses only GitHub-hosted runners and repository contents. It has `contents: read` permission and uses no credentials, paid service, or live Salesforce/HubSpot connection.
+- No business logic, schema, contract, architecture decision, P1.2/P1.3 behavior, or progress percentage changed. P1.4 has not started.
+
+### Git commit
+
+CI workflow commit: `12182ed` (`ci: add continuous integration workflow`). Authored and committed under the repository user's configured Git identity with no co-author attribution.

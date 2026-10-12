@@ -24,12 +24,15 @@ All P1.3 payloads are realistic synthetic examples. No Salesforce or HubSpot API
 - P1.2 four-part SourceRecord registration and immutable observations through the existing public interface.
 - Unresolved identity state after ingestion; P1.3 never approves a candidate or activates a crosswalk.
 - A runnable temporary-database demonstration using synthetic Globex Health events.
+- GitHub Actions continuous integration on pushes to `main`, pull requests targeting `main`, and manual runs. Python 3.9 and 3.14 each run the complete 36-test suite, architecture validation, syntax and JSON checks, and the synthetic Globex demonstration.
 
 ### Verification status
 
 On 2026-10-11, all 36 scenarios passed: 23 P1.2 identity scenarios and 13 P1.3 source-model scenarios. The P1.3 suite covers versioned contracts, both vendors, raw-field retention, duplicate replay, updates, tombstones, malformed envelopes and payloads, late updates, overlap windows, injected failure and recovery, event-ID conflict, and unresolved identity.
 
 Architecture validation passed with 23 canonical entities, 31 relationships, 19 accepted decisions, P1.2/P1.3 artifacts, continuity files, and secret-filename checks. The synthetic demonstration completed successfully.
+
+The first GitHub-hosted CI execution passed on 2026-10-11: [Actions run 38188026670](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38188026670).
 
 ## Intentionally deferred
 

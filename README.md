@@ -1,6 +1,7 @@
 # SAI RevenueOS
 
 [![Project status: P1.0 through P1.3 complete](https://img.shields.io/badge/status-P1.0%E2%80%93P1.3%20complete-2f855a)](projects/01-data-foundation/PROJECT_STATE.md)
+[![CI](https://github.com/BsdSaiPrasad/sai-revenueos/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BsdSaiPrasad/sai-revenueos/actions/workflows/ci.yml)
 
 ## What Is SAI RevenueOS?
 
