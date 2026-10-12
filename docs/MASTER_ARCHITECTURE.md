@@ -20,7 +20,8 @@ flowchart LR
   H --> S[P1 SourceRecords]
   S --> X[External identity crosswalk]
   X --> C[P1 canonical identities]
-  C --> R[Canonical relationships and history]
+  C --> A[P1 field authority and review]
+  A --> R[Canonical relationships and history]
   R --> K[Versioned shared contracts]
   K -. future use .-> P2[P2 Inbound]
   K -. future use .-> P3[P3 Outbound]
@@ -36,7 +37,7 @@ Example: synthetic company Globex Health can appear in Salesforce and HubSpot. P
 
 | Project | What it owns | Current status |
 |---|---|---|
-| **P1 — Data Foundation & Customer Identity** | Canonical entities, source identity, historical relationships, provenance, and shared data contracts. | P1.0–P1.3 complete |
+| **P1 — Data Foundation & Customer Identity** | Canonical entities, source identity, historical relationships, field authority, provenance, and shared data contracts. | P1.0–P1.4 complete |
 | **P2 — Inbound** | Future inbound demand capture, scoring, and routing. | Planned |
 | **P3 — Outbound** | Future prospecting, sequencing, and outbound engagement. | Planned |
 | **P4 — Revenue Intelligence** | Future pipeline, forecasting, and revenue analytics. | Planned |
@@ -46,7 +47,7 @@ Example: synthetic company Globex Health can appear in Salesforce and HubSpot. P
 
 ## What P1 Publishes
 
-P1 owns the shared logical model in `shared/contracts/canonical-model.v1.json` and the versioned P1.3 source contracts under `projects/01-data-foundation/contracts/`. Other projects may map those contracts into warehouse tables, Application Programming Interfaces (APIs), events, or semantic models, but they must not create incompatible definitions inside their own folders.
+P1 owns the shared logical model in `shared/contracts/canonical-model.v1.json` and the versioned P1.3 source and P1.4 authority contracts under `projects/01-data-foundation/contracts/`. Other projects may map those contracts into warehouse tables, Application Programming Interfaces (APIs), events, or semantic models, but they must not create incompatible definitions inside their own folders.
 
 A breaking change—such as changing what an Account ID means—requires a new major contract version and a review of every downstream project. If work reveals a cross-project change, label it **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
 
@@ -65,6 +66,9 @@ A breaking change—such as changing what an Account ID means—requires a new m
 11. Raw source payloads are preserved before standardization.
 12. Source deletions create tombstones and never automatically delete canonical identities.
 13. Checkpoints advance only after durable processing; overlap and idempotency make replay safe.
+14. Source-of-truth ownership is assigned to fields, not entire entities.
+15. Conflicting or manually verified values require auditable human review.
+16. Write-back requires explicit authority and approval; P1.4 does not deliver writes.
 
 The reasoning is recorded in the [P1 decision index](../projects/01-data-foundation/DECISIONS.md).
 
@@ -80,4 +84,4 @@ Repository validation catches structural drift, but future physical systems will
 
 ## What Comes Next?
 
-P1.3 is complete as a local synthetic-data reference. Review its executable demonstration and approve P1.4 scope before further implementation; P2–P7 stay planned until their own work begins.
+P1.4 is complete as a local synthetic-data reference. Review its executable demonstration and approve P1.5 scope before further implementation; P2–P7 stay planned until their own work begins.

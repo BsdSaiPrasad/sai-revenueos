@@ -1,0 +1,162 @@
+{
+  "contract_name": "field-authority-policy",
+  "contract_version": "1.0.0",
+  "description": "Field-level source-of-truth and controlled write-authority policy for the local P1.4 reference implementation.",
+  "default_action": "deny",
+  "source_domains": {
+    "sales": ["salesforce"],
+    "marketing": ["hubspot"],
+    "enrichment": ["clay", "apollo"],
+    "usage": ["product"],
+    "billing": ["billing"],
+    "payments": ["stripe"],
+    "accounting": ["erp"],
+    "customer_health": ["customer_success"],
+    "consent": ["consent_registry"]
+  },
+  "field_policies": [
+    {
+      "entity_type": "Account",
+      "field_name": "lifecycle_status",
+      "domain": "sales",
+      "authoritative_sources": ["salesforce"],
+      "allowed_writer_roles": ["source_processor", "data_steward"],
+      "review_owner_role": "revenue_operations",
+      "protect_manual_verification": true,
+      "write_back_targets": ["salesforce", "hubspot"]
+    },
+    {
+      "entity_type": "Opportunity",
+      "field_name": "stage",
+      "domain": "sales",
+      "authoritative_sources": ["salesforce"],
+      "allowed_writer_roles": ["source_processor", "data_steward"],
+      "review_owner_role": "revenue_operations",
+      "protect_manual_verification": true,
+      "write_back_targets": ["salesforce", "hubspot"]
+    },
+    {
+      "entity_type": "Opportunity",
+      "field_name": "amount",
+      "domain": "sales",
+      "authoritative_sources": ["salesforce"],
+      "allowed_writer_roles": ["source_processor", "data_steward"],
+      "review_owner_role": "revenue_operations",
+      "protect_manual_verification": true,
+      "write_back_targets": ["salesforce"]
+    },
+    {
+      "entity_type": "Campaign",
+      "field_name": "status",
+      "domain": "marketing",
+      "authoritative_sources": ["hubspot"],
+      "allowed_writer_roles": ["source_processor", "data_steward"],
+      "review_owner_role": "marketing_operations",
+      "protect_manual_verification": true,
+      "write_back_targets": ["hubspot"]
+    },
+    {
+      "entity_type": "Person",
+      "field_name": "display_name",
+      "domain": "enrichment",
+      "authoritative_sources": ["clay", "apollo"],
+      "allowed_writer_roles": ["source_processor", "data_steward"],
+      "review_owner_role": "data_steward",
+      "protect_manual_verification": true,
+      "write_back_targets": ["salesforce", "hubspot"]
+    },
+    {
+      "entity_type": "ProductUser",
+      "field_name": "user_status",
+      "domain": "usage",
+      "authoritative_sources": ["product"],
+      "allowed_writer_roles": ["source_processor", "data_steward"],
+      "review_owner_role": "product_operations",
+      "protect_manual_verification": true,
+      "write_back_targets": []
+    },
+    {
+      "entity_type": "ProductUser",
+      "field_name": "last_seen_at",
+      "domain": "usage",
+      "authoritative_sources": ["product"],
+      "allowed_writer_roles": ["source_processor", "data_steward"],
+      "review_owner_role": "product_operations",
+      "protect_manual_verification": true,
+      "write_back_targets": []
+    },
+    {
+      "entity_type": "Subscription",
+      "field_name": "status",
+      "domain": "billing",
+      "authoritative_sources": ["billing"],
+      "allowed_writer_roles": ["source_processor", "data_steward"],
+      "review_owner_role": "billing_operations",
+      "protect_manual_verification": true,
+      "write_back_targets": ["salesforce"]
+    },
+    {
+      "entity_type": "Invoice",
+      "field_name": "amount_due",
+      "domain": "billing",
+      "authoritative_sources": ["billing"],
+      "allowed_writer_roles": ["source_processor", "data_steward"],
+      "review_owner_role": "billing_operations",
+      "protect_manual_verification": true,
+      "write_back_targets": []
+    },
+    {
+      "entity_type": "Invoice",
+      "field_name": "amount_paid",
+      "domain": "payments",
+      "authoritative_sources": ["stripe"],
+      "allowed_writer_roles": ["source_processor", "data_steward"],
+      "review_owner_role": "finance_operations",
+      "protect_manual_verification": true,
+      "write_back_targets": ["billing", "erp"]
+    },
+    {
+      "entity_type": "Invoice",
+      "field_name": "currency_code",
+      "domain": "accounting",
+      "authoritative_sources": ["erp"],
+      "allowed_writer_roles": ["source_processor", "data_steward"],
+      "review_owner_role": "finance_operations",
+      "protect_manual_verification": true,
+      "write_back_targets": ["billing"]
+    },
+    {
+      "entity_type": "SupportCase",
+      "field_name": "priority",
+      "domain": "customer_health",
+      "authoritative_sources": ["customer_success"],
+      "allowed_writer_roles": ["source_processor", "data_steward"],
+      "review_owner_role": "customer_success_operations",
+      "protect_manual_verification": true,
+      "write_back_targets": ["salesforce"]
+    }
+  ],
+  "write_back_policy": {
+    "mode": "authorization_only",
+    "authorized_roles": ["data_steward"],
+    "requires_resolved_conflict": true,
+    "network_delivery": false
+  },
+  "future_extension_points": [
+    {
+      "domain": "consent",
+      "status": "reserved_not_implemented",
+      "note": "Add explicit consent entities and fields before evaluating consent values. Only verified consent sources may then be authoritative."
+    },
+    {
+      "domain": "customer_health",
+      "status": "policy_only",
+      "note": "Additional health scores may use Signal in P6 after their derivation and ownership rules are approved."
+    },
+    {
+      "domain": "revenue_intelligence",
+      "status": "reserved_not_implemented",
+      "note": "P4 may consume governed Opportunity and revenue fields but cannot redefine their P1.4 ownership."
+    }
+  ]
+}

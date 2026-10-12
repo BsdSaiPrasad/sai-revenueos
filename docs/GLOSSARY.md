@@ -11,6 +11,7 @@ This glossary explains terms used in the repository. Definitions are specific to
 | **Canonical identity** | A stable ID used for one real-world entity across systems and over time. | Sarah Kim keeps one Person ID after changing employers. |
 | **Cardinality** | The allowed number of records on each side of a relationship. | One Account can have many Opportunities. |
 | **Checkpoint** | The last source position known to be durably processed. | The Salesforce Account cursor advances only after its history row commits. |
+| **Conflict review** | A human-owned case that preserves disagreeing values and evidence until an authorized person decides. | Sarah Kim reviews whether Globex Health's lifecycle should remain `prospect` or become `customer`. |
 | **CRM — Customer Relationship Management** | Software used to manage companies, people, sales activity, and opportunities. | Salesforce is a possible CRM source. |
 | **Crosswalk** | A mapping between a source-system record and a canonical entity. | Salesforce Account `SF-1001` maps to the canonical Globex Health Account. |
 | **Data contract** | A versioned agreement about data meaning, structure, and allowed relationships. | `canonical-model.v1.json` defines the shared P1 logical model. |
@@ -38,10 +39,10 @@ This glossary explains terms used in the repository. Definitions are specific to
 | **Source of truth** | The system or governed dataset considered authoritative for a specific fact. | A contract system may be authoritative for signed contract dates. |
 | **SourceRecord** | RevenueOS's stable reference to one object in one source system and tenant. | A Salesforce Lead and Contact are separate SourceRecords. |
 | **Source event envelope** | Standard metadata wrapped around a vendor payload for identity, time, tracing, event type, and replay. | Salesforce and HubSpot payloads use the same P1.3 envelope. |
-| **Survivorship** | Rules that choose which source value becomes the preferred canonical value. | A later rule may choose the preferred company name when sources disagree. |
+| **Survivorship** | Rules that choose which source value becomes the preferred canonical value. | P1.4 implements approved ownership and human review for selected fields; a complete enterprise ruleset remains later work. |
 | **Synthetic data** | Fictional data created for learning or testing. | Globex Health and Sarah Kim are synthetic examples. |
 | **Tombstone** | A retained marker that says a source record was deleted without erasing prior versions. | Deleting the synthetic Salesforce Globex Account appends a tombstone and leaves its canonical Account untouched. |
 | **Transaction** | A group of changes that either all succeed or all fail. | Creating a canonical ID and its active mapping should be atomic. |
 | **Upsert** | Insert a record if it does not exist, otherwise return or update the existing record. | Reprocessing a source identity should return its existing SourceRecord. |
 | **Webhook** | A source-system message sent when an event happens. | A future CRM webhook may announce that an Account changed. |
-| **Write authority** | The component allowed to create or change a governed record. | P1 identity authority generates canonical IDs; P1.3 has source-registration authority only. |
+| **Write authority** | The role or component allowed to propose, approve, or send a governed change. | P1.4 denies automatic HubSpot write-back but can record data-steward authorization. |

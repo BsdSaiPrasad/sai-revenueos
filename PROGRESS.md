@@ -2,11 +2,11 @@
 
 This is the single authoritative milestone tracker. Percentages measure completed planned phases, not engineering effort.
 
-**Verified through:** 2026-10-11
+**Verified through:** 2026-10-12
 
 | Project | Completed milestones | Completion |
 |---|---:|---:|
-| P1 — Data Foundation & Customer Identity | 4 of 16 (P1.0–P1.3) | 25% |
+| P1 — Data Foundation & Customer Identity | 5 of 16 (P1.0–P1.4) | 31.25% |
 | P2 — Inbound | 0 | 0% |
 | P3 — Outbound | 0 | 0% |
 | P4 — Revenue Intelligence | 0 | 0% |
@@ -14,6 +14,6 @@ This is the single authoritative milestone tracker. Percentages measure complete
 | P6 — Customer 360 | 0 | 0% |
 | P7 — Reliability | 0 | 0% |
 
-**Overall RevenueOS completion:** approximately **3.6%**, using seven equally weighted projects (`25% / 7`).
+**Overall RevenueOS completion:** approximately **4.5%**, using seven equally weighted projects (`31.25% / 7`).
 
-P1.3 is marked complete because its source contracts, local reference implementation, synthetic demonstration, all 36 P1.2/P1.3 scenarios, architecture validation, and documentation checks passed. P1.4 has not started.
+P1.4 is marked complete because its authority policy, local reference implementation, synthetic demonstration, all 51 P1.2–P1.4 scenarios, architecture validation, and documentation checks passed. P1.5 has not started.

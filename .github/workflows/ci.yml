@@ -61,7 +61,7 @@ jobs:
           print(f"Validated {len(json_files)} JSON files.")
           PY
 
-      - name: Run all 36 Python tests
+      - name: Run all Python tests
         run: python -m unittest discover -s projects/01-data-foundation/tests -v
 
       - name: Run architecture validation
@@ -69,3 +69,6 @@ jobs:
 
       - name: Run the synthetic Globex demonstration
         run: python projects/01-data-foundation/scripts/demo_source_model.py
+
+      - name: Run the synthetic Globex field-authority demonstration
+        run: python projects/01-data-foundation/scripts/demo_field_authority.py

@@ -3,7 +3,7 @@
 
 This script checks the shared JavaScript Object Notation (JSON) contract, canonical
 Entity Relationship Diagram (ERD), Architecture Decision Records (ADRs), required
-P1.2 and P1.3 artifacts, schema enforcement names, continuity documents, and
+P1.2, P1.3, and P1.4 artifacts, schema enforcement names, continuity documents, and
 secret-like filenames. It validates repository consistency; it does not execute
 runtime tests or claim that a production service is deployed.
 """
@@ -30,7 +30,13 @@ SOURCE_SCHEMA_PATH = PROJECT_DIR / "src/sai_revenueos_sources/schema.sql"
 SOURCE_TEST_PATH = PROJECT_DIR / "tests/test_source_model.py"
 SOURCE_DEMO_PATH = PROJECT_DIR / "scripts/demo_source_model.py"
 SOURCE_CONTRACT_DIR = PROJECT_DIR / "contracts"
-DECISION_COUNT = 19
+AUTHORITY_GUIDE_PATH = PROJECT_DIR / "architecture/FIELD_AUTHORITY.md"
+AUTHORITY_SCHEMA_PATH = PROJECT_DIR / "src/sai_revenueos_authority/schema.sql"
+AUTHORITY_TEST_PATH = PROJECT_DIR / "tests/test_field_authority.py"
+AUTHORITY_DEMO_PATH = PROJECT_DIR / "scripts/demo_field_authority.py"
+AUTHORITY_POLICY_PATH = PROJECT_DIR / "contracts/field-authority-policy.v1.json"
+AUTHORITY_EXAMPLE_PATH = PROJECT_DIR / "examples/p14/globex-field-authority-demo.v1.json"
+DECISION_COUNT = 25
 
 REQUIRED_ENTITIES = {
     "Account",
@@ -227,7 +233,7 @@ def validate_erd(contract: dict, errors: list[str]) -> None:
 
 
 def validate_decisions_and_continuity(errors: list[str]) -> None:
-    """Check that D001–D013 and the project continuity documents are present."""
+    """Check that every approved ADR and the project continuity documents are present."""
     missing_files = [name for name in REQUIRED_CONTINUITY_FILES if not (PROJECT_DIR / name).is_file()]
     if missing_files:
         fail(errors, f"missing continuity files: {', '.join(sorted(missing_files))}")
@@ -315,6 +321,83 @@ def validate_p13_reference(errors: list[str]) -> None:
             fail(errors, f"P1.3 schema is missing enforcement rule {enforcement}")
 
 
+def validate_p14_reference(contract: dict, errors: list[str]) -> None:
+    """Check P1.4 policy, reference schema, tests, guide, example, and demo."""
+    required = (
+        AUTHORITY_GUIDE_PATH,
+        AUTHORITY_SCHEMA_PATH,
+        AUTHORITY_TEST_PATH,
+        AUTHORITY_DEMO_PATH,
+        AUTHORITY_POLICY_PATH,
+        AUTHORITY_EXAMPLE_PATH,
+    )
+    missing = [str(path.relative_to(REPO_ROOT)) for path in required if not path.is_file()]
+    if missing:
+        fail(errors, f"missing P1.4 reference artifacts: {', '.join(missing)}")
+        return
+
+    try:
+        policy = json.loads(AUTHORITY_POLICY_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        fail(errors, f"P1.4 authority policy cannot be loaded: {exc}")
+        return
+    if policy.get("contract_version") != "1.0.0":
+        fail(errors, "P1.4 authority policy must declare version 1.0.0")
+    if policy.get("default_action") != "deny":
+        fail(errors, "P1.4 authority policy must default to deny")
+    write_back = policy.get("write_back_policy", {})
+    if write_back.get("mode") != "authorization_only" or write_back.get("network_delivery") is not False:
+        fail(errors, "P1.4 write-back must remain authorization-only")
+
+    approved_domains = {
+        "sales": ["salesforce"],
+        "marketing": ["hubspot"],
+        "enrichment": ["clay", "apollo"],
+        "usage": ["product"],
+        "billing": ["billing"],
+        "payments": ["stripe"],
+        "accounting": ["erp"],
+        "customer_health": ["customer_success"],
+        "consent": ["consent_registry"],
+    }
+    domains = policy.get("source_domains", {})
+    if domains != approved_domains:
+        fail(errors, "P1.4 source domains do not match the approved decision")
+    entities = contract.get("entities", {})
+    seen_fields = set()
+    for field in policy.get("field_policies", []):
+        key = (field.get("entity_type"), field.get("field_name"))
+        if key in seen_fields:
+            fail(errors, f"P1.4 field policy is duplicated: {key}")
+        seen_fields.add(key)
+        entity = entities.get(key[0], {})
+        if key[1] not in entity.get("important_attributes", []):
+            fail(errors, f"P1.4 field policy is outside the canonical contract: {key}")
+        if field.get("domain") not in domains:
+            fail(errors, f"P1.4 field policy uses unknown domain: {key}")
+        if not set(field.get("authoritative_sources", [])).issubset(
+            set(domains.get(field.get("domain"), []))
+        ):
+            fail(errors, f"P1.4 field policy uses a source outside its domain: {key}")
+
+    schema = AUTHORITY_SCHEMA_PATH.read_text(encoding="utf-8")
+    for table in (
+        "canonical_field_state", "field_value_history", "field_conflict",
+        "conflict_review_event", "field_change_attempt", "write_back_request",
+        "authority_audit_event",
+    ):
+        if f"CREATE TABLE IF NOT EXISTS {table}" not in schema:
+            fail(errors, f"P1.4 schema is missing {table}")
+    for enforcement in (
+        "field_value_history_immutable", "field_conflict_evidence_immutable",
+        "conflict_review_event_immutable", "conflict_review_event_no_delete",
+        "field_change_attempt_immutable", "write_back_request_immutable",
+        "authority_audit_event_no_delete",
+    ):
+        if enforcement not in schema:
+            fail(errors, f"P1.4 schema is missing enforcement rule {enforcement}")
+
+
 def validate_no_tracked_secrets(errors: list[str]) -> None:
     """Flag secret-like filenames among tracked and candidate repository files."""
     try:
@@ -347,6 +430,7 @@ def main() -> int:
     validate_decisions_and_continuity(errors)
     validate_p12_reference(errors)
     validate_p13_reference(errors)
+    validate_p14_reference(contract, errors)
     validate_no_tracked_secrets(errors)
 
     if errors:
@@ -360,7 +444,7 @@ def main() -> int:
     print(
         "P1 architecture validation PASSED: "
         f"{entity_count} entities, {relationship_count} relationships, "
-        f"{DECISION_COUNT} decisions, ERD coverage, P1.2/P1.3 reference artifacts, "
+        f"{DECISION_COUNT} decisions, ERD coverage, P1.2/P1.3/P1.4 reference artifacts, "
         "continuity files, and secret filename checks."
     )
     return 0

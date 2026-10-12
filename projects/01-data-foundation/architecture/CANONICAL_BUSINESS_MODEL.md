@@ -177,6 +177,6 @@ The architecture requires provenance, effective dates, append-oriented correctio
 
 ## 11. What Comes Next?
 
-P1.2 defines and locally implements canonical ID generation, crosswalk lifecycle, correction, merge/unmerge, idempotency, and recovery semantics. P1.3 adds synthetic Salesforce/HubSpot source events, raw history, tombstones, and safe replay. Neither phase builds the full matching or survivorship engines.
+P1.2 defines and locally implements canonical ID generation, crosswalk lifecycle, correction, merge/unmerge, idempotency, and recovery semantics. P1.3 adds synthetic Salesforce/HubSpot source events, raw history, tombstones, and safe replay. P1.4 adds field-level ownership, provenance, conflict review, and write-back authorization for selected fields. These phases do not build complete matching, enterprise survivorship, or external delivery services.
 
-The following remain deliberately deferred: source ingestion, physical Snowflake design, dbt transformations, customer-status derivation, field survivorship, workflow deployment, and reverse Extract-Transform-Load (ETL).
+The following remain deliberately deferred: live source ingestion, physical Snowflake design, dbt transformations, a complete field catalog, workflow deployment, and reverse Extract-Transform-Load (ETL).

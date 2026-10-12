@@ -66,7 +66,7 @@ Runs the 13 P1.3 source-model acceptance scenarios.
 python3 -m unittest discover -s projects/01-data-foundation/tests -v
 ```
 
-Runs all P1.2 and P1.3 executable scenarios.
+Runs all P1.2–P1.4 executable scenarios.
 
 ## Small Exercise
 
@@ -83,5 +83,5 @@ Before reading `NEXT REPLAY WINDOW`, predict its `replay_from` value and explain
 - Payloads in `examples/p13/` are realistic but fictional.
 - No OAuth, vendor pagination, rate-limit handling, webhook receiver, or live API client exists.
 - No production object storage, queue, distributed transaction, scheduler, monitoring, or privacy policy exists.
-- No Snowflake table, dbt model, survivorship rule, or automatic identity matching exists.
-- P1.4 and later phases remain unstarted.
+- No Snowflake table, dbt model, automatic identity matching, or live connector exists.
+- P1.4 consumes P1.3 evidence through a separate governed interface; P1.3 itself does not choose canonical field truth.

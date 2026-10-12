@@ -225,3 +225,32 @@ Pending the implementation commit. The final hash is reported in the task handof
 ### Git commit
 
 CI workflow commit: `12182ed` (`ci: add continuous integration workflow`). Authored and committed under the repository user's configured Git identity with no co-author attribution.
+
+## 2026-10-12 — P1.4 Source of Truth and Write Authority
+
+### Implemented
+
+- Added a version 1 field-authority policy covering sales, marketing, enrichment, usage, billing, payments, accounting, customer health, and consent boundaries.
+- Added a standard-library Python + SQLite reference for default-deny field evaluation, current trusted values, provenance, replay-safe changes, and append-only value history.
+- Added conflict cases with preserved current/proposed values, evidence, owner roles and people, assignment, escalation, approval, rejection, and immutable review/audit events.
+- Added authorization-only write-back evaluation that requires the current canonical value, an approved target, data-steward authority, and a resolved conflict. It performs no network delivery.
+- Reused P1.2 canonical identities and SourceRecords plus P1.3 source-event evidence through public interfaces.
+- Added accepted Decisions D020–D025, a field-authority guide, 15 acceptance scenarios, and a runnable synthetic Globex Health demonstration.
+
+### Verification evidence
+
+- `python3 -m unittest discover -s projects/01-data-foundation/tests -v` — **passed**, 51/51 scenarios: 23 P1.2, 13 P1.3, and 15 P1.4.
+- `python3 projects/01-data-foundation/scripts/validate_architecture.py` — **passed**: 23 entities, 31 relationships, 25 decisions, P1.2–P1.4 artifacts, continuity files, and secret-filename checks.
+- `python3 projects/01-data-foundation/scripts/demo_field_authority.py` — **passed** with actual synthetic input, P1.2/P1.3 integration, replay, conflicts, assignment, approvals, rejected writes, and before/after history.
+- Python compilation and the independent `--salesforce-decision keep_current` exercise path passed.
+
+### Boundaries and progress
+
+- The canonical v1.0.0 contract, its 23 entities and 31 relationships, and Decisions D001–D019 remain unchanged.
+- No live API, write-back delivery, connector, warehouse, dbt model, downstream P4–P6 workflow, consent entity, health-score model, or P1.5 work was added.
+- No **MASTER ARCHITECTURE DECISION NEEDED** change was required. Consent and downstream domains are documented as future extension points only.
+- P1 is now 31.25% complete (5 of 16 milestones); overall RevenueOS completion is approximately 4.5%.
+
+### Git commit
+
+Pending the implementation commit. The final hash is reported in the task handoff rather than written here to avoid a self-referential commit.

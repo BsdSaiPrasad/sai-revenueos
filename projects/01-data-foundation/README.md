@@ -57,6 +57,15 @@ Read the repository-wide [beginner walkthrough](../../docs/START_HERE.md) for th
 - Reuse of the P1.2 source-identity interface without automatic identity approval.
 - Thirteen executed source-model scenarios and a runnable synthetic Globex demonstration.
 
+### P1.4 — Source of Truth and Write Authority
+
+- Versioned field-level authority matrix validated against the canonical contract.
+- Domain ownership for sales, marketing, enrichment, usage, billing, payments, accounting, customer health, and consent.
+- Provenance-preserving current values and append-only value history.
+- Conflict detection, manual-verification protection, assigned review, escalation, approval, rejection, and audit history.
+- Controlled write-back authorization with no external delivery.
+- Fifteen executed authority scenarios and a runnable synthetic Globex demonstration.
+
 The [project state](PROJECT_STATE.md) is the authoritative source for current status.
 
 ## Key Documents
@@ -69,7 +78,9 @@ The [project state](PROJECT_STATE.md) is the authoritative source for current st
 | [P1.2 Runtime ERD](architecture/diagrams/identity-control.mmd) | Inspect the operational reference tables. |
 | [P1.3 Source Model Guide](architecture/SOURCE_MODEL.md) | Run and understand raw history, tombstones, checkpoints, replay, and identity integration. |
 | [P1.3 Source Contracts](contracts/) | Inspect the versioned envelope, checkpoint, Salesforce, and HubSpot definitions. |
-| [Decision Index](DECISIONS.md) | See all 19 approved decisions and open their ADRs. |
+| [P1.4 Field Authority Guide](architecture/FIELD_AUTHORITY.md) | Run and understand ownership, conflicts, review, provenance, and write-back authorization. |
+| [P1.4 Authority Policy](contracts/field-authority-policy.v1.json) | Inspect the versioned field matrix and domain ownership rules. |
+| [Decision Index](DECISIONS.md) | See all 25 approved decisions and open their ADRs. |
 | [Shared Contract](../../shared/contracts/canonical-model.v1.json) | Inspect the machine-readable technical definition. |
 | [Project State](PROJECT_STATE.md) | Confirm what works, what is deferred, and what comes next. |
 | [Work Log](WORK_LOG.md) | Review chronological implementation and verification evidence. |
@@ -93,6 +104,7 @@ From the repository root, using Python 3.9 or newer:
 python3 projects/01-data-foundation/scripts/validate_architecture.py
 python3 -m unittest discover -s projects/01-data-foundation/tests -v
 python3 projects/01-data-foundation/scripts/demo_source_model.py
+python3 projects/01-data-foundation/scripts/demo_field_authority.py
 ```
 
 No credentials, package installation, warehouse, or external service is required.
@@ -100,14 +112,14 @@ No credentials, package installation, warehouse, or external service is required
 ## What Is Not Implemented?
 
 - Live Salesforce/HubSpot API ingestion and a complete identity-matching engine.
-- Survivorship and field-level source precedence.
+- A complete enterprise survivorship catalog beyond the selected P1.4 fields.
 - A deployed production identity service or Snowflake publication pipeline.
 - Physical Snowflake tables and dbt transformations.
-- Reverse Extract-Transform-Load (ETL), activation, scoring, routing, or forecasting.
+- Live write-back, reverse Extract-Transform-Load (ETL), activation, scoring, routing, or forecasting.
 - Production security policies, monitoring, or stewardship interfaces.
 
 The future folders for those capabilities are intentionally absent until they contain working deliverables.
 
 ## What Comes Next?
 
-Review the P1.3 implementation and demonstration before approving any P1.4 scope. No P1.4 work has started.
+Review the P1.4 policy, implementation, tests, and demonstration before approving any P1.5 scope. No P1.5 work has started.

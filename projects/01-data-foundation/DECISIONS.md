@@ -4,7 +4,7 @@
 
 This is the index of Project 1's approved architecture decisions. An Architecture Decision Record (ADR) explains the problem, alternatives, decision, technical design, and tradeoffs.
 
-All 19 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, and D014–D019 define the P1.3 source model. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
+All 25 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, D014–D019 define the P1.3 source model, and D020–D025 define P1.4 field authority. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
 
 ## Approved Decisions
 
@@ -29,6 +29,12 @@ All 19 decisions below are **Accepted**. D001–D008 define the canonical model,
 | **D017** | Standardize essential Salesforce and HubSpot objects and fields first while retaining full raw payloads. | Keeps the v1 model small and testable without losing unmodeled data. | [Standardize Essential Source Fields First](architecture/adr/0017-essential-source-fields-first.md) |
 | **D018** | Advance checkpoints only after durable processing and replay with overlap plus idempotency. | Prevents gaps after failure and safely handles duplicates or late updates. | [Use Checkpoints, Overlap, Idempotency, and Safe Replay](architecture/adr/0018-checkpoint-overlap-and-safe-replay.md) |
 | **D019** | Reuse the P1.2 source-identity interface and never auto-approve uncertain matches. | Preserves one identity authority and keeps ingestion separate from resolution truth. | [Reuse P1.2 Identity Control Without Automatic Approval](architecture/adr/0019-reuse-identity-interface.md) |
+| **D020** | Assign source-of-truth ownership to individual canonical fields. | Prevents one system from controlling unrelated facts on an entire entity. | [Assign Source of Truth at the Field Level](architecture/adr/0020-field-level-source-of-truth.md) |
+| **D021** | Preserve conflicting values and protect manually verified truth. | Prevents arrival order or automation from destroying reviewed evidence. | [Preserve Conflicts and Protect Manually Verified Values](architecture/adr/0021-preserve-conflicts-and-manual-truth.md) |
+| **D022** | Give each business domain its own authoritative systems. | Keeps sales, marketing, usage, billing, payments, accounting, health, and consent ownership explicit. | [Give Each Business Domain Its Own Authoritative Systems](architecture/adr/0022-domain-specific-field-authority.md) |
+| **D023** | Require explicit, auditable authorization before future write-back. | Prevents unrestricted synchronization loops and excessive automated authority. | [Authorize Write-Back Explicitly and Audit Every Decision](architecture/adr/0023-controlled-auditable-write-back.md) |
+| **D024** | Assign human owners to conflicts and preserve their review history. | Makes escalation and final decisions accountable and explainable. | [Make People Accountable for Conflict Resolution](architecture/adr/0024-human-owned-conflict-resolution.md) |
+| **D025** | Reserve future domain boundaries without implementing later projects. | Lets P4–P6 consume governed truth without redefining ownership or expanding P1.4 scope. | [Reserve Future Authority Boundaries Without Building Future Products](architecture/adr/0025-future-compatible-authority-boundaries.md) |
 
 ## What These Decisions Do Not Implement
 
@@ -36,7 +42,7 @@ The decisions define the architecture. They do not mean the following capabiliti
 
 - Live Salesforce or HubSpot API ingestion and scheduled connector execution.
 - Complete identity matching or artificial-intelligence scoring.
-- Survivorship or field-level source precedence.
 - Physical warehouse constraints and reconciliation jobs.
+- Live field synchronization or write-back delivery.
 
-The P1.2 identity and P1.3 source mechanics are local references, not deployed services. P1.4 and later work require a separate approved scope.
+The P1.2 identity, P1.3 source, and P1.4 field-authority mechanics are local references, not deployed services. P1.5 and later work require a separate approved scope.

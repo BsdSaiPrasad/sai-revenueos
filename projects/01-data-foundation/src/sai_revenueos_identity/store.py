@@ -261,6 +261,33 @@ class IdentityStore:
             raise ValidationError("unsupported table")
         return int(self._connection.execute("SELECT COUNT(*) FROM %s" % table).fetchone()[0])
 
+    def get_canonical_identity(self, canonical_id: str) -> Dict[str, Any]:
+        """Return one canonical identity for downstream P1 policy checks.
+
+        P1.4 uses this read-only boundary instead of reaching into the identity
+        database directly. Retired identities remain visible so the caller can
+        reject new field writes while preserving their historical references.
+        """
+        row = self._connection.execute(
+            "SELECT * FROM canonical_identity WHERE canonical_id=?", (canonical_id,)
+        ).fetchone()
+        if row is None:
+            raise NotFoundError("canonical identity was not found")
+        return dict(row)
+
+    def get_source_record(self, source_record_id: str) -> Dict[str, Any]:
+        """Return one registered SourceRecord for provenance validation.
+
+        This keeps P1.4 tied to the four-part source identity created by P1.2 and
+        reused by P1.3 rather than allowing a second source registry.
+        """
+        row = self._connection.execute(
+            "SELECT * FROM source_record WHERE source_record_id=?", (source_record_id,)
+        ).fetchone()
+        if row is None:
+            raise NotFoundError("source record was not found")
+        return dict(row)
+
     def create_canonical_identity(
         self, entity_type: str, actor_id: str, authority: str, idempotency_key: str,
         at: Optional[str] = None,

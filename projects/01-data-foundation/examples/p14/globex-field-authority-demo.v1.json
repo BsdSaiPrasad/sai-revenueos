@@ -1,0 +1,106 @@
+{
+  "demo_version": "1.0.0",
+  "synthetic": true,
+  "description": "Synthetic source events used to demonstrate P1.4 field authority. No vendor API produced these records.",
+  "source_events": [
+    {
+      "contract_version": "1.0.0",
+      "event_id": "evt-p14-sf-account-lifecycle-v1",
+      "source": {
+        "system": "salesforce",
+        "tenant": "globex-salesforce-prod",
+        "object_type": "Account",
+        "object_id": "001GLOBEX"
+      },
+      "event_type": "upsert",
+      "timestamps": {
+        "source_updated_at": "2026-10-12T16:00:00Z",
+        "observed_at": "2026-10-12T16:00:05Z"
+      },
+      "tracing": {
+        "trace_id": "trace-globex-p14",
+        "extraction_id": "synthetic-p14-sf-run-001"
+      },
+      "checkpoint": {
+        "stream_name": "Account",
+        "cursor": "sf-account-p14-0001",
+        "high_watermark_at": "2026-10-12T16:00:10Z"
+      },
+      "payload": {
+        "attributes": {"type": "Account"},
+        "Id": "001GLOBEX",
+        "Name": "Globex Health",
+        "Lifecycle_Status__c": "prospect",
+        "LastModifiedDate": "2026-10-12T16:00:00Z",
+        "IsDeleted": false
+      }
+    },
+    {
+      "contract_version": "1.0.0",
+      "event_id": "evt-p14-hs-company-lifecycle-conflict",
+      "source": {
+        "system": "hubspot",
+        "tenant": "globex-hubspot-prod",
+        "object_type": "Company",
+        "object_id": "987654"
+      },
+      "event_type": "upsert",
+      "timestamps": {
+        "source_updated_at": "2026-10-12T16:01:00Z",
+        "observed_at": "2026-10-12T16:01:05Z"
+      },
+      "tracing": {
+        "trace_id": "trace-globex-p14",
+        "extraction_id": "synthetic-p14-hs-run-001"
+      },
+      "checkpoint": {
+        "stream_name": "Company",
+        "cursor": "hs-company-p14-0001",
+        "high_watermark_at": "2026-10-12T16:01:10Z"
+      },
+      "payload": {
+        "id": "987654",
+        "properties": {
+          "name": "Globex Health",
+          "domain": "globex.example",
+          "lifecyclestage": "marketingqualifiedlead"
+        },
+        "createdAt": "2026-01-15T09:30:00Z",
+        "updatedAt": "2026-10-12T16:01:00Z",
+        "archived": false
+      }
+    },
+    {
+      "contract_version": "1.0.0",
+      "event_id": "evt-p14-sf-account-lifecycle-v2",
+      "source": {
+        "system": "salesforce",
+        "tenant": "globex-salesforce-prod",
+        "object_type": "Account",
+        "object_id": "001GLOBEX"
+      },
+      "event_type": "upsert",
+      "timestamps": {
+        "source_updated_at": "2026-10-12T16:02:00Z",
+        "observed_at": "2026-10-12T16:02:05Z"
+      },
+      "tracing": {
+        "trace_id": "trace-globex-p14",
+        "extraction_id": "synthetic-p14-sf-run-002"
+      },
+      "checkpoint": {
+        "stream_name": "Account",
+        "cursor": "sf-account-p14-0002",
+        "high_watermark_at": "2026-10-12T16:02:10Z"
+      },
+      "payload": {
+        "attributes": {"type": "Account"},
+        "Id": "001GLOBEX",
+        "Name": "Globex Health",
+        "Lifecycle_Status__c": "customer",
+        "LastModifiedDate": "2026-10-12T16:02:00Z",
+        "IsDeleted": false
+      }
+    }
+  ]
+}

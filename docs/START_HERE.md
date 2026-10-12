@@ -6,7 +6,7 @@ This walkthrough explains Project 1 through one continuous, synthetic example. N
 
 **Globex Health** appears in both Salesforce and HubSpot. **Sarah Kim** and **John Lee** work there. The company is evaluating a fictional analytics product, signs a contract, and starts a subscription.
 
-The architecture and local references are complete through P1.3. P1.3 uses realistic synthetic source events; live connector execution and complete identity matching are later work.
+The architecture and local references are complete through P1.4. P1.3 uses realistic synthetic source events, and P1.4 governs selected field values. Live connector and write-back execution remain later work.
 
 ## Step 1 — Preserve the Source Records
 
@@ -40,7 +40,13 @@ The source records are preserved; they are not replaced by the canonical Account
 
 **Implemented locally:** mapping states, idempotency, correction, merge, unmerge, rollback, and reconciliation. The complete matching engine still comes later.
 
-## Step 4 — Connect a Person to the Account
+## Step 4 — Decide Which Source Owns Each Field
+
+Salesforce owns Globex Health's sales lifecycle, while HubSpot owns marketing fields. If HubSpot proposes a different sales lifecycle, RevenueOS keeps the Salesforce value current and opens a human-owned conflict instead of overwriting it.
+
+**Implemented locally:** a versioned field-level authority matrix, provenance and value history, manual-verification protection, assigned review cases, escalation, decisions, and write-back authorization without external delivery.
+
+## Step 5 — Connect a Person to the Account
 
 Sarah Kim has one canonical `Person` identity. Her employment at Globex Health is stored separately in `AccountPersonRelationship`.
 
@@ -50,7 +56,7 @@ If Sarah later joins **Northstar Labs**, her Person ID remains the same. One rel
 
 **Later:** matching rules will decide when Salesforce, HubSpot, and product profiles represent the same human.
 
-## Step 5 — Create an Opportunity
+## Step 6 — Create an Opportunity
 
 Globex Health's potential purchase is an `Opportunity`. It has exactly one primary buying Account: Globex Health.
 
@@ -58,7 +64,7 @@ Globex Health's potential purchase is an `Opportunity`. It has exactly one prima
 
 **Later:** source ingestion and stage-history transformations will populate and maintain these records.
 
-## Step 6 — Add the Buying Committee
+## Step 7 — Add the Buying Committee
 
 Sarah Kim is the champion and John Lee is the economic buyer. `OpportunityPersonRole` connects each Person to the Opportunity and records their role.
 
@@ -68,7 +74,7 @@ This relationship table is necessary because one Opportunity can involve many Pe
 
 **Later:** CRM ingestion and future inference rules will supply the participants and roles.
 
-## Step 7 — Preserve the Commercial Lifecycle
+## Step 8 — Preserve the Commercial Lifecycle
 
 The accepted proposal becomes a `Quote`, then a `Contract`, `Order`, and `Subscription`. Future `Invoice` records represent billing demands.
 
@@ -78,7 +84,7 @@ These are separate entities because a company can sign several contracts, place 
 
 **Later:** P5 will implement quote-to-cash workflows. Project 1 only provides the shared identity foundation.
 
-## Step 8 — Keep History Instead of Overwriting It
+## Step 9 — Keep History Instead of Overwriting It
 
 Suppose Globex Health rebrands to **Helio Health** and changes its primary domain. RevenueOS keeps the same Account ID while adding effective-dated rows to `AccountNameHistory` and `AccountDomainHistory`.
 
@@ -97,3 +103,4 @@ If an identity mapping is wrong, the prior crosswalk row remains in history and 
 5. Check [project state](../projects/01-data-foundation/PROJECT_STATE.md) before assuming a feature is implemented.
 6. Read the [P1.2 identity-control guide](../projects/01-data-foundation/architecture/IDENTITY_CONTROL.md) for the executable workflow.
 7. Run the [P1.3 source-model guide](../projects/01-data-foundation/architecture/SOURCE_MODEL.md) for raw history, replay, failure, and tombstone behavior.
+8. Run the [P1.4 field-authority guide](../projects/01-data-foundation/architecture/FIELD_AUTHORITY.md) for ownership, conflict, review, and write-back policy.
