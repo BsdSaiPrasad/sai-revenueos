@@ -387,3 +387,9 @@ GitHub Actions run [38320413720](https://github.com/BsdSaiPrasad/sai-revenueos/a
 - P1.6 is complete. P1 is now 43.75% complete (7 of 16 milestones), and overall RevenueOS completion is 6.25%.
 - P1.2–P1.6 contracts, the 23 canonical entities, 31 relationships, and 36 approved decisions remain unchanged in meaning.
 - P1.7 was not started. No **MASTER ARCHITECTURE DECISION NEEDED** change was required.
+
+### Git commit and CI
+
+Acceptance commit: `8e1c4f8` (`docs: complete P1.6 acceptance`). Authored and committed as `BsdSaiPrasad <bsdsaiprasad1@gmail.com>` with no co-author attribution.
+
+GitHub Actions run [38321426966](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38321426966) passed the complete workflow on Python 3.9 and 3.14, including all 90 tests, architecture validation, four demonstrations, and 25-company file generation.

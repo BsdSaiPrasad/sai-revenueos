@@ -45,6 +45,8 @@ The P1.6 Salesforce idempotency repair passed the complete Python 3.9 and 3.14 G
 
 Authenticated acceptance also passed on 2026-10-12. Salesforce preserved the marked Account's raw versions, captured its phone update, replayed repeated initial and overlap polls without row growth, and kept its checkpoint stable on unchanged data. HubSpot preserved three marked Company versions, changed the name from `[SAI TEST] Globex Health` to `[SAI TEST] Globex Health - Incremental Update`, processed that incremental event once, and advanced the Company checkpoint to `2026-10-12T23:14:40.388000Z`. Both source identities remain unresolved with no active canonical crosswalk.
 
+The final P1.6 acceptance status commit passed the complete Python 3.9 and 3.14 GitHub Actions matrix: [Actions run 38321426966](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38321426966).
+
 ### Verified preset counts with seed 42
 
 | Companies | People | Opportunities | Activities | Source events |
