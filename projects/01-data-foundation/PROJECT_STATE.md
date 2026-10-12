@@ -2,7 +2,7 @@
 
 **As of:** 2026-10-12
 
-**Current phase:** P1.5 complete and locally verified; P1.6 has not started
+**Current phase:** P1.5 complete and verified; P1.6 has not started
 
 **Completed phases:** P1.0 Engineering Foundation; P1.1 Canonical Business Model and Entity Relationship Diagram (ERD); P1.2 Canonical ID and Crosswalk Control; P1.3 Salesforce + HubSpot Source Model; P1.4 Source of Truth and Write Authority; P1.5 Synthetic GTM Data Generation
 
@@ -32,7 +32,7 @@ On 2026-10-12, all 68 scenarios passed locally: 23 P1.2 identity scenarios, 13 P
 
 Architecture validation passed with 23 canonical entities, 31 relationships, 30 accepted decisions, P1.2–P1.5 artifacts, continuity files, generated-data exclusion, and secret-filename checks. Python compilation, all JSON files, local Markdown links, the three concise demonstrations, both P1.5 command modes, and the 2,500-company scale case passed locally.
 
-The most recent pre-P1.5 GitHub Actions run passed on 2026-10-12: [Actions run 38210214654](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38210214654). The P1.5 run is recorded after its pushed commit completes.
+The P1.5 implementation passed the complete Python 3.9 and 3.14 GitHub Actions matrix on 2026-10-12: [Actions run 38213609446](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38213609446).
 
 ### Verified preset counts with seed 42
 
