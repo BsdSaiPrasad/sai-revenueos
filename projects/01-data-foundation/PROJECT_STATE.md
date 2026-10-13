@@ -55,7 +55,7 @@ Authenticated acceptance also passed on 2026-10-12. Salesforce preserved the mar
 
 The final P1.6 acceptance status commit passed the complete Python 3.9 and 3.14 GitHub Actions matrix: [Actions run 38321426966](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38321426966).
 
-Authenticated P1.7 acceptance passed on 2026-10-12. The loader inserted 39 immutable Salesforce/HubSpot source events into Snowflake RAW, then inserted 0 on immediate replay while recognizing all 39 existing event IDs. dbt built 9 views and passed 63 production data tests with no warnings or errors; documentation and lineage catalog generation succeeded. The real Globex demonstration preserved 3 HubSpot history rows from the original name through `[SAI TEST] Globex Health - Incremental Update`. The isolated missing-name fixture failed as expected and its table was removed. GitHub Actions for the new P1.7 commit is pending.
+Authenticated P1.7 acceptance passed on 2026-10-12. The loader inserted 39 immutable Salesforce/HubSpot source events into Snowflake RAW, then inserted 0 on immediate replay while recognizing all 39 existing event IDs. dbt built 9 views and passed 63 production data tests with no warnings or errors; documentation and lineage catalog generation succeeded. The real Globex demonstration preserved 3 HubSpot history rows from the original name through `[SAI TEST] Globex Health - Incremental Update`. The isolated missing-name fixture failed as expected and its table was removed. [GitHub Actions run 38340822278](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38340822278) passed the Python 3.9 and 3.14 checks plus the credential-free dbt parse job.
 
 ### Verified preset counts with seed 42
 
