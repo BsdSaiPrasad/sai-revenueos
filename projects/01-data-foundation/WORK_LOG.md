@@ -459,3 +459,32 @@ Implementation commit: `e3580ee` (`feat: complete P1.7 Snowflake and dbt staging
 - No automatic merge, automatic crosswalk approval, production user interface, live write-back, or P1.9 model was added.
 - No **MASTER ARCHITECTURE DECISION NEEDED** change was required.
 - P1.8 is complete. P1 is 56.25% complete (9 of 16 milestones), and overall RevenueOS completion is approximately 8.04%.
+
+## 2026-10-13 — P1.9 Canonical Business Models (Complete)
+
+### Implemented
+
+- Added Decisions D045–D047 and a versioned P1.9 contract without changing the 23 canonical entities or 31 relationships.
+- Added atomic, content-addressed publication of complete P1.8 Account/Person mapping snapshots into the existing Snowflake `STAGING` schema.
+- Added 10 dbt models for active mappings, canonical Accounts/People, complete mapped history, conflict evidence, unresolved identities, Person/Account relationship inputs, and Opportunity inputs.
+- Reused P1.4 Salesforce lifecycle authority and deliberately left unowned Account names/domains and CRM Person fields as evidence.
+- Kept Opportunities and relationship inputs explicit without inventing unsupported canonical IDs.
+- Added 8 Python scenarios, dbt generic/singular tests, and a 14-line authenticated Globex demonstration with exact read-only SQL in verbose mode.
+
+### Verification
+
+- `python3 -m unittest discover -s projects/01-data-foundation/tests -v` — **passed**, 125/125 scenarios.
+- Architecture validation — **passed**: 23 entities, 31 relationships, 47 decisions, and P1.2–P1.9 artifacts.
+- Credential-free dbt parse and static validation — **passed**: 20 models, 130 declared data tests, and 3 sources.
+- First real identity publication — **inserted** 1 complete snapshot containing 2 Globex mappings; exact replay inserted none.
+- Authenticated Snowflake/dbt build — **passed**: 20 views and 127 production data tests; `PASS=147`, `WARN=0`, `ERROR=0`.
+- `dbt docs generate` — **passed** and regenerated documentation and lineage metadata for all P1.9 models.
+- Real Globex queries — **passed**: 2 source IDs resolved to 1 stable canonical Account, 12 historical events remained queryable, and unrelated records remained unresolved.
+- No current authoritative Salesforce lifecycle value existed, so P1.9 correctly left the field unpromoted rather than using HubSpot or arrival order.
+
+### Boundaries and status
+
+- The acceptance mapping lives in an ignored isolated P1.9 identity store; the original P1.6 database and both CRM accounts were unchanged.
+- No automatic merge, new field owner, fabricated Opportunity/relationship ID, write-back, P1.10 capability, or downstream workflow was added.
+- No **MASTER ARCHITECTURE DECISION NEEDED** change was required.
+- P1.9 is complete. P1 is 62.5% complete (10 of 16 milestones), and overall RevenueOS completion is approximately 8.93%.

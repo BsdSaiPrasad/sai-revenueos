@@ -3,7 +3,7 @@
 
 This script checks the shared JavaScript Object Notation (JSON) contract, canonical
 Entity Relationship Diagram (ERD), Architecture Decision Records (ADRs), required
-P1.2 through P1.8 artifacts, schema enforcement names, continuity documents, and
+P1.2 through P1.9 artifacts, schema enforcement names, continuity documents, and
 secret-like filenames. It validates repository consistency; it does not execute
 runtime tests or claim that a production service is deployed.
 """
@@ -66,7 +66,14 @@ RESOLUTION_PACKAGE_DIR = PROJECT_DIR / "src/sai_revenueos_resolution"
 RESOLUTION_TEST_PATH = PROJECT_DIR / "tests/test_identity_resolution.py"
 RESOLUTION_DEMO_PATH = PROJECT_DIR / "scripts/demo_identity_resolution.py"
 RESOLUTION_SNOWFLAKE_PATH = PROJECT_DIR / "scripts/verify_identity_resolution_snowflake.py"
-DECISION_COUNT = 44
+CANONICAL_POLICY_PATH = PROJECT_DIR / "contracts/canonical-warehouse-models.v1.json"
+CANONICAL_PACKAGE_DIR = PROJECT_DIR / "src/sai_revenueos_canonical"
+CANONICAL_TEST_PATH = PROJECT_DIR / "tests/test_canonical_models.py"
+CANONICAL_DEMO_PATH = PROJECT_DIR / "scripts/demo_canonical_models.py"
+CANONICAL_PREPARE_PATH = PROJECT_DIR / "scripts/prepare_p19_globex_approval.py"
+CANONICAL_PUBLISH_PATH = PROJECT_DIR / "scripts/publish_identity_mappings_to_snowflake.py"
+CANONICAL_DBT_DIR = WAREHOUSE_DBT_DIR / "models/canonical"
+DECISION_COUNT = 47
 
 REQUIRED_ENTITIES = {
     "Account",
@@ -649,6 +656,68 @@ def validate_p18_reference(errors: list[str]) -> None:
         fail(errors, "P1.8 is not connected to both P1.7 identity staging views")
 
 
+def validate_p19_reference(errors: list[str]) -> None:
+    """Check approved identity, governed values, history, and dbt publication."""
+    required = (
+        CANONICAL_POLICY_PATH,
+        CANONICAL_PACKAGE_DIR / "__init__.py",
+        CANONICAL_PACKAGE_DIR / "publisher.py",
+        CANONICAL_TEST_PATH,
+        CANONICAL_DEMO_PATH,
+        CANONICAL_PREPARE_PATH,
+        CANONICAL_PUBLISH_PATH,
+        CANONICAL_DBT_DIR / "canonical.yml",
+    )
+    expected_models = {
+        "int_active_identity_mappings.sql",
+        "canonical_identity_crosswalks.sql",
+        "canonical_accounts.sql",
+        "canonical_people.sql",
+        "canonical_account_source_history.sql",
+        "canonical_person_source_history.sql",
+        "canonical_field_conflict_evidence.sql",
+        "unresolved_identity_records.sql",
+        "resolved_person_account_relationship_inputs.sql",
+        "canonical_opportunity_inputs.sql",
+    }
+    missing = [str(path.relative_to(REPO_ROOT)) for path in required if not path.is_file()]
+    found_models = {path.name for path in CANONICAL_DBT_DIR.glob("*.sql")}
+    missing_models = sorted(expected_models - found_models)
+    if missing or missing_models:
+        fail(errors, "missing P1.9 artifacts: %s" % ", ".join(missing + missing_models))
+        return
+    try:
+        policy = json.loads(CANONICAL_POLICY_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        fail(errors, f"P1.9 canonical contract cannot be loaded: {exc}")
+        return
+    if policy.get("contract_version") != "1.0.0":
+        fail(errors, "P1.9 canonical contract must declare version 1.0.0")
+    identity = policy.get("identity_input", {})
+    if identity.get("accepted_mapping_status") != "active" or identity.get("automatic_merge"):
+        fail(errors, "P1.9 must consume active approved mappings without automatic merge")
+    if set(identity.get("approved_entity_types", [])) != {"Account", "Person"}:
+        fail(errors, "P1.9 canonical identity scope must remain Account and Person")
+    authority = policy.get("authority_input", {})
+    if authority.get("invent_unowned_field_authority") is not False:
+        fail(errors, "P1.9 cannot invent field owners outside P1.4")
+    history = policy.get("history_policy", {})
+    for rule in ("preserve_all_staged_versions", "preserve_deletions", "preserve_late_arrivals"):
+        if history.get(rule) is not True:
+            fail(errors, f"P1.9 history policy must keep {rule}")
+    boundaries = policy.get("downstream_boundary", {})
+    if boundaries.get("p1_10_implemented") or boundaries.get("live_write_back"):
+        fail(errors, "P1.9 cannot implement P1.10 or live write-back")
+    account_sql = (CANONICAL_DBT_DIR / "canonical_accounts.sql").read_text(encoding="utf-8")
+    if "source_system = 'salesforce'" not in account_sql:
+        fail(errors, "P1.9 Account lifecycle must reuse Salesforce P1.4 authority")
+    if "cast(null as varchar) as governed_account_name" not in account_sql:
+        fail(errors, "P1.9 cannot promote an unowned Account name")
+    opportunity_sql = (CANONICAL_DBT_DIR / "canonical_opportunity_inputs.sql").read_text(encoding="utf-8")
+    if "cast(null as varchar) as opportunity_id" not in opportunity_sql:
+        fail(errors, "P1.9 cannot invent canonical Opportunity IDs")
+
+
 def validate_no_tracked_secrets(errors: list[str]) -> None:
     """Flag secret-like filenames among tracked and candidate repository files."""
     try:
@@ -686,6 +755,7 @@ def main() -> int:
     validate_p16_reference(errors)
     validate_p17_reference(errors)
     validate_p18_reference(errors)
+    validate_p19_reference(errors)
     validate_no_tracked_secrets(errors)
 
     if errors:
@@ -699,7 +769,7 @@ def main() -> int:
     print(
         "P1 architecture validation PASSED: "
         f"{entity_count} entities, {relationship_count} relationships, "
-        f"{DECISION_COUNT} decisions, ERD coverage, P1.2–P1.8 reference artifacts, "
+        f"{DECISION_COUNT} decisions, ERD coverage, P1.2–P1.9 reference artifacts, "
         "continuity files, and secret filename checks."
     )
     return 0

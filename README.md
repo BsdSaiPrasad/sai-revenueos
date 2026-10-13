@@ -1,13 +1,13 @@
 # SAI RevenueOS
 
-[![Project status: P1.0 through P1.8 complete](https://img.shields.io/badge/status-P1.0%E2%80%93P1.8%20complete-2f855a)](projects/01-data-foundation/PROJECT_STATE.md)
+[![Project status: P1.0 through P1.9 complete](https://img.shields.io/badge/status-P1.0%E2%80%93P1.9%20complete-2f855a)](projects/01-data-foundation/PROJECT_STATE.md)
 [![CI](https://github.com/BsdSaiPrasad/sai-revenueos/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BsdSaiPrasad/sai-revenueos/actions/workflows/ci.yml)
 
 ## What Is SAI RevenueOS?
 
 SAI RevenueOS is a learning and portfolio project that models how an enterprise business can connect its Go-To-Market (GTM) systems. It creates a consistent view of companies, people, sales opportunities, contracts, subscriptions, and customer activity across disconnected tools. The platform is designed around realistic Business-to-Business Software-as-a-Service (B2B SaaS) scenarios, but every company, person, and data example is synthetic.
 
-The repository contains the completed architecture foundation plus tested references for P1.2 identity control, P1.3 Salesforce/HubSpot source history, P1.4 field authority, P1.5 deterministic synthetic data, P1.6 live ingestion, P1.7 Snowflake/dbt staging, and P1.8 governed identity resolution. This is not a deployed production platform.
+The repository contains the completed architecture foundation plus tested references through P1.9: identity control, source history, field authority, synthetic data, live ingestion, Snowflake/dbt staging, governed identity resolution, and canonical business models. This is not a deployed production platform.
 
 ## What Business Problem Are We Solving?
 
@@ -40,7 +40,7 @@ Start with the [beginner walkthrough](docs/START_HERE.md). Use the [glossary](do
 
 | Project | Purpose | Status |
 |---|---|---|
-| **P1 — Data Foundation & Customer Identity** | Build shared identities, source mappings, historical relationships, normalized staging, and governed resolution. | P1.0–P1.8 complete |
+| **P1 — Data Foundation & Customer Identity** | Build shared identities, source mappings, history, governed resolution, and canonical warehouse models. | P1.0–P1.9 complete |
 | **P2 — Inbound** | Connect future marketing demand, scoring, and routing processes. | Planned |
 | **P3 — Outbound** | Support future prospecting and outbound engagement workflows. | Planned |
 | **P4 — Revenue Intelligence** | Support future pipeline, forecasting, and revenue analysis. | Planned |
@@ -61,11 +61,12 @@ Start with the [beginner walkthrough](docs/START_HERE.md). Use the [glossary](do
 - P1.6 — Salesforce and HubSpot connectors, safe authentication, raw-first initial and incremental polling, retries, replay, checkpoints, mocked recovery tests, and authenticated acceptance verification.
 - P1.7 — Real Snowflake RAW loading, dbt Core staging, quality tests, lineage, cost safeguards, replay verification, and an isolated failure demonstration.
 - P1.8 — Deterministic Account/Person matching, explainable evidence, mandatory human approval, authority-first survivorship, stale-review protection, and an active-mapping output contract for P1.9.
+- P1.9 — Versioned canonical Account/Person dbt models, approved crosswalk publication, governed values, history, unresolved records, relationship inputs, and Opportunity integration.
 - Repository readability and learning-documentation improvement.
 
 **Planned next**
 
-- Define and approve P1.9 canonical-model scope before implementation.
+- Define and approve P1.10 scope before implementation.
 
 See the authoritative [progress tracker](PROGRESS.md) and [P1 project state](projects/01-data-foundation/PROJECT_STATE.md) for exact status and limitations.
 
@@ -84,13 +85,13 @@ See the authoritative [progress tracker](PROGRESS.md) and [P1 project state](pro
     ├── PROJECT_STATE.md           # Current, authoritative status
     ├── DECISIONS.md               # Approved decision index
     ├── WORK_LOG.md                # Chronological evidence log
-    ├── contracts/                 # P1.3–P1.8 versioned contracts and policy
+    ├── contracts/                 # P1.3–P1.9 versioned contracts and policy
     ├── examples/                  # Synthetic P1.3/P1.4 inputs
     ├── architecture/              # Model, ERD, and ADRs
     ├── scripts/                   # Validation and runnable demonstration
-    ├── src/                       # P1.2–P1.8 Python + SQLite references
-    ├── tests/                     # P1.2–P1.8 executable acceptance scenarios
-    └── warehouse/                 # P1.7/P1.8 Snowflake and dbt models
+    ├── src/                       # P1.2–P1.9 Python + SQLite references
+    ├── tests/                     # P1.2–P1.9 executable acceptance scenarios
+    └── warehouse/                 # P1.7–P1.9 Snowflake and dbt models
 ```
 
 Future project folders are intentionally absent until they contain real work.
@@ -108,8 +109,9 @@ Future project folders are intentionally absent until they contain real work.
 9. [P1.6 Live Ingestion](projects/01-data-foundation/architecture/LIVE_INGESTION.md) — understand connector behavior and securely run real-account verification.
 10. [P1.7 Snowflake + dbt](projects/01-data-foundation/architecture/SNOWFLAKE_DBT.md) — prepare and verify RAW loading, staging, tests, and lineage.
 11. [P1.8 Identity Resolution](projects/01-data-foundation/architecture/IDENTITY_RESOLUTION.md) — follow staged records through matching, review, crosswalk activation, and survivorship.
-12. [Project State](projects/01-data-foundation/PROJECT_STATE.md) — confirm what is actually working and what remains unverified.
-13. [Progress](PROGRESS.md) — see the milestone-based completion calculation.
+12. [P1.9 Canonical Models](projects/01-data-foundation/architecture/SNOWFLAKE_DBT.md#p19-canonical-business-models) — inspect approved identity publication and downstream dbt models.
+13. [Project State](projects/01-data-foundation/PROJECT_STATE.md) — confirm what is actually working and what remains unverified.
+14. [Progress](PROGRESS.md) — see the milestone-based completion calculation.
 
 ## How to Verify the Current Implementation
 
@@ -126,13 +128,14 @@ python3 projects/01-data-foundation/scripts/demo_live_ingestion.py
 python3 projects/01-data-foundation/scripts/demo_identity_resolution.py
 ```
 
-These commands check the unchanged 23 entities and 31 relationships, 44 approved decisions, required reference artifacts, 117 P1.2–P1.8 scenarios, the dbt structure, and all five credential-free Globex demonstrations. Authenticated P1.7/P1.8 evidence is documented separately because CI receives no Snowflake credentials. Add `--verbose` to a demonstration command for complete technical evidence.
+These commands check the unchanged 23 entities and 31 relationships, 47 approved decisions, required reference artifacts, 125 P1.2–P1.9 scenarios, the dbt structure, and all five credential-free Globex demonstrations. Authenticated P1.7–P1.9 evidence is documented separately because CI receives no Snowflake credentials. Add `--verbose` to a demonstration command for complete technical evidence.
 
 ## Important Limitations
 
-- The P1.2–P1.8 runtimes are reference implementations, not deployed services or a production data platform.
+- The P1.2–P1.9 runtimes are reference implementations, not deployed services or a production data platform.
 - Live connector acceptance is verified only for the controlled marked records in the two local test accounts. There is no scheduler, webhook receiver, write-back delivery, production-scale matcher, review user interface, reverse Extract-Transform-Load (ETL), or workflow service.
 - P1.7 is manually operated and learning-scale; it is not a scheduled production warehouse pipeline.
+- P1.9 publishes Account and Person identities only. Opportunities and relationship inputs do not receive invented canonical IDs.
 - The shared JSON contract describes intended meaning and relationships; it does not prove that source data has been loaded.
 - P2–P7 are planned boundaries, not implemented capabilities.
 

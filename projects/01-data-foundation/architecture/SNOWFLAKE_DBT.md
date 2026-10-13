@@ -160,7 +160,7 @@ GitHub Actions runs these checks with dummy identifiers and never contacts Snowf
 - Relationship tests warn for references outside a partial source extract; production completeness rules remain future work.
 - Resource monitors control assigned warehouse compute, not every possible Snowflake charge. P1.7 does not enable serverless features.
 - The 30-day service tokens and current-address network restriction require manual rotation or update when they expire or the authorized network changes.
-- P1.8 is complete and consumes the shared company and people views. P1.9 canonical models have not started.
+- P1.8 consumes the shared company and people views. P1.9 canonical models are complete; P1.10 has not started.
 
 ## Authenticated Acceptance Evidence
 
@@ -177,3 +177,51 @@ On 2026-10-12:
 ## P1.8 Extension Evidence
 
 On 2026-10-13, P1.8 added the shared people view without changing the accepted P1.7 RAW or source-specific models. The restricted dbt role built 10 views and passed 68 production data tests (`PASS=78`, including model builds). The read-only P1.8 verifier then read actual company staging rows and completed the Globex review flow using only a temporary local identity-database copy.
+
+## P1.9 Canonical Business Models
+
+P1.9 publishes complete snapshots of active P1.8 Account/Person mappings into the existing `STAGING` schema. dbt then builds source-neutral canonical identities, mapped history, conflict evidence, unresolved records, relationship inputs, and Opportunity inputs. It does not generate unsupported canonical IDs.
+
+Prepare the isolated fictional acceptance identity store. This reuses the real staged Globex rows but never changes the original P1.6 identity database:
+
+```bash
+.venv/bin/python projects/01-data-foundation/scripts/prepare_p19_globex_approval.py
+```
+
+Publish the approved mapping snapshot twice to prove replay safety, then build all production models and tests:
+
+```bash
+.venv/bin/python projects/01-data-foundation/scripts/publish_identity_mappings_to_snowflake.py
+.venv/bin/python projects/01-data-foundation/scripts/publish_identity_mappings_to_snowflake.py
+.venv/bin/python projects/01-data-foundation/scripts/run_snowflake_dbt.py build --exclude tag:failure_demo
+```
+
+Run the 14-line authenticated demonstration. Add `--verbose` for complete rows and executable read-only SQL:
+
+```bash
+.venv/bin/python projects/01-data-foundation/scripts/demo_canonical_models.py
+```
+
+Read the approved Globex source links and canonical Account yourself:
+
+```sql
+SELECT SOURCE_SYSTEM, SOURCE_OBJECT_ID, OBSERVED_NAME, OBSERVED_DOMAIN, ACCOUNT_ID
+FROM SAI_REVENUEOS.STAGING.CANONICAL_ACCOUNT_SOURCE_HISTORY
+WHERE IS_LATEST_SOURCE_VERSION = TRUE
+  AND LOWER(OBSERVED_DOMAIN) LIKE '%globex-p16.invalid%'
+ORDER BY SOURCE_SYSTEM;
+
+SELECT *
+FROM SAI_REVENUEOS.STAGING.CANONICAL_ACCOUNTS
+WHERE ACCOUNT_ID IN (
+  SELECT ACCOUNT_ID
+  FROM SAI_REVENUEOS.STAGING.CANONICAL_ACCOUNT_SOURCE_HISTORY
+  WHERE LOWER(OBSERVED_DOMAIN) LIKE '%globex-p16.invalid%'
+);
+
+SELECT SOURCE_SYSTEM, SOURCE_OBJECT_TYPE, SOURCE_OBJECT_ID, IDENTITY_RESOLUTION_STATUS
+FROM SAI_REVENUEOS.STAGING.UNRESOLVED_IDENTITY_RECORDS
+ORDER BY SOURCE_SYSTEM, SOURCE_OBJECT_TYPE, SOURCE_OBJECT_ID;
+```
+
+Authenticated acceptance on 2026-10-13 published 2 approved Globex mappings. The exact replay inserted no second publication. dbt built 20 views and passed 127 production data tests (`PASS=147`, `WARN=0`, `ERROR=0`). The final query returned one canonical Account, 2 current source links, 12 preserved historical events, and separate unresolved source records. No authoritative lifecycle value existed in the current Salesforce fixture, so P1.9 correctly left it unpromoted instead of inventing one.

@@ -21,7 +21,7 @@ flowchart LR
   T --> S[P1 SourceRecords]
   S --> M[P1 explainable matching and review]
   M --> X[External identity crosswalk]
-  X --> C[P1 canonical identities]
+  X --> C[P1 canonical warehouse models]
   C --> A[P1 field authority and review]
   A --> R[Canonical relationships and history]
   R --> K[Versioned shared contracts]
@@ -39,7 +39,7 @@ Example: synthetic company Globex Health can appear in Salesforce and HubSpot. P
 
 | Project | What it owns | Current status |
 |---|---|---|
-| **P1 — Data Foundation & Customer Identity** | Canonical entities, source identity, historical relationships, field authority, provenance, shared data contracts, CRM ingestion, normalized source staging, and governed identity resolution. | P1.0–P1.8 complete |
+| **P1 — Data Foundation & Customer Identity** | Canonical entities, source identity, historical relationships, field authority, provenance, CRM ingestion, governed resolution, and canonical warehouse publication. | P1.0–P1.9 complete |
 | **P2 — Inbound** | Future inbound demand capture, scoring, and routing. | Planned |
 | **P3 — Outbound** | Future prospecting, sequencing, and outbound engagement. | Planned |
 | **P4 — Revenue Intelligence** | Future pipeline, forecasting, and revenue analytics. | Planned |
@@ -49,7 +49,7 @@ Example: synthetic company Globex Health can appear in Salesforce and HubSpot. P
 
 ## What P1 Publishes
 
-P1 owns the shared logical model in `shared/contracts/canonical-model.v1.json` and the versioned source, authority, synthetic-data, ingestion, warehouse-normalization, identity-resolution, and active-mapping contracts under `projects/01-data-foundation/contracts/`. Other projects may map those contracts into warehouse tables, Application Programming Interfaces (APIs), events, or semantic models, but they must not create incompatible definitions inside their own folders.
+P1 owns the shared logical model in `shared/contracts/canonical-model.v1.json` and the versioned source, authority, synthetic-data, ingestion, warehouse-normalization, identity-resolution, active-mapping, and canonical-warehouse contracts under `projects/01-data-foundation/contracts/`. Other projects may map those contracts into warehouse tables, Application Programming Interfaces (APIs), events, or semantic models, but they must not create incompatible definitions inside their own folders.
 
 A breaking change—such as changing what an Account ID means—requires a new major contract version and a review of every downstream project. If work reveals a cross-project change, label it **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
 
@@ -79,6 +79,9 @@ A breaking change—such as changing what an Account ID means—requires a new m
 22. Every new authoritative crosswalk requires an authorized human identity steward; matching never auto-merges identities.
 23. Survivorship uses P1.4 field authority and preserves losing values, provenance, conflicts, and history.
 24. Review decisions are version-locked so stale evidence cannot overwrite a newer resolution case.
+25. Canonical warehouse identities come only from the latest complete P1.8 approved-mapping publication.
+26. P1.9 promotes a field only when P1.4 already defines its authority; unowned values remain source evidence.
+27. Unsupported Opportunity and relationship identities remain explicit inputs rather than receiving invented canonical IDs.
 
 The reasoning is recorded in the [P1 decision index](../projects/01-data-foundation/DECISIONS.md).
 
@@ -94,4 +97,4 @@ Repository validation catches structural drift, but future physical systems will
 
 ## What Comes Next?
 
-P1.6 live ingestion, P1.7 Snowflake/dbt staging, and P1.8 governed identity resolution have passed their authenticated or end-to-end acceptance checks. P1.9 has not started; P2–P7 stay planned until their own work begins.
+P1.6 live ingestion, P1.7 staging, P1.8 resolution, and P1.9 canonical Snowflake/dbt publication have passed their authenticated or end-to-end acceptance checks. P1.10 has not started; P2–P7 stay planned until their own work begins.

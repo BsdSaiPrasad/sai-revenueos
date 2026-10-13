@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/BsdSaiPrasad/sai-revenueos/identity-resolution-output.v1.json",
   "title": "SAI RevenueOS Approved Identity Mapping v1",
-  "description": "Stable P1.8 output boundary for future P1.9 canonical models. Only active, human-approved P1.2 crosswalks qualify.",
+  "description": "Stable P1.8 output boundary consumed by P1.9 canonical models. Only active, human-approved P1.2 crosswalks qualify.",
   "type": "object",
   "additionalProperties": false,
   "required": [

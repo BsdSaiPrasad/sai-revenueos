@@ -43,3 +43,45 @@ sources:
             data_tests: [not_null]
           - name: envelope_sha256
             data_tests: [not_null]
+
+  - name: p18_identity
+    description: Complete publications of active, human-approved P1.8 Account and Person mappings.
+    database: "{{ env_var('SNOWFLAKE_DATABASE', 'SAI_REVENUEOS') }}"
+    schema: "{{ env_var('SNOWFLAKE_STAGING_SCHEMA', 'STAGING') }}"
+    tables:
+      - name: p18_identity_mapping_publication
+        description: One immutable publication header for one complete active-mapping set.
+        columns:
+          - name: publication_id
+            data_tests: [unique, not_null]
+          - name: mapping_set_sha256
+            data_tests: [unique, not_null]
+          - name: mapping_count
+            data_tests: [not_null]
+      - name: p18_approved_identity_mapping
+        description: Active P1.8 crosswalk rows belonging to a complete publication.
+        columns:
+          - name: publication_id
+            data_tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    to: source('p18_identity', 'p18_identity_mapping_publication')
+                    field: publication_id
+          - name: external_identity_crosswalk_id
+            data_tests: [not_null]
+          - name: source_record_id
+            data_tests: [not_null]
+          - name: canonical_entity_id
+            data_tests: [not_null]
+          - name: canonical_entity_type
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [Account, Person]
+          - name: mapping_status
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: [active]

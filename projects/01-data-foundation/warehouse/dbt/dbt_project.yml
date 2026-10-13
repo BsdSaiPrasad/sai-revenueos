@@ -21,6 +21,9 @@ models:
     staging:
       +materialized: view
       +tags: ["p17", "staging"]
+    canonical:
+      +materialized: view
+      +tags: ["p19", "canonical"]
 
 seeds:
   sai_revenueos_p17:

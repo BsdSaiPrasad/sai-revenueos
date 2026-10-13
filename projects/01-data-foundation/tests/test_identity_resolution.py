@@ -171,7 +171,7 @@ class IdentityResolutionTests(unittest.TestCase):
         self.assertIsNone(self.identity.active_mapping_for_source(hubspot.source_record_id))
 
     def test_03_approval_activates_crosswalk_and_publishes_p19_boundary(self) -> None:
-        """Only steward approval creates the active mapping exported for future P1.9."""
+        """Only steward approval creates the active mapping exported to P1.9."""
         _, hubspot, account_id = self.globex_pair()
         result = self.service.resolve(hubspot, self.records)
         review = self.resolution.get_review(result.review_id)

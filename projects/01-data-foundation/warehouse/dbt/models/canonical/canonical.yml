@@ -1,0 +1,145 @@
+version: 2
+
+models:
+  - name: int_active_identity_mappings
+    description: Active Account and Person mappings from the latest complete P1.8 publication.
+    columns:
+      - name: external_identity_crosswalk_id
+        data_tests: [unique, not_null]
+      - name: source_record_id
+        data_tests: [unique, not_null]
+      - name: canonical_entity_id
+        data_tests: [not_null]
+      - name: mapping_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [active]
+
+  - name: canonical_identity_crosswalks
+    description: Downstream-facing approved source-to-canonical identity bridge.
+    columns:
+      - name: external_identity_crosswalk_id
+        data_tests: [unique, not_null]
+      - name: source_record_id
+        data_tests: [unique, not_null]
+      - name: canonical_entity_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [Account, Person]
+
+  - name: canonical_accounts
+    description: One row per approved Account identity with P1.4-governed fields only.
+    columns:
+      - name: account_id
+        data_tests: [unique, not_null]
+      - name: account_type
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [organization]
+
+  - name: canonical_people
+    description: One row per approved Person identity; unowned CRM names and emails remain evidence.
+    columns:
+      - name: person_id
+        data_tests: [unique, not_null]
+      - name: identity_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [active]
+
+  - name: canonical_account_source_history
+    description: Complete staged company history connected to approved Accounts.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: account_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('canonical_accounts')
+                field: account_id
+
+  - name: canonical_person_source_history
+    description: Complete staged person history connected to approved Persons.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: person_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('canonical_people')
+                field: person_id
+
+  - name: canonical_field_conflict_evidence
+    description: Non-authoritative values that disagree with an available P1.4-authoritative value.
+    columns:
+      - name: conflict_evidence_id
+        data_tests: [unique, not_null]
+      - name: canonical_entity_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('canonical_accounts')
+                field: account_id
+      - name: review_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [open_evidence]
+
+  - name: unresolved_identity_records
+    description: Latest source records not present in the approved P1.8 mapping publication.
+    columns:
+      - name: source_record_id
+        data_tests: [unique, not_null]
+      - name: identity_resolution_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [unresolved]
+
+  - name: resolved_person_account_relationship_inputs
+    description: Employment evidence where both Person and Account identities are approved.
+    columns:
+      - name: person_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('canonical_people')
+                field: person_id
+      - name: account_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('canonical_accounts')
+                field: account_id
+      - name: relationship_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [resolved_input]
+
+  - name: canonical_opportunity_inputs
+    description: Source-neutral opportunity evidence; canonical Opportunity IDs stay NULL until approved.
+    columns:
+      - name: opportunity_source_record_id
+        data_tests: [unique, not_null]
+      - name: opportunity_resolution_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [unresolved_opportunity]
+      - name: primary_account_resolution_status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [resolved, unresolved]

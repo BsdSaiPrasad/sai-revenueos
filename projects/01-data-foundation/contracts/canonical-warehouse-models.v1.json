@@ -1,0 +1,51 @@
+{
+  "contract_name": "canonical-warehouse-models",
+  "contract_version": "1.0.0",
+  "description": "P1.9 Snowflake/dbt publication contract for trusted Account and Person identities, governed values, relationships, opportunity inputs, history, and unresolved evidence.",
+  "identity_input": {
+    "contract": "identity-resolution-output.v1.json",
+    "accepted_mapping_status": "active",
+    "approved_entity_types": ["Account", "Person"],
+    "automatic_merge": false
+  },
+  "authority_input": {
+    "contract": "field-authority-policy.v1.json",
+    "invent_unowned_field_authority": false,
+    "implemented_fields": [
+      {
+        "entity_type": "Account",
+        "field_name": "lifecycle_status",
+        "authoritative_sources": ["salesforce"]
+      },
+      {
+        "entity_type": "Person",
+        "field_name": "display_name",
+        "authoritative_sources": ["clay", "apollo"],
+        "current_crm_value_status": "evidence_only"
+      }
+    ]
+  },
+  "published_models": {
+    "canonical_identity_crosswalks": "Current approved source-to-canonical mappings from the latest complete P1.8 publication.",
+    "canonical_accounts": "One row per approved Account identity with only governed canonical values promoted.",
+    "canonical_people": "One row per approved Person identity with unowned CRM values left as evidence.",
+    "canonical_account_source_history": "Every staged company version connected to an approved Account mapping.",
+    "canonical_person_source_history": "Every staged person version connected to an approved Person mapping.",
+    "canonical_field_conflict_evidence": "Preserved non-authoritative lifecycle disagreements for P1.4 review.",
+    "unresolved_identity_records": "Latest Account and Person source rows without an approved mapping.",
+    "resolved_person_account_relationship_inputs": "Person-to-Account relationship evidence only when both identities are approved.",
+    "canonical_opportunity_inputs": "Source-neutral Opportunity/Deal inputs with an approved primary Account link where available."
+  },
+  "history_policy": {
+    "preserve_all_staged_versions": true,
+    "preserve_deletions": true,
+    "preserve_late_arrivals": true,
+    "current_models_use_latest_source_version": true
+  },
+  "downstream_boundary": {
+    "projects": ["P2", "P3", "P4", "P5", "P6", "P7"],
+    "source_specific_knowledge_required": false,
+    "p1_10_implemented": false,
+    "live_write_back": false
+  }
+}

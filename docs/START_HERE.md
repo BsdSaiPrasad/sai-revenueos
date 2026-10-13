@@ -6,7 +6,7 @@ This walkthrough explains Project 1 through one continuous, synthetic example. N
 
 **Globex Health** appears in both Salesforce and HubSpot. **Sarah Kim** and **John Lee** work there. The company is evaluating a fictional analytics product, signs a contract, and starts a subscription.
 
-The architecture and completed milestones are verified through P1.8. The live connectors passed mocked and authenticated acceptance for marked fictional CRM records; Snowflake/dbt passed authenticated RAW loading and staging checks; and P1.8 passed matching, manual-review, survivorship, replay, and stale-review checks. Write-back execution remains later work.
+The architecture and completed milestones are verified through P1.9. Live CRM ingestion, Snowflake/dbt staging, governed matching, manual review, and canonical warehouse publication have passed their relevant authenticated and automated checks. Write-back execution remains later work.
 
 ## Step 1 — Preserve the Source Records
 
@@ -118,7 +118,13 @@ P1.7 copies the same immutable source events into Snowflake RAW. dbt Core extrac
 
 P1.8 reads the latest Account and Person rows from P1.7 staging. It produces deterministic feature evidence, such as an exact Globex domain, then opens a review instead of activating the proposed crosswalk.
 
-**Implemented and verified:** Sarah Kim acting as an authorized identity steward can approve the proposed mapping; retries are idempotent, stale work cannot overwrite newer evidence, and the active mapping can be consumed by future P1.9 models. Governed field values still pass through P1.4, so conflicting values and their provenance remain available.
+**Implemented and verified:** Sarah Kim acting as an authorized identity steward can approve the proposed mapping; retries are idempotent, stale work cannot overwrite newer evidence, and P1.9 consumes the active mapping. Governed field values still pass through P1.4, so conflicting values and their provenance remain available.
+
+## Step 14 — Publish the Canonical Account
+
+P1.9 publishes only active P1.8 Account and Person mappings. The Salesforce and HubSpot Globex records now point to one canonical Account in Snowflake, while unmapped companies remain in a separate unresolved model.
+
+**Implemented and authenticated:** complete mapping snapshots, one stable Globex Account, mapped source history, P1.4 lifecycle authority, conflict evidence, unresolved records, Person/Account relationship inputs, and source-neutral Opportunity inputs. Names and domains remain evidence because no P1.4 owner has been approved for them; P1.9 does not invent one.
 
 ## Where to Go Next
 
@@ -134,3 +140,4 @@ P1.8 reads the latest Account and Person rows from P1.7 staging. It produces det
 10. Follow the [P1.6 live-ingestion guide](../projects/01-data-foundation/architecture/LIVE_INGESTION.md) for the mocked demo and secure real-account verification.
 11. Follow the [P1.7 Snowflake + dbt guide](../projects/01-data-foundation/architecture/SNOWFLAKE_DBT.md) for RAW loading, staging, data tests, and lineage.
 12. Run the [P1.8 identity-resolution guide](../projects/01-data-foundation/architecture/IDENTITY_RESOLUTION.md) for matching, review, approval, survivorship, and the P1.9 output boundary.
+13. Follow the [P1.9 canonical-model section](../projects/01-data-foundation/architecture/SNOWFLAKE_DBT.md#p19-canonical-business-models) to publish mappings, build the models, and run the real Globex demonstration.

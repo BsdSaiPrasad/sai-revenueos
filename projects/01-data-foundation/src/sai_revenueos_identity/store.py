@@ -942,8 +942,8 @@ class IdentityStore:
     def list_active_mappings(self, entity_types: Optional[Iterable[str]] = None) -> List[Dict[str, Any]]:
         """Return current approved crosswalks through a stable read boundary.
 
-        P1.8 uses this read-only output to publish mappings for future P1.9
-        canonical models. Candidate scores and unresolved reviews are excluded.
+        P1.8 uses this read-only output to publish mappings to P1.9 canonical
+        models. Candidate scores and unresolved reviews are excluded.
         """
         values = tuple(sorted(set(entity_types or CANONICAL_TARGET_TYPES)))
         if not values or any(value not in CANONICAL_TARGET_TYPES for value in values):

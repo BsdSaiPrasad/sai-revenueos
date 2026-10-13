@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate P1.7 staging and its P1.8 identity-input view without credentials."""
+"""Validate P1.7 staging plus P1.8/P1.9 dbt boundaries without credentials."""
 
 from __future__ import annotations
 
@@ -31,6 +31,10 @@ def main() -> int:
         PROJECT / "scripts/load_source_events_to_snowflake.py",
         PROJECT / "scripts/demo_snowflake_dbt.py",
         PROJECT / "scripts/demo_dbt_failure.py",
+        PROJECT / "scripts/publish_identity_mappings_to_snowflake.py",
+        PROJECT / "scripts/demo_canonical_models.py",
+        PROJECT / "contracts/canonical-warehouse-models.v1.json",
+        DBT / "models/canonical/canonical.yml",
     ]
     object_models = {
         "salesforce": ("accounts", "leads", "contacts", "opportunities"),
@@ -39,6 +43,15 @@ def main() -> int:
     for system, objects in object_models.items():
         for object_name in objects:
             required.append(DBT / "models/staging" / system / ("stg_%s_%s.sql" % (system, object_name)))
+    canonical_models = {
+        "int_active_identity_mappings", "canonical_identity_crosswalks",
+        "canonical_accounts", "canonical_people", "canonical_account_source_history",
+        "canonical_person_source_history", "canonical_field_conflict_evidence",
+        "unresolved_identity_records", "resolved_person_account_relationship_inputs",
+        "canonical_opportunity_inputs",
+    }
+    for model in canonical_models:
+        required.append(DBT / "models/canonical" / (model + ".sql"))
     for path in required:
         if not path.is_file():
             errors.append("missing %s" % path.relative_to(PROJECT))
@@ -66,6 +79,9 @@ def main() -> int:
         "payload_sha256",
         "envelope_sha256",
         "failure_demo",
+        "p18_approved_identity_mapping",
+        "unresolved_identity_records",
+        "canonical_accounts",
     ):
         if marker.casefold() not in combined.casefold():
             errors.append("P1.7 artifacts are missing %s" % marker)
@@ -85,7 +101,7 @@ def main() -> int:
         for error in errors:
             print("  - %s" % error)
         return 1
-    print("P1.7/P1.8 dbt validation PASSED: Snowflake RAW, 10 staging models, identity inputs, tests, lineage, and failure demo.")
+    print("P1.7–P1.9 dbt validation PASSED: 10 staging and 10 canonical models, approved identity inputs, tests, lineage, and failure demo.")
     return 0
 
 

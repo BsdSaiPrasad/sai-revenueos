@@ -101,8 +101,18 @@ Read the repository-wide [beginner walkthrough](../../docs/START_HERE.md) for th
 - Mandatory identity-steward approval for every new crosswalk; no automatic merge or mapping activation.
 - Version-locked review work that blocks unauthorized decisions and stale-review overwrites.
 - Reuse of P1.2 cases, evidence, mappings, and audit behavior plus P1.4 authority-first survivorship.
-- Versioned active-mapping output for future P1.9 canonical models without implementing P1.9.
+- Versioned active-mapping output consumed by P1.9 while keeping resolution separate from warehouse publication.
 - Thirteen executed resolution scenarios and concise synthetic and authenticated Snowflake demonstrations.
+
+### P1.9 — Canonical Business Models
+
+- Complete, idempotent publication snapshots of active P1.8 Account and Person mappings.
+- Source-neutral canonical Account and Person dbt views using stable P1.2 IDs.
+- P1.4-governed lifecycle selection without inventing ownership for names, domains, or CRM person fields.
+- Complete mapped source history, deletion and late-arrival evidence, conflict evidence, and separate unresolved records.
+- Resolved Person/Account relationship inputs and Opportunity inputs without fabricated canonical IDs.
+- Versioned downstream contract plus generic and singular dbt quality tests.
+- Authenticated acceptance: 2 Globex source mappings, 1 canonical Account, 12 historical events, replay without duplication, and a successful 147-check dbt build.
 
 The [project state](PROJECT_STATE.md) is the authoritative source for current status.
 
@@ -126,8 +136,10 @@ The [project state](PROJECT_STATE.md) is the authoritative source for current st
 | [P1.7 Normalization Policy](contracts/warehouse-normalization-policy.v1.json) | Inspect the versioned RAW, staging, history, test, and completion requirements. |
 | [P1.8 Identity Resolution Guide](architecture/IDENTITY_RESOLUTION.md) | Follow staged Accounts/Persons through matching, review, approval, survivorship, and publication. |
 | [P1.8 Resolution Policy](contracts/identity-resolution-policy.v1.json) | Inspect matching features, thresholds, review rules, survivorship reuse, and boundaries. |
-| [P1.8 Active-Mapping Contract](contracts/identity-resolution-output.v1.json) | Inspect the approved-mapping boundary available to future P1.9 models. |
-| [Decision Index](DECISIONS.md) | See all 44 approved decisions and open their ADRs. |
+| [P1.8 Active-Mapping Contract](contracts/identity-resolution-output.v1.json) | Inspect the approved-mapping boundary consumed by P1.9 models. |
+| [P1.9 Canonical Model Contract](contracts/canonical-warehouse-models.v1.json) | Inspect the approved identity, authority, history, model, and downstream boundaries. |
+| [P1.9 Snowflake/dbt Guide](architecture/SNOWFLAKE_DBT.md#p19-canonical-business-models) | Publish mappings, build canonical views, and run the real Globex demonstration. |
+| [Decision Index](DECISIONS.md) | See all 47 approved decisions and open their ADRs. |
 | [Shared Contract](../../shared/contracts/canonical-model.v1.json) | Inspect the machine-readable technical definition. |
 | [Project State](PROJECT_STATE.md) | Confirm what works, what is deferred, and what comes next. |
 | [Work Log](WORK_LOG.md) | Review chronological implementation and verification evidence. |
@@ -158,7 +170,7 @@ python3 projects/01-data-foundation/scripts/demo_identity_resolution.py
 python3 projects/01-data-foundation/scripts/validate_dbt_project.py
 ```
 
-No credentials, warehouse, or external service is required for these checks. Completed authenticated evidence remains local and ignored; CI stays credential-free. P1.7/P1.8 dbt parsing uses the separately pinned Python 3.12 environment described in the Snowflake guide.
+No credentials, warehouse, or external service is required for these checks. Completed authenticated evidence remains local and ignored; CI stays credential-free. P1.7–P1.9 dbt parsing uses the separately pinned Python 3.12 environment described in the Snowflake guide.
 
 ## What Is Not Implemented?
 
@@ -170,9 +182,10 @@ No credentials, warehouse, or external service is required for these checks. Com
 - Production security policies, monitoring, or a stewardship user interface.
 - Distributed or production-scale synthetic data generation.
 - Webhook receivers, managed secret storage, cloud raw storage, and production connector observability.
+- Canonical Opportunity IDs, canonical AccountPersonRelationship IDs, or new field owners beyond the approved P1.4 matrix.
 
 The future folders for those capabilities are intentionally absent until they contain working deliverables.
 
 ## What Comes Next?
 
-Review the completed [P1.8 identity-resolution guide](architecture/IDENTITY_RESOLUTION.md), then define and approve P1.9 scope separately before implementation.
+Review the completed [P1.9 canonical-model evidence](architecture/SNOWFLAKE_DBT.md#p19-canonical-business-models), then define and approve P1.10 scope separately before implementation.

@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This repository contains the SAI RevenueOS architecture and completed implementation through P1.8, including authenticated acceptance for controlled Salesforce/HubSpot test records, Snowflake/dbt staging, and governed identity resolution. Keep the root focused on project metadata and navigation. Shared cross-project definitions belong in `shared/contracts/`; project-specific work belongs under `projects/<project-name>/`; repository-wide learning and architecture guides belong in `docs/`.
+This repository contains the SAI RevenueOS architecture and completed implementation through P1.9, including authenticated acceptance for controlled Salesforce/HubSpot test records, Snowflake/dbt staging, governed identity resolution, and canonical warehouse models. Keep the root focused on project metadata and navigation. Shared cross-project definitions belong in `shared/contracts/`; project-specific work belongs under `projects/<project-name>/`; repository-wide learning and architecture guides belong in `docs/`.
 
 When application code is introduced, use clear project-local `src/` and `tests/` directories and mirror source paths in tests where practical. Do not create empty folders for future projects or phases.
 
@@ -10,7 +10,7 @@ Avoid committing generated output, local environments, editor settings, credenti
 
 ## Build, Test, and Development Commands
 
-The P1.2–P1.8 Python references use Python 3.9+ and the standard library. P1.7/P1.8 dbt parsing uses the separately pinned Python 3.12 environment. Run the credential-free checks with:
+The P1.2–P1.9 Python references use Python 3.9+ and the standard library. P1.7–P1.9 dbt parsing uses the separately pinned Python 3.12 environment. Run the credential-free checks with:
 
 ```bash
 python3 projects/01-data-foundation/scripts/validate_architecture.py

@@ -9,7 +9,7 @@ P1.7 STG_CRM_COMPANIES / STG_CRM_PEOPLE
   -> version-locked human review
   -> active P1.2 ExternalIdentityCrosswalk
   -> P1.4 field authority and conflict history
-  -> versioned active-mapping output for future P1.9
+  -> versioned active-mapping output consumed by P1.9
 ```
 
 ## What Is Implemented
@@ -22,7 +22,7 @@ P1.7 STG_CRM_COMPANIES / STG_CRM_PEOPLE
 | [`matcher.py`](../src/sai_revenueos_resolution/matcher.py) | Blocks candidates and records positive and negative feature evidence. |
 | [`service.py`](../src/sai_revenueos_resolution/service.py) | Reuses P1.2 proposals, review, decisions, activation, and P1.4 survivorship. |
 | [`schema.sql`](../src/sai_revenueos_resolution/schema.sql) | Stores immutable runs, candidate results, versioned review work, and audit events. |
-| [`identity-resolution-output.v1.json`](../contracts/identity-resolution-output.v1.json) | Publishes active Account/Person mappings for later P1.9 consumption. |
+| [`identity-resolution-output.v1.json`](../contracts/identity-resolution-output.v1.json) | Publishes active Account/Person mappings for P1.9 consumption. |
 
 ## Matching Rules
 
@@ -77,4 +77,4 @@ The command reads actual P1.7 staged Globex rows. It performs identity writes on
 - This is a Python and SQLite reference, not a deployed matching service or user interface.
 - Only Account and Person matching is implemented.
 - There is no automatic crosswalk activation, merge, canonical-field invention, or external write-back.
-- The output contract is ready for P1.9; P1.9 canonical models are not implemented.
+- P1.9 now consumes the output contract; P1.8 still does not build canonical warehouse models itself.

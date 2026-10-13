@@ -4,7 +4,7 @@
 
 This is the index of Project 1's approved architecture decisions. An Architecture Decision Record (ADR) explains the problem, alternatives, decision, technical design, and tradeoffs.
 
-All 44 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, D014–D019 define the P1.3 source model, D020–D025 define P1.4 field authority, D026–D030 define P1.5 synthetic data, D031–D036 define P1.6 live ingestion, D037–D040 define P1.7 Snowflake and dbt staging, and D041–D044 define P1.8 identity resolution, survivorship, and manual review. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
+All 47 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, D014–D019 define the P1.3 source model, D020–D025 define P1.4 field authority, D026–D030 define P1.5 synthetic data, D031–D036 define P1.6 live ingestion, D037–D040 define P1.7 Snowflake and dbt staging, D041–D044 define P1.8 identity resolution, and D045–D047 define P1.9 canonical warehouse publication. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
 
 ## Approved Decisions
 
@@ -54,6 +54,9 @@ All 44 decisions below are **Accepted**. D001–D008 define the canonical model,
 | **D042** | Require human approval before every new authoritative crosswalk. | Keeps even strong domain or email evidence from silently becoming identity truth. | [Require Human Approval for Every New Crosswalk](architecture/adr/0042-human-approval-for-new-crosswalks.md) |
 | **D043** | Apply P1.4 field authority after identity approval; match scores never choose values. | Preserves manual truth, provenance, history, and conflicting values. | [Select Surviving Values with Field Authority](architecture/adr/0043-authority-first-survivorship.md) |
 | **D044** | Version resolution runs and reject decisions based on stale evidence. | Makes retries safe and prevents delayed reviews from overwriting newer identity evidence. | [Version Resolution Runs and Protect Reviews from Stale Evidence](architecture/adr/0044-versioned-resolution-review.md) |
+| **D045** | Publish approved Account and Person identities before unsupported canonical entities. | Delivers useful trusted models without inventing Opportunity or relationship IDs. | [Publish Account and Person Before Broader Canonical Entities](architecture/adr/0045-publish-conservative-canonical-model-scope.md) |
+| **D046** | Require P1.8-approved mappings and existing P1.4 field authority. | Keeps unresolved data separate and prevents dbt from inventing field owners. | [Require Approved Identity and Existing Field Authority](architecture/adr/0046-require-approved-mappings-and-governed-values.md) |
+| **D047** | Publish versioned, tested dbt models for downstream projects. | Gives P2–P7 a source-neutral boundary with executable identity, history, and relationship checks. | [Publish Versioned and Tested Canonical dbt Models](architecture/adr/0047-publish-versioned-tested-dbt-models.md) |
 
 ## What These Decisions Do Not Implement
 
@@ -64,4 +67,4 @@ The decisions define the architecture. They do not mean the following capabiliti
 - Physical warehouse constraints and reconciliation jobs.
 - Live field synchronization or write-back delivery.
 
-The P1.2 identity, P1.3 source, P1.4 field-authority, P1.5 synthetic-data, P1.6 live-ingestion, P1.7 warehouse, and P1.8 resolution mechanics are reference implementations, not deployed services. Authenticated P1.6 acceptance passed for controlled Salesforce and HubSpot test records, and authenticated P1.7/P1.8 checks use the cost-controlled Snowflake account; CI remains credential-free. P1.9 and later work require a separate approved scope.
+The P1.2 identity, P1.3 source, P1.4 field-authority, P1.5 synthetic-data, P1.6 live-ingestion, P1.7 warehouse, P1.8 resolution, and P1.9 canonical models are reference implementations, not deployed services. Authenticated P1.6 acceptance passed for controlled Salesforce and HubSpot test records, and authenticated P1.7–P1.9 checks use the cost-controlled Snowflake account; CI remains credential-free. P1.10 and later work require a separate approved scope.

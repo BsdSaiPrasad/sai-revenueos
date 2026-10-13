@@ -9,6 +9,7 @@ This glossary explains terms used in the repository. Definitions are specific to
 | **B2B SaaS — Business-to-Business Software as a Service** | Subscription software sold by one business to another. | Globex Health subscribes to a fictional analytics product. |
 | **Canonical entity** | The shared, source-independent representation of a business concept. | One canonical Account represents Globex Health across Salesforce and HubSpot. |
 | **Canonical identity** | A stable ID used for one real-world entity across systems and over time. | Sarah Kim keeps one Person ID after changing employers. |
+| **Canonical warehouse model** | A source-neutral dbt model that publishes approved business identities and governed values for downstream use. | P1.9 publishes one Globex Account from two approved CRM mappings. |
 | **Cardinality** | The allowed number of records on each side of a relationship. | One Account can have many Opportunities. |
 | **Checkpoint** | The last source position known to be durably processed. | The Salesforce Account cursor advances only after its history row commits. |
 | **Conflict review** | A human-owned case that preserves disagreeing values and evidence until an authorized person decides. | Sarah Kim reviews whether Globex Health's lifecycle should remain `prospect` or become `customer`. |
@@ -27,6 +28,7 @@ This glossary explains terms used in the repository. Definitions are specific to
 | **JSONL — JavaScript Object Notation Lines** | A text format containing one complete JSON record per line. | P1.5 writes one Salesforce or HubSpot source-event envelope per line. |
 | **Identity resolution** | The process of deciding which source records represent the same real-world entity. | Determining whether Salesforce and HubSpot records both describe Globex Health. |
 | **Match feature** | One explainable comparison used to support or weaken a candidate match. | P1.8 records that two Globex records have the same normalized domain. |
+| **Mapping publication** | One complete, versioned snapshot of currently active approved crosswalks. | Replaying the unchanged P1.8 Globex mapping set does not create another P1.9 publication. |
 | **Many-to-many relationship** | Each side can relate to many records on the other side. A relationship table usually represents it. | Persons and Opportunities connect through OpportunityPersonRole. |
 | **Overlap window** | A small period reread before a saved checkpoint to catch late source changes. | P1.3 starts a default replay five minutes before the saved high watermark. |
 | **OAuth 2.0 — Open Authorization 2.0** | A standard that lets an application receive limited API tokens without collecting a user's password. | P1.6 uses Salesforce browser authorization and a refresh token. |

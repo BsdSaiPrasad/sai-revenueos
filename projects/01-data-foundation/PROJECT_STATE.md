@@ -2,13 +2,13 @@
 
 **As of:** 2026-10-13
 
-**Current phase:** P1.8 Identity Resolution, Survivorship, and Manual Review complete; P1.9 not started
+**Current phase:** P1.9 Canonical Business Models complete; P1.10 not started
 
-**Completed phases:** P1.0 Engineering Foundation; P1.1 Canonical Business Model and Entity Relationship Diagram (ERD); P1.2 Canonical ID and Crosswalk Control; P1.3 Salesforce + HubSpot Source Model; P1.4 Source of Truth and Write Authority; P1.5 Synthetic GTM Data Generation; P1.6 Live Salesforce and HubSpot Ingestion; P1.7 Snowflake + dbt Core Staging and Normalization; P1.8 Identity Resolution, Survivorship, and Manual Review
+**Completed phases:** P1.0 Engineering Foundation; P1.1 Canonical Business Model and Entity Relationship Diagram (ERD); P1.2 Canonical ID and Crosswalk Control; P1.3 Salesforce + HubSpot Source Model; P1.4 Source of Truth and Write Authority; P1.5 Synthetic GTM Data Generation; P1.6 Live Salesforce and HubSpot Ingestion; P1.7 Snowflake + dbt Core Staging and Normalization; P1.8 Identity Resolution, Survivorship, and Manual Review; P1.9 Canonical Business Models
 
 ## Current implementation status
 
-P1 retains the unchanged canonical v1.0.0 architecture: 23 entities, 31 declared relationships, and its canonical ERD. Decisions D001–D040 remain unchanged. P1.8 adds accepted Decisions D041–D044, deterministic Account/Person matching from P1.7 staging, versioned manual review, P1.2 crosswalk activation, P1.4 survivorship, and an approved-mapping boundary for future P1.9 models.
+P1 retains the unchanged canonical v1.0.0 architecture: 23 entities, 31 declared relationships, and its canonical ERD. Decisions D001–D044 remain unchanged. P1.9 adds accepted Decisions D045–D047, approved identity publication, canonical Account/Person views, mapped history, unresolved evidence, conservative relationship and Opportunity inputs, and a versioned downstream contract.
 
 All checked-in examples and automated test records are synthetic. Authenticated acceptance used only explicitly marked fictional records in Salesforce Developer Edition and HubSpot Free; credentials and local raw evidence remain ignored. No external write-back, automatic identity merge, or downstream workflow runs.
 
@@ -46,13 +46,19 @@ All checked-in examples and automated test records are synthetic. Authenticated 
 - Immutable resolution runs and candidate results, mandatory identity-steward review, version-locked decisions, unauthorized-actor denial, and stale-review protection.
 - Safe replay and recoverable approval operations that reuse P1.2 `ResolutionCase`, `CandidateEvidence`, and active crosswalk behavior without automatic merges.
 - Authority-first survivorship through the existing P1.4 engine, preserving previous values, losing values, provenance, conflicts, and review history.
-- A versioned output contract that publishes only active approved Account/Person mappings for future P1.9 consumption.
+- A versioned P1.8 output contract that publishes only active approved Account/Person mappings for P1.9 consumption.
+- Atomic, content-addressed publication of complete P1.8 active-mapping snapshots into the existing Snowflake `STAGING` schema; exact replay creates no duplicate publication.
+- Canonical Account and Person views whose stable IDs come only from P1.8-approved P1.2 crosswalks.
+- Mapped Account/Person history views retaining raw payload, source identity, deletions, late-arrival flags, timestamps, trace IDs, and payload hashes.
+- P1.4-authoritative Account lifecycle selection, preserved competing evidence, and deliberate `NULL` values for fields without an approved owner.
+- Separate unresolved Account/Person records, resolved Person/Account relationship inputs, and source-neutral Opportunity inputs with no fabricated canonical Opportunity or relationship IDs.
+- A versioned P1.9 contract and executable dbt tests for identity approval, uniqueness, authority, history completeness, unresolved separation, and relationship consistency.
 
 ### Verification status
 
-On 2026-10-13, all 117 scenarios passed locally: 23 P1.2 identity scenarios, 13 P1.3 source-model scenarios, 15 P1.4 field-authority scenarios, 11 P1.5 generator scenarios, 20 mocked P1.6 connector scenarios, 10 demonstration-output scenarios, 12 P1.7 warehouse scenarios, and 13 P1.8 resolution scenarios.
+On 2026-10-13, all 125 scenarios passed locally: 23 P1.2 identity scenarios, 13 P1.3 source-model scenarios, 15 P1.4 field-authority scenarios, 11 P1.5 generator scenarios, 20 mocked P1.6 connector scenarios, 10 demonstration-output scenarios, 12 P1.7 warehouse scenarios, 13 P1.8 resolution scenarios, and 8 P1.9 canonical-model scenarios.
 
-Architecture validation passed with 23 canonical entities, 31 relationships, 44 accepted decisions, P1.2–P1.8 artifacts, continuity files, generated-data exclusion, and secret-filename checks. Python compilation, JSON parsing, local Markdown links, all five credential-free demonstrations, and the dbt project validator passed locally. The project contains 10 models, 71 declared data tests, 1 isolated failure-demo seed, and 1 RAW source.
+Architecture validation passed with 23 canonical entities, 31 relationships, 47 accepted decisions, P1.2–P1.9 artifacts, continuity files, generated-data exclusion, and secret-filename checks. Python compilation, JSON parsing, local Markdown links, all credential-free demonstrations, and the dbt project validator passed locally. The project contains 20 models, 130 declared data tests, 1 isolated failure-demo seed, and 3 sources.
 
 The P1.6 Salesforce idempotency repair passed the complete Python 3.9 and 3.14 GitHub Actions matrix on 2026-10-12: [Actions run 38320413720](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38320413720). The run executed all 90 tests, architecture validation, four demonstrations, and a generated 25-company smoke dataset without vendor credentials.
 
@@ -63,6 +69,8 @@ The final P1.6 acceptance status commit passed the complete Python 3.9 and 3.14 
 Authenticated P1.7 acceptance passed on 2026-10-12. The loader inserted 39 immutable Salesforce/HubSpot source events into Snowflake RAW, then inserted 0 on immediate replay while recognizing all 39 existing event IDs. dbt built 9 views and passed 63 production data tests with no warnings or errors; documentation and lineage catalog generation succeeded. The real Globex demonstration preserved 3 HubSpot history rows from the original name through `[SAI TEST] Globex Health - Incremental Update`. The isolated missing-name fixture failed as expected and its table was removed. [GitHub Actions run 38340822278](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38340822278) passed the Python 3.9 and 3.14 checks plus the credential-free dbt parse job.
 
 Authenticated P1.8 acceptance passed on 2026-10-13. The existing restricted dbt role built 10 views and passed 68 production data tests (`PASS=78`, `WARN=0`, `ERROR=0`). The read-only Snowflake verifier read 16 latest Account rows, matched the real staged HubSpot Globex record to the staged Salesforce-backed canonical candidate with score `0.70`, required explicit steward approval, activated the crosswalk only in a temporary copy of the local identity database, and exposed 2 approved mappings through the P1.9 boundary. Snowflake, Salesforce, HubSpot, and the original local identity database were not modified by this verification.
+
+Authenticated P1.9 acceptance passed on 2026-10-13. An isolated persistent acceptance store reused the real staged fictional Globex rows and recorded 2 explicit P1.8-approved mappings without changing the original P1.6 identity database. The first Snowflake publication inserted one complete mapping snapshot; exact replay inserted none. dbt built 20 views, passed 127 production data tests (`PASS=147`, `WARN=0`, `ERROR=0`), and generated updated documentation/lineage metadata. Real queries returned 1 canonical Globex Account, 2 current source links, 12 mapped historical events, and separate unresolved records. No current Salesforce lifecycle value existed, so the governed field correctly remained `NULL`.
 
 ### Verified preset counts with seed 42
 
@@ -80,17 +88,17 @@ Authenticated P1.8 acceptance passed on 2026-10-13. The existing restricted dbt 
 - Production scheduling, cloud object storage, and reverse Extract-Transform-Load (ETL).
 - Live write-back delivery, connector-specific permissions, and vendor delivery retry handling.
 - Subscription, renewal, billing, revenue-intelligence, customer-health, or other P4–P6 workflows.
-- P1.9 and all P2–P7 implementation.
+- P1.10 and all P2–P7 implementation.
 
 ## Blockers and architecture flags
 
-No **MASTER ARCHITECTURE DECISION NEEDED** item was introduced. P1.8 reuses the existing canonical model, P1.2 identity controls, P1.4 authority rules, and P1.7 staging views. It does not change canonical entities, relationships, approved earlier decisions, or write-back behavior.
+No **MASTER ARCHITECTURE DECISION NEEDED** item was introduced. P1.9 reuses the existing canonical model, P1.2/P1.8 approved identities, P1.4 authority rules, and P1.7 staging views. It does not change canonical entities, relationships, approved earlier decisions, or write-back behavior.
 
-The complete P1.8 checklist passed without changing the approved architecture. P1 progress is 9 of 16 milestones (56.25%), and overall RevenueOS progress is approximately 8.04%.
+The complete P1.9 checklist passed without changing the approved architecture. P1 progress is 10 of 16 milestones (62.5%), and overall RevenueOS progress is approximately 8.93%.
 
 ## Next immediate step
 
-Review the completed P1.8 evidence and define P1.9 scope separately. Do not start P1.9 without approval.
+Review the completed P1.9 evidence and define P1.10 scope separately. Do not start P1.10 without approval.
 
 ## Relevant paths
 
@@ -147,5 +155,15 @@ Review the completed P1.8 evidence and define P1.9 scope separately. Do not star
 - `projects/01-data-foundation/architecture/adr/0042-human-approval-for-new-crosswalks.md`
 - `projects/01-data-foundation/architecture/adr/0043-authority-first-survivorship.md`
 - `projects/01-data-foundation/architecture/adr/0044-versioned-resolution-review.md`
+- `projects/01-data-foundation/src/sai_revenueos_canonical/`
+- `projects/01-data-foundation/contracts/canonical-warehouse-models.v1.json`
+- `projects/01-data-foundation/tests/test_canonical_models.py`
+- `projects/01-data-foundation/scripts/prepare_p19_globex_approval.py`
+- `projects/01-data-foundation/scripts/publish_identity_mappings_to_snowflake.py`
+- `projects/01-data-foundation/scripts/demo_canonical_models.py`
+- `projects/01-data-foundation/warehouse/dbt/models/canonical/`
+- `projects/01-data-foundation/architecture/adr/0045-publish-conservative-canonical-model-scope.md`
+- `projects/01-data-foundation/architecture/adr/0046-require-approved-mappings-and-governed-values.md`
+- `projects/01-data-foundation/architecture/adr/0047-publish-versioned-tested-dbt-models.md`
 - `shared/contracts/canonical-model.v1.json` (unchanged v1.0.0)
 - `PROGRESS.md`
