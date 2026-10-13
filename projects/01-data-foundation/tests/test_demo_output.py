@@ -1,4 +1,4 @@
-"""Command-line acceptance tests for the P1.3 through P1.6 demonstrations."""
+"""Command-line acceptance tests for the P1.3 through P1.8 demonstrations."""
 
 from __future__ import annotations
 
@@ -135,6 +135,26 @@ class DemonstrationOutputTests(unittest.TestCase):
         ):
             self.assertIn(heading, output)
         self.assertNotIn("demo-token-never-logged", output)
+
+    def test_p18_default_is_a_complete_summary_with_at_most_15_lines(self) -> None:
+        """The identity demo shows matching, review, approval, survivor, and output."""
+        lines = self.run_demo("demo_identity_resolution.py")
+        output = "\n".join(lines)
+        self.assertGreaterEqual(len(lines), 10)
+        self.assertLessEqual(len(lines), 15)
+        self.assertIn("Before: HubSpot case=unresolved", output)
+        self.assertIn("Review: pending; human approval required", output)
+        self.assertIn("After: HubSpot case=resolved; crosswalk=active", output)
+        self.assertIn("P1.9 boundary", output)
+
+    def test_p18_verbose_preserves_match_review_and_audit_evidence(self) -> None:
+        """Verbose mode retains candidate features, review data, and audit history."""
+        lines = self.run_demo("demo_identity_resolution.py", "--verbose")
+        output = "\n".join(lines)
+        self.assertGreater(len(lines), 15)
+        self.assertIn("TECHNICAL EVIDENCE", output)
+        self.assertIn('"resolution_audit"', output)
+        self.assertIn('"authority_audit"', output)
 
 
 if __name__ == "__main__":

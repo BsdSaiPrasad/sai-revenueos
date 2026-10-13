@@ -26,6 +26,7 @@ This glossary explains terms used in the repository. Definitions are specific to
 | **Idempotency** | Repeating the same operation produces the same result instead of a duplicate. | Reprocessing `SF-1001` must not create another SourceRecord. |
 | **JSONL — JavaScript Object Notation Lines** | A text format containing one complete JSON record per line. | P1.5 writes one Salesforce or HubSpot source-event envelope per line. |
 | **Identity resolution** | The process of deciding which source records represent the same real-world entity. | Determining whether Salesforce and HubSpot records both describe Globex Health. |
+| **Match feature** | One explainable comparison used to support or weaken a candidate match. | P1.8 records that two Globex records have the same normalized domain. |
 | **Many-to-many relationship** | Each side can relate to many records on the other side. A relationship table usually represents it. | Persons and Opportunities connect through OpportunityPersonRole. |
 | **Overlap window** | A small period reread before a saved checkpoint to catch late source changes. | P1.3 starts a default replay five minutes before the saved high watermark. |
 | **OAuth 2.0 — Open Authorization 2.0** | A standard that lets an application receive limited API tokens without collecting a user's password. | P1.6 uses Salesforce browser authorization and a refresh token. |
@@ -36,6 +37,7 @@ This glossary explains terms used in the repository. Definitions are specific to
 | **Reconciliation** | A check that compares records and finds missing, conflicting, or inconsistent states. | A future job may find two active mappings for one SourceRecord. |
 | **ResolutionCase** | The workflow record that tracks whether one source identity is unresolved, a candidate, ambiguous, under review, resolved, or has no match. | Two plausible Northstar Labs Accounts make the case ambiguous. |
 | **CandidateEvidence** | An append-oriented record of a possible canonical match, its evidence, confidence, policy, and review decision. | A verified Globex domain supports a proposed Account match. |
+| **Resolution run** | An immutable record of one matching attempt, its policy version, input fingerprint, candidates, and outcome. | Repeating unchanged Globex input reuses the same P1.8 result instead of opening another review. |
 | **UUIDv7 — Universally Unique Identifier version 7** | A standards-based unique identifier whose leading bits preserve approximate creation-time order. | P1 combines UUIDv7 with `sai_acc_` for an Account ID. |
 | **Reverse ETL — Reverse Extract, Transform, Load** | Sending prepared warehouse data back into operational tools. | A future process may send a canonical Account segment to a CRM. |
 | **RevOps — Revenue Operations** | The people and processes that align marketing, sales, customer success, and revenue data. | RevOps needs one reliable view of an Account across tools. |
@@ -50,7 +52,7 @@ This glossary explains terms used in the repository. Definitions are specific to
 | **Snowflake** | A cloud data platform that stores and queries structured and semi-structured data. | P1.7 loads immutable CRM source events into a cost-controlled Snowflake database. |
 | **Staging model** | A first transformation that gives source data consistent names and types while retaining traceability. | `stg_hubspot_companies` turns the raw Globex payload into typed company fields and keeps its event ID. |
 | **Service Key** | A scoped HubSpot credential for account-level system-to-system API access. | P1.6 can use a Service Key limited to Company, Contact, and Deal access. |
-| **Survivorship** | Rules that choose which source value becomes the preferred canonical value. | P1.4 implements approved ownership and human review for selected fields; a complete enterprise ruleset remains later work. |
+| **Survivorship** | Rules that choose which source value becomes the preferred canonical value. | P1.8 sends approved Globex fields through P1.4 authority rules and preserves conflicting values for review. |
 | **Synthetic data** | Fictional data created for learning or testing. | Globex Health and Sarah Kim are synthetic examples. |
 | **Dataset fingerprint** | A repeatable hash that changes when generated dataset content changes. | Two P1.5 runs with the same count and seed have the same SHA-256 fingerprint. |
 | **Random seed** | A starting number that makes pseudo-random generation repeatable. | Seed `42` recreates the same fictional P1.5 records. |

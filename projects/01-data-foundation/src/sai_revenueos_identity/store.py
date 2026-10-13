@@ -939,6 +939,24 @@ class IdentityStore:
         ).fetchone()
         return dict(row) if row is not None else None
 
+    def list_active_mappings(self, entity_types: Optional[Iterable[str]] = None) -> List[Dict[str, Any]]:
+        """Return current approved crosswalks through a stable read boundary.
+
+        P1.8 uses this read-only output to publish mappings for future P1.9
+        canonical models. Candidate scores and unresolved reviews are excluded.
+        """
+        values = tuple(sorted(set(entity_types or CANONICAL_TARGET_TYPES)))
+        if not values or any(value not in CANONICAL_TARGET_TYPES for value in values):
+            raise ValidationError("active mapping filter contains an unsupported entity type")
+        placeholders = ",".join("?" for _ in values)
+        rows = self._connection.execute(
+            "SELECT * FROM external_identity_crosswalk WHERE mapping_status='active' "
+            "AND valid_to IS NULL AND canonical_entity_type IN (%s) "
+            "ORDER BY canonical_entity_type, canonical_entity_id, source_record_id" % placeholders,
+            values,
+        ).fetchall()
+        return [dict(row) for row in rows]
+
     def resolution_case_for_source(self, source_record_id: str) -> Dict[str, Any]:
         """Return a SourceRecord's resolution workflow state.
 

@@ -432,3 +432,30 @@ GitHub Actions run [38321426966](https://github.com/BsdSaiPrasad/sai-revenueos/a
 Implementation commit: `e3580ee` (`feat: complete P1.7 Snowflake and dbt staging`). Authored and committed as `BsdSaiPrasad <bsdsaiprasad1@gmail.com>` with no co-author attribution.
 
 [GitHub Actions run 38340822278](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38340822278) passed the Python 3.9 and 3.14 required checks and the credential-free dbt Core Snowflake parse job.
+
+## 2026-10-13 — P1.8 Identity Resolution, Survivorship, and Manual Review (Complete)
+
+### Implemented
+
+- Added deterministic, versioned Account and Person matching over the real P1.7 `STG_CRM_COMPANIES` and new `STG_CRM_PEOPLE` views.
+- Added immutable resolution runs, explainable feature evidence, manual review work, audit events, version-locked decisions, and recoverable approval operations.
+- Reused P1.2 cases, candidate evidence, active crosswalks, idempotency, and transactions; every new authoritative mapping requires an authorized identity steward.
+- Reused P1.4 field authority for survivorship so manually verified values, conflicts, provenance, previous values, and resolution history remain protected.
+- Added a versioned active-mapping output contract for future P1.9 use without implementing P1.9.
+- Added Decisions D041–D044, a 14-line Globex demonstration, an authenticated read-only Snowflake verifier, and 13 focused resolution scenarios.
+
+### Verification
+
+- `python3 -m unittest discover -s projects/01-data-foundation/tests -v` — **passed**, 117/117 scenarios.
+- `python3 projects/01-data-foundation/scripts/validate_architecture.py` — **passed**: 23 entities, 31 relationships, 44 accepted decisions, and P1.2–P1.8 artifacts.
+- `python3 projects/01-data-foundation/scripts/validate_dbt_project.py` — **passed**: 10 models and 71 declared tests.
+- Python compilation, JSON parsing, local Markdown links, the five credential-free demonstrations, and diff whitespace checks passed.
+- Authenticated dbt build — **passed**: 10 views and 68 production data tests; `PASS=78`, `WARN=0`, `ERROR=0`.
+- Authenticated P1.7-to-P1.8 verification — **passed**: 16 latest Account rows read, real staged Globex candidate score `0.70`, explicit steward approval, active crosswalk in a temporary database copy, and 2 approved mappings available through the P1.9 boundary.
+
+### Boundaries and status
+
+- The canonical v1.0.0 contract, 23 entities, 31 relationships, source history, prior decisions, and write-back controls remain unchanged.
+- No automatic merge, automatic crosswalk approval, production user interface, live write-back, or P1.9 model was added.
+- No **MASTER ARCHITECTURE DECISION NEEDED** change was required.
+- P1.8 is complete. P1 is 56.25% complete (9 of 16 milestones), and overall RevenueOS completion is approximately 8.04%.

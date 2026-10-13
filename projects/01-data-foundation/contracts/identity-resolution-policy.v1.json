@@ -1,0 +1,83 @@
+{
+  "contract_name": "identity-resolution-policy",
+  "contract_version": "1.0.0",
+  "description": "Deterministic, explainable Account and Person matching, authority-first survivorship, and human review policy for P1.8.",
+  "input_models": {
+    "Account": "STG_CRM_COMPANIES",
+    "Person": "STG_CRM_PEOPLE"
+  },
+  "matching": {
+    "Account": {
+      "minimum_candidate_score": 0.55,
+      "blocking_fields": ["domain_normalized", "name_normalized"],
+      "features": {
+        "exact_domain": 0.6,
+        "exact_name": 0.3,
+        "similar_name": 0.2,
+        "exact_country": 0.1,
+        "conflicting_domain": -0.35
+      },
+      "similar_name_minimum": 0.67
+    },
+    "Person": {
+      "minimum_candidate_score": 0.65,
+      "blocking_fields": ["email_normalized", "name_normalized"],
+      "features": {
+        "exact_email": 0.75,
+        "exact_name": 0.15,
+        "similar_name": 0.1,
+        "same_employer": 0.1,
+        "conflicting_email": -0.65
+      },
+      "similar_name_minimum": 0.8
+    }
+  },
+  "decision_policy": {
+    "human_approval_required_for_every_new_crosswalk": true,
+    "automatic_merge": false,
+    "automatic_crosswalk_activation": false,
+    "one_candidate_outcome": "candidate",
+    "multiple_candidate_outcome": "ambiguous",
+    "zero_candidate_outcome": "pending_review"
+  },
+  "survivorship": {
+    "authority_contract": "field-authority-policy.v1.json",
+    "precedence": [
+      "manually_verified_value",
+      "authoritative_source",
+      "latest_valid_source_version",
+      "human_review"
+    ],
+    "missing_values_overwrite": false,
+    "late_versions_become_current": false,
+    "matching_score_selects_field_value": false,
+    "field_extractors": [
+      {
+        "entity_type": "Account",
+        "field_name": "lifecycle_status",
+        "source_system": "salesforce",
+        "payload_path": ["Lifecycle_Status__c"]
+      },
+      {
+        "entity_type": "Account",
+        "field_name": "lifecycle_status",
+        "source_system": "hubspot",
+        "payload_path": ["properties", "lifecyclestage"]
+      }
+    ]
+  },
+  "review": {
+    "identity_owner_role": "p1_identity_steward",
+    "identity_and_field_reviews_remain_separate": true,
+    "stale_case_versions_are_rejected": true,
+    "same_input_and_policy_are_idempotent": true,
+    "new_evidence_creates_a_new_run": true
+  },
+  "boundaries": {
+    "implemented_entity_types": ["Account", "Person"],
+    "production_service": false,
+    "user_interface": false,
+    "live_write_back": false,
+    "p1_9_canonical_models": false
+  }
+}

@@ -1,14 +1,14 @@
 # P1 Project State
 
-**As of:** 2026-10-12
+**As of:** 2026-10-13
 
-**Current phase:** P1.7 Snowflake and dbt staging complete; P1.8 not started
+**Current phase:** P1.8 Identity Resolution, Survivorship, and Manual Review complete; P1.9 not started
 
-**Completed phases:** P1.0 Engineering Foundation; P1.1 Canonical Business Model and Entity Relationship Diagram (ERD); P1.2 Canonical ID and Crosswalk Control; P1.3 Salesforce + HubSpot Source Model; P1.4 Source of Truth and Write Authority; P1.5 Synthetic GTM Data Generation; P1.6 Live Salesforce and HubSpot Ingestion; P1.7 Snowflake + dbt Core Staging and Normalization
+**Completed phases:** P1.0 Engineering Foundation; P1.1 Canonical Business Model and Entity Relationship Diagram (ERD); P1.2 Canonical ID and Crosswalk Control; P1.3 Salesforce + HubSpot Source Model; P1.4 Source of Truth and Write Authority; P1.5 Synthetic GTM Data Generation; P1.6 Live Salesforce and HubSpot Ingestion; P1.7 Snowflake + dbt Core Staging and Normalization; P1.8 Identity Resolution, Survivorship, and Manual Review
 
 ## Current implementation status
 
-P1 retains the unchanged canonical v1.0.0 architecture: 23 entities, 31 declared relationships, and its canonical ERD. Decisions D001–D036 remain unchanged. P1.7 adds accepted Decisions D037–D040, a Snowflake RAW loader, and dbt Core staging models that consume the existing P1.3/P1.6 event contract.
+P1 retains the unchanged canonical v1.0.0 architecture: 23 entities, 31 declared relationships, and its canonical ERD. Decisions D001–D040 remain unchanged. P1.8 adds accepted Decisions D041–D044, deterministic Account/Person matching from P1.7 staging, versioned manual review, P1.2 crosswalk activation, P1.4 survivorship, and an approved-mapping boundary for future P1.9 models.
 
 All checked-in examples and automated test records are synthetic. Authenticated acceptance used only explicitly marked fictional records in Salesforce Developer Edition and HubSpot Free; credentials and local raw evidence remain ignored. No external write-back, automatic identity merge, or downstream workflow runs.
 
@@ -24,7 +24,7 @@ All checked-in examples and automated test records are synthetic. Authenticated 
 - Effective-dated Account-name and employment history plus append-oriented late source events.
 - JSON, JSON Lines (JSONL), Comma-Separated Values (CSV), and versioned scenario-manifest output.
 - A 13-line Globex demonstration by default with `--verbose` for complete generated records and P1.2–P1.4 evidence.
-- GitHub Actions coverage for Python 3.9 and 3.14, all tests, architecture validation, all four demonstrations, and a generated 25-company smoke dataset.
+- GitHub Actions coverage for Python 3.9 and 3.14, all tests, architecture validation, all five credential-free demonstrations, and a generated 25-company smoke dataset.
 - Reusable Salesforce OAuth 2.0 and HubSpot scoped-token connectors with credential-free request traces.
 - Salesforce full QueryAll pagination, complete active-record reads, Get Updated/Get Deleted polling, and OAuth refresh.
 - HubSpot `2026-09` CRM Objects pagination, last-modified search, and archived-record deletion polling.
@@ -35,19 +35,24 @@ All checked-in examples and automated test records are synthetic. Authenticated 
 - Stable Salesforce event identity that preserves `LastViewedDate` and `LastReferencedDate` in raw evidence without treating their read-side changes as new business versions.
 - Complete authenticated acceptance for the marked Salesforce Account and HubSpot Company: initial retrieval, raw storage, real field updates, incremental capture, unchanged-version replay, durable checkpoints, and unresolved source identities.
 - An atomic and idempotent loader that copies immutable P1.3 source-event envelopes from local SQLite into Snowflake RAW without changing the source history.
-- Nine dbt Core staging models covering the shared event envelope, seven approved Salesforce/HubSpot object types, and one cross-source company view.
+- Ten dbt Core staging models covering the shared event envelope, seven approved Salesforce/HubSpot object types, and cross-source company and people views.
 - Safe timestamp, boolean, number, and date conversions that retain invalid input in the raw `VARIANT` payload instead of failing or silently rewriting evidence.
 - Explicit latest-version and late-arrival metadata derived from source and arrival times while preserving every historical event.
-- Sixty-six dbt data tests for keys, required fields, accepted values, relationships, payload identity, typed values, and source-history integrity.
+- Seventy-one declared dbt data tests for keys, required fields, accepted values, relationships, payload identity, typed values, and source-history integrity.
 - A least-privilege Snowflake bootstrap with an extra-small warehouse, 60-second auto-suspend, five-minute statement timeout, separate loader/dbt roles, and a one-credit monthly resource monitor.
 - Separate service users with 30-day role-restricted PATs, a current-address network policy, and ignored mode-600 local credential storage.
 - Credential-free static validation, dbt parsing, a concise real-data demonstration, and an isolated intentionally failing data-quality demonstration.
+- Deterministic Account matching from domain, normalized name, and country evidence plus Person matching from email, name, and mapped-employer evidence.
+- Immutable resolution runs and candidate results, mandatory identity-steward review, version-locked decisions, unauthorized-actor denial, and stale-review protection.
+- Safe replay and recoverable approval operations that reuse P1.2 `ResolutionCase`, `CandidateEvidence`, and active crosswalk behavior without automatic merges.
+- Authority-first survivorship through the existing P1.4 engine, preserving previous values, losing values, provenance, conflicts, and review history.
+- A versioned output contract that publishes only active approved Account/Person mappings for future P1.9 consumption.
 
 ### Verification status
 
-On 2026-10-12, all 102 scenarios passed locally: 23 P1.2 identity scenarios, 13 P1.3 source-model scenarios, 15 P1.4 field-authority scenarios, 11 P1.5 generator scenarios, 20 mocked P1.6 connector scenarios, 8 demonstration-output scenarios, and 12 P1.7 warehouse scenarios.
+On 2026-10-13, all 117 scenarios passed locally: 23 P1.2 identity scenarios, 13 P1.3 source-model scenarios, 15 P1.4 field-authority scenarios, 11 P1.5 generator scenarios, 20 mocked P1.6 connector scenarios, 10 demonstration-output scenarios, 12 P1.7 warehouse scenarios, and 13 P1.8 resolution scenarios.
 
-Architecture validation passed with 23 canonical entities, 31 relationships, 40 accepted decisions, P1.2–P1.7 artifacts, continuity files, generated-data exclusion, and secret-filename checks. Python compilation, JSON parsing, local Markdown links, all four credential-free demonstrations, the dbt project validator, and `dbt parse` with dbt Core 1.12.5 and dbt-snowflake 1.12.2 passed locally. The parsed project contains 9 models, 66 data tests, 1 isolated failure-demo seed, and 1 RAW source.
+Architecture validation passed with 23 canonical entities, 31 relationships, 44 accepted decisions, P1.2–P1.8 artifacts, continuity files, generated-data exclusion, and secret-filename checks. Python compilation, JSON parsing, local Markdown links, all five credential-free demonstrations, and the dbt project validator passed locally. The project contains 10 models, 71 declared data tests, 1 isolated failure-demo seed, and 1 RAW source.
 
 The P1.6 Salesforce idempotency repair passed the complete Python 3.9 and 3.14 GitHub Actions matrix on 2026-10-12: [Actions run 38320413720](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38320413720). The run executed all 90 tests, architecture validation, four demonstrations, and a generated 25-company smoke dataset without vendor credentials.
 
@@ -56,6 +61,8 @@ Authenticated acceptance also passed on 2026-10-12. Salesforce preserved the mar
 The final P1.6 acceptance status commit passed the complete Python 3.9 and 3.14 GitHub Actions matrix: [Actions run 38321426966](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38321426966).
 
 Authenticated P1.7 acceptance passed on 2026-10-12. The loader inserted 39 immutable Salesforce/HubSpot source events into Snowflake RAW, then inserted 0 on immediate replay while recognizing all 39 existing event IDs. dbt built 9 views and passed 63 production data tests with no warnings or errors; documentation and lineage catalog generation succeeded. The real Globex demonstration preserved 3 HubSpot history rows from the original name through `[SAI TEST] Globex Health - Incremental Update`. The isolated missing-name fixture failed as expected and its table was removed. [GitHub Actions run 38340822278](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38340822278) passed the Python 3.9 and 3.14 checks plus the credential-free dbt parse job.
+
+Authenticated P1.8 acceptance passed on 2026-10-13. The existing restricted dbt role built 10 views and passed 68 production data tests (`PASS=78`, `WARN=0`, `ERROR=0`). The read-only Snowflake verifier read 16 latest Account rows, matched the real staged HubSpot Globex record to the staged Salesforce-backed canonical candidate with score `0.70`, required explicit steward approval, activated the crosswalk only in a temporary copy of the local identity database, and exposed 2 approved mappings through the P1.9 boundary. Snowflake, Salesforce, HubSpot, and the original local identity database were not modified by this verification.
 
 ### Verified preset counts with seed 42
 
@@ -68,22 +75,22 @@ Authenticated P1.7 acceptance passed on 2026-10-12. The loader inserted 39 immut
 ## Intentionally deferred
 
 - Webhook receivers, periodic scheduling, production reconciliation orchestration, and managed secret rotation.
-- A complete automatic identity matcher, automatic candidate approval, or unrestricted survivorship.
+- Automatic candidate approval, automatic merge, unrestricted survivorship, or production-scale fuzzy/entity matching.
 - Production object storage, message queues, distributed execution, observability, privacy controls, and retention enforcement.
 - Production scheduling, cloud object storage, and reverse Extract-Transform-Load (ETL).
 - Live write-back delivery, connector-specific permissions, and vendor delivery retry handling.
 - Subscription, renewal, billing, revenue-intelligence, customer-health, or other P4–P6 workflows.
-- P1.8 and all P2–P7 implementation.
+- P1.9 and all P2–P7 implementation.
 
 ## Blockers and architecture flags
 
-No **MASTER ARCHITECTURE DECISION NEEDED** item was introduced. P1.7 reuses the existing canonical model and P1.3/P1.6 immutable event history. It does not change identity resolution, field authority, or write-back behavior.
+No **MASTER ARCHITECTURE DECISION NEEDED** item was introduced. P1.8 reuses the existing canonical model, P1.2 identity controls, P1.4 authority rules, and P1.7 staging views. It does not change canonical entities, relationships, approved earlier decisions, or write-back behavior.
 
-The complete P1.7 checklist passed without changing the approved architecture. P1 progress is 8 of 16 milestones (50%), and overall RevenueOS progress is approximately 7.14%.
+The complete P1.8 checklist passed without changing the approved architecture. P1 progress is 9 of 16 milestones (56.25%), and overall RevenueOS progress is approximately 8.04%.
 
 ## Next immediate step
 
-Review the completed P1.7 evidence and define P1.8 scope separately. Do not start P1.8 without approval.
+Review the completed P1.8 evidence and define P1.9 scope separately. Do not start P1.9 without approval.
 
 ## Relevant paths
 
@@ -128,5 +135,17 @@ Review the completed P1.7 evidence and define P1.8 scope separately. Do not star
 - `projects/01-data-foundation/architecture/adr/0038-standardize-sources-with-provenance.md`
 - `projects/01-data-foundation/architecture/adr/0039-handle-types-history-and-late-data-safely.md`
 - `projects/01-data-foundation/architecture/adr/0040-test-document-and-demonstrate-dbt-lineage.md`
+- `projects/01-data-foundation/src/sai_revenueos_resolution/`
+- `projects/01-data-foundation/contracts/identity-resolution-policy.v1.json`
+- `projects/01-data-foundation/contracts/identity-resolution-output.v1.json`
+- `projects/01-data-foundation/tests/test_identity_resolution.py`
+- `projects/01-data-foundation/scripts/demo_identity_resolution.py`
+- `projects/01-data-foundation/scripts/verify_identity_resolution_snowflake.py`
+- `projects/01-data-foundation/warehouse/dbt/models/staging/shared/stg_crm_people.sql`
+- `projects/01-data-foundation/architecture/IDENTITY_RESOLUTION.md`
+- `projects/01-data-foundation/architecture/adr/0041-deterministic-entity-specific-matching.md`
+- `projects/01-data-foundation/architecture/adr/0042-human-approval-for-new-crosswalks.md`
+- `projects/01-data-foundation/architecture/adr/0043-authority-first-survivorship.md`
+- `projects/01-data-foundation/architecture/adr/0044-versioned-resolution-review.md`
 - `shared/contracts/canonical-model.v1.json` (unchanged v1.0.0)
 - `PROGRESS.md`

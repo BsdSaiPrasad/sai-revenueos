@@ -4,7 +4,7 @@
 
 This is the index of Project 1's approved architecture decisions. An Architecture Decision Record (ADR) explains the problem, alternatives, decision, technical design, and tradeoffs.
 
-All 40 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, D014–D019 define the P1.3 source model, D020–D025 define P1.4 field authority, D026–D030 define P1.5 synthetic data, D031–D036 define P1.6 live ingestion, and D037–D040 define P1.7 Snowflake and dbt staging. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
+All 44 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, D014–D019 define the P1.3 source model, D020–D025 define P1.4 field authority, D026–D030 define P1.5 synthetic data, D031–D036 define P1.6 live ingestion, D037–D040 define P1.7 Snowflake and dbt staging, and D041–D044 define P1.8 identity resolution, survivorship, and manual review. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
 
 ## Approved Decisions
 
@@ -50,14 +50,18 @@ All 40 decisions below are **Accepted**. D001–D008 define the canonical model,
 | **D038** | Standardize Salesforce and HubSpot records while retaining complete source identity and provenance. | Gives consumers consistent fields without hiding vendor evidence or implying an identity merge. | [Standardize CRM Records Without Losing Their Source Identity](architecture/adr/0038-standardize-sources-with-provenance.md) |
 | **D039** | Use safe conversions, validity flags, immutable history, and explicit late-arrival labels. | Makes malformed or out-of-order data visible without losing good records or source evidence. | [Make Invalid, Historical, and Late Data Visible](architecture/adr/0039-handle-types-history-and-late-data-safely.md) |
 | **D040** | Make dbt quality tests, documentation, lineage, and an isolated failure demonstration executable. | Proves expected success and failure behavior instead of relying on written claims. | [Make Warehouse Quality and Lineage Executable](architecture/adr/0040-test-document-and-demonstrate-dbt-lineage.md) |
+| **D041** | Match Accounts and Persons with versioned deterministic rules over P1.7 staging. | Produces explainable candidates without an opaque model or a duplicate canonical store. | [Match Accounts and People with Explainable Rules](architecture/adr/0041-deterministic-entity-specific-matching.md) |
+| **D042** | Require human approval before every new authoritative crosswalk. | Keeps even strong domain or email evidence from silently becoming identity truth. | [Require Human Approval for Every New Crosswalk](architecture/adr/0042-human-approval-for-new-crosswalks.md) |
+| **D043** | Apply P1.4 field authority after identity approval; match scores never choose values. | Preserves manual truth, provenance, history, and conflicting values. | [Select Surviving Values with Field Authority](architecture/adr/0043-authority-first-survivorship.md) |
+| **D044** | Version resolution runs and reject decisions based on stale evidence. | Makes retries safe and prevents delayed reviews from overwriting newer identity evidence. | [Version Resolution Runs and Protect Reviews from Stale Evidence](architecture/adr/0044-versioned-resolution-review.md) |
 
 ## What These Decisions Do Not Implement
 
 The decisions define the architecture. They do not mean the following capabilities are running:
 
 - Scheduled connector execution, webhook receivers, and production deployment.
-- Complete identity matching or artificial-intelligence scoring.
+- Production-scale identity matching or artificial-intelligence scoring.
 - Physical warehouse constraints and reconciliation jobs.
 - Live field synchronization or write-back delivery.
 
-The P1.2 identity, P1.3 source, P1.4 field-authority, P1.5 synthetic-data, P1.6 live-ingestion, and P1.7 warehouse mechanics are reference implementations, not deployed services. Authenticated P1.6 acceptance passed for controlled Salesforce and HubSpot test records, and authenticated P1.7 acceptance passed against the cost-controlled Snowflake account; CI remains credential-free. P1.8 and later work require a separate approved scope.
+The P1.2 identity, P1.3 source, P1.4 field-authority, P1.5 synthetic-data, P1.6 live-ingestion, P1.7 warehouse, and P1.8 resolution mechanics are reference implementations, not deployed services. Authenticated P1.6 acceptance passed for controlled Salesforce and HubSpot test records, and authenticated P1.7/P1.8 checks use the cost-controlled Snowflake account; CI remains credential-free. P1.9 and later work require a separate approved scope.

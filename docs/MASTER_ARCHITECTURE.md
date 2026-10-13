@@ -17,8 +17,10 @@ The seven-project structure gives each concern a clear home. Shared definitions 
 ```mermaid
 flowchart LR
   V[Salesforce and HubSpot payloads] --> H[P1 raw source history]
-  H --> S[P1 SourceRecords]
-  S --> X[External identity crosswalk]
+  H --> T[P1 Snowflake and dbt staging]
+  T --> S[P1 SourceRecords]
+  S --> M[P1 explainable matching and review]
+  M --> X[External identity crosswalk]
   X --> C[P1 canonical identities]
   C --> A[P1 field authority and review]
   A --> R[Canonical relationships and history]
@@ -37,7 +39,7 @@ Example: synthetic company Globex Health can appear in Salesforce and HubSpot. P
 
 | Project | What it owns | Current status |
 |---|---|---|
-| **P1 — Data Foundation & Customer Identity** | Canonical entities, source identity, historical relationships, field authority, provenance, shared data contracts, CRM ingestion, and normalized source staging. | P1.0–P1.7 complete |
+| **P1 — Data Foundation & Customer Identity** | Canonical entities, source identity, historical relationships, field authority, provenance, shared data contracts, CRM ingestion, normalized source staging, and governed identity resolution. | P1.0–P1.8 complete |
 | **P2 — Inbound** | Future inbound demand capture, scoring, and routing. | Planned |
 | **P3 — Outbound** | Future prospecting, sequencing, and outbound engagement. | Planned |
 | **P4 — Revenue Intelligence** | Future pipeline, forecasting, and revenue analytics. | Planned |
@@ -47,7 +49,7 @@ Example: synthetic company Globex Health can appear in Salesforce and HubSpot. P
 
 ## What P1 Publishes
 
-P1 owns the shared logical model in `shared/contracts/canonical-model.v1.json` and the versioned P1.3 source, P1.4 authority, P1.5 synthetic-manifest, and P1.6 ingestion-policy contracts under `projects/01-data-foundation/contracts/`. Other projects may map those contracts into warehouse tables, Application Programming Interfaces (APIs), events, or semantic models, but they must not create incompatible definitions inside their own folders.
+P1 owns the shared logical model in `shared/contracts/canonical-model.v1.json` and the versioned source, authority, synthetic-data, ingestion, warehouse-normalization, identity-resolution, and active-mapping contracts under `projects/01-data-foundation/contracts/`. Other projects may map those contracts into warehouse tables, Application Programming Interfaces (APIs), events, or semantic models, but they must not create incompatible definitions inside their own folders.
 
 A breaking change—such as changing what an Account ID means—requires a new major contract version and a review of every downstream project. If work reveals a cross-project change, label it **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
 
@@ -73,6 +75,10 @@ A breaking change—such as changing what an Account ID means—requires a new m
 18. API retries are bounded, and a failed stream cannot advance its checkpoint past a gap.
 19. Snowflake RAW preserves the complete P1.3/P1.6 event before dbt normalization.
 20. dbt staging keeps source identities and provenance separate from canonical resolution.
+21. Account and Person matching is deterministic, entity-specific, and explainable from versioned evidence.
+22. Every new authoritative crosswalk requires an authorized human identity steward; matching never auto-merges identities.
+23. Survivorship uses P1.4 field authority and preserves losing values, provenance, conflicts, and history.
+24. Review decisions are version-locked so stale evidence cannot overwrite a newer resolution case.
 
 The reasoning is recorded in the [P1 decision index](../projects/01-data-foundation/DECISIONS.md).
 
@@ -88,4 +94,4 @@ Repository validation catches structural drift, but future physical systems will
 
 ## What Comes Next?
 
-P1.6 connector code and authenticated Salesforce/HubSpot acceptance are complete. P1.7 code and credential-free checks are ready, but authenticated Snowflake loading and dbt execution must pass before P1.7 is complete. P1.8 has not started; P2–P7 stay planned until their own work begins.
+P1.6 live ingestion, P1.7 Snowflake/dbt staging, and P1.8 governed identity resolution have passed their authenticated or end-to-end acceptance checks. P1.9 has not started; P2–P7 stay planned until their own work begins.

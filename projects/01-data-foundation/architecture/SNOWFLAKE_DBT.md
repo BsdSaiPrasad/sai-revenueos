@@ -28,6 +28,7 @@ flowchart LR
 | [`stg_source_events.sql`](../warehouse/dbt/models/staging/shared/stg_source_events.sql) | Safely types timestamps and labels latest and late-arriving versions. |
 | Source-specific models | Normalize all four Salesforce and three HubSpot v1 objects. |
 | [`stg_crm_companies.sql`](../warehouse/dbt/models/staging/shared/stg_crm_companies.sql) | Gives Accounts and Companies consistent fields without merging identities. |
+| [`stg_crm_people.sql`](../warehouse/dbt/models/staging/shared/stg_crm_people.sql) | Gives Leads and Contacts consistent person fields for P1.8 while preserving source identities. |
 | dbt data tests | Check keys, required fields, relationships, types, payload identity, and history integrity. |
 
 ## 1. Prepare a Snowflake Account
@@ -155,11 +156,11 @@ GitHub Actions runs these checks with dummy identifiers and never contacts Snowf
 ## Boundaries and Limitations
 
 - The RAW loader is manually invoked; no scheduler, Snowpipe, task, or webhook exists.
-- Staging views standardize source records but do not create canonical matches or enforce P1.4 survivorship.
+- Staging views standardize source records but do not create canonical matches or enforce P1.4 survivorship; P1.8 performs those separate governed steps.
 - Relationship tests warn for references outside a partial source extract; production completeness rules remain future work.
 - Resource monitors control assigned warehouse compute, not every possible Snowflake charge. P1.7 does not enable serverless features.
 - The 30-day service tokens and current-address network restriction require manual rotation or update when they expire or the authorized network changes.
-- P1.8 has not started.
+- P1.8 is complete and consumes the shared company and people views. P1.9 canonical models have not started.
 
 ## Authenticated Acceptance Evidence
 
@@ -172,3 +173,7 @@ On 2026-10-12:
 - dbt generated `catalog.json` for documentation and lineage;
 - the Globex demonstration preserved 3 HubSpot history rows and standardized the latest updated name;
 - the isolated `NULL` company-name fixture failed its required-value test and was removed afterward.
+
+## P1.8 Extension Evidence
+
+On 2026-10-13, P1.8 added the shared people view without changing the accepted P1.7 RAW or source-specific models. The restricted dbt role built 10 views and passed 68 production data tests (`PASS=78`, including model builds). The read-only P1.8 verifier then read actual company staging rows and completed the Globex review flow using only a temporary local identity-database copy.

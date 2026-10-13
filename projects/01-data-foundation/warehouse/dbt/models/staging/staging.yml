@@ -171,3 +171,21 @@ models:
           - not_null:
               config:
                 where: "event_type = 'upsert'"
+
+  - name: stg_crm_people
+    description: Salesforce Leads/Contacts and HubSpot Contacts aligned for explainable P1.8 Person matching without merging source identities.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: source_system
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [salesforce, hubspot]
+      - name: source_object_id
+        data_tests: [not_null]
+      - name: name
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'upsert'"

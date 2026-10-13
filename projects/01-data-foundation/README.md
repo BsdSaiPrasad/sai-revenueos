@@ -94,6 +94,16 @@ Read the repository-wide [beginner walkthrough](../../docs/START_HERE.md) for th
 - Least-privilege roles, an extra-small auto-suspending warehouse, query timeout, and a one-credit monthly resource monitor.
 - Authenticated acceptance loaded 39 immutable source events, replayed all 39 without duplicates, built 9 staging views, passed 63 production tests, generated dbt documentation, verified Globex history, and detected then removed the isolated invalid fixture.
 
+### P1.8 — Identity Resolution, Survivorship, and Manual Review
+
+- Deterministic, entity-specific Account and Person matching from P1.7 company and people staging views.
+- Explainable positive and negative evidence with versioned policy, thresholds, and immutable resolution runs.
+- Mandatory identity-steward approval for every new crosswalk; no automatic merge or mapping activation.
+- Version-locked review work that blocks unauthorized decisions and stale-review overwrites.
+- Reuse of P1.2 cases, evidence, mappings, and audit behavior plus P1.4 authority-first survivorship.
+- Versioned active-mapping output for future P1.9 canonical models without implementing P1.9.
+- Thirteen executed resolution scenarios and concise synthetic and authenticated Snowflake demonstrations.
+
 The [project state](PROJECT_STATE.md) is the authoritative source for current status.
 
 ## Key Documents
@@ -114,7 +124,10 @@ The [project state](PROJECT_STATE.md) is the authoritative source for current st
 | [P1.6 Ingestion Policy](contracts/live-ingestion-policy.v1.json) | Inspect the versioned authentication, API, reliability, seed, and storage boundary. |
 | [P1.7 Snowflake + dbt Guide](architecture/SNOWFLAKE_DBT.md) | Configure the cost-controlled warehouse, load source history, build staging models, and run the demonstrations. |
 | [P1.7 Normalization Policy](contracts/warehouse-normalization-policy.v1.json) | Inspect the versioned RAW, staging, history, test, and completion requirements. |
-| [Decision Index](DECISIONS.md) | See all 40 approved decisions and open their ADRs. |
+| [P1.8 Identity Resolution Guide](architecture/IDENTITY_RESOLUTION.md) | Follow staged Accounts/Persons through matching, review, approval, survivorship, and publication. |
+| [P1.8 Resolution Policy](contracts/identity-resolution-policy.v1.json) | Inspect matching features, thresholds, review rules, survivorship reuse, and boundaries. |
+| [P1.8 Active-Mapping Contract](contracts/identity-resolution-output.v1.json) | Inspect the approved-mapping boundary available to future P1.9 models. |
+| [Decision Index](DECISIONS.md) | See all 44 approved decisions and open their ADRs. |
 | [Shared Contract](../../shared/contracts/canonical-model.v1.json) | Inspect the machine-readable technical definition. |
 | [Project State](PROJECT_STATE.md) | Confirm what works, what is deferred, and what comes next. |
 | [Work Log](WORK_LOG.md) | Review chronological implementation and verification evidence. |
@@ -141,19 +154,20 @@ python3 projects/01-data-foundation/scripts/demo_source_model.py
 python3 projects/01-data-foundation/scripts/demo_field_authority.py
 python3 projects/01-data-foundation/scripts/demo_synthetic_data.py
 python3 projects/01-data-foundation/scripts/demo_live_ingestion.py
+python3 projects/01-data-foundation/scripts/demo_identity_resolution.py
 python3 projects/01-data-foundation/scripts/validate_dbt_project.py
 ```
 
-No credentials, warehouse, or external service is required for these checks. The completed authenticated P1.6 evidence remains local and ignored; CI stays credential-free. P1.7's dbt parser uses the separately pinned Python 3.12 environment described in its guide.
+No credentials, warehouse, or external service is required for these checks. Completed authenticated evidence remains local and ignored; CI stays credential-free. P1.7/P1.8 dbt parsing uses the separately pinned Python 3.12 environment described in the Snowflake guide.
 
 ## What Is Not Implemented?
 
-- A deployed or scheduled live-ingestion service and a complete identity-matching engine.
+- A deployed or scheduled live-ingestion service and a production-scale identity-matching service.
 - A complete enterprise survivorship catalog beyond the selected P1.4 fields.
 - A deployed production identity service, scheduled warehouse loader, or production Snowflake publication pipeline.
 - A scheduled production Snowflake loader, managed secret rotation, or automated dbt deployment.
 - Live write-back, reverse Extract-Transform-Load (ETL), activation, scoring, routing, or forecasting.
-- Production security policies, monitoring, or stewardship interfaces.
+- Production security policies, monitoring, or a stewardship user interface.
 - Distributed or production-scale synthetic data generation.
 - Webhook receivers, managed secret storage, cloud raw storage, and production connector observability.
 
@@ -161,4 +175,4 @@ The future folders for those capabilities are intentionally absent until they co
 
 ## What Comes Next?
 
-Review the completed [P1.7 Snowflake + dbt guide](architecture/SNOWFLAKE_DBT.md), then approve P1.8 scope separately before implementation.
+Review the completed [P1.8 identity-resolution guide](architecture/IDENTITY_RESOLUTION.md), then define and approve P1.9 scope separately before implementation.

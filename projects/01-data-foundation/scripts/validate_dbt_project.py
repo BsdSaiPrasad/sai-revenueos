@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate P1.7 Snowflake/dbt artifacts without credentials or dbt packages."""
+"""Validate P1.7 staging and its P1.8 identity-input view without credentials."""
 
 from __future__ import annotations
 
@@ -22,6 +22,7 @@ def main() -> int:
         DBT / "models/staging/staging.yml",
         DBT / "models/staging/shared/stg_source_events.sql",
         DBT / "models/staging/shared/stg_crm_companies.sql",
+        DBT / "models/staging/shared/stg_crm_people.sql",
         DBT / "seeds/p17_invalid_globex.csv",
         PROJECT / "warehouse/snowflake/bootstrap.sql",
         PROJECT / "warehouse/snowflake/pat_auth_setup.sql",
@@ -84,7 +85,7 @@ def main() -> int:
         for error in errors:
             print("  - %s" % error)
         return 1
-    print("P1.7 dbt project validation PASSED: Snowflake RAW, 9 staging models, tests, lineage, and failure demo.")
+    print("P1.7/P1.8 dbt validation PASSED: Snowflake RAW, 10 staging models, identity inputs, tests, lineage, and failure demo.")
     return 0
 
 

@@ -3,7 +3,7 @@
 
 This script checks the shared JavaScript Object Notation (JSON) contract, canonical
 Entity Relationship Diagram (ERD), Architecture Decision Records (ADRs), required
-P1.2 through P1.7 artifacts, schema enforcement names, continuity documents, and
+P1.2 through P1.8 artifacts, schema enforcement names, continuity documents, and
 secret-like filenames. It validates repository consistency; it does not execute
 runtime tests or claim that a production service is deployed.
 """
@@ -59,7 +59,14 @@ WAREHOUSE_FAILURE_DEMO_PATH = PROJECT_DIR / "scripts/demo_dbt_failure.py"
 WAREHOUSE_VALIDATOR_PATH = PROJECT_DIR / "scripts/validate_dbt_project.py"
 WAREHOUSE_DBT_DIR = PROJECT_DIR / "warehouse/dbt"
 WAREHOUSE_BOOTSTRAP_PATH = PROJECT_DIR / "warehouse/snowflake/bootstrap.sql"
-DECISION_COUNT = 40
+RESOLUTION_GUIDE_PATH = PROJECT_DIR / "architecture/IDENTITY_RESOLUTION.md"
+RESOLUTION_POLICY_PATH = PROJECT_DIR / "contracts/identity-resolution-policy.v1.json"
+RESOLUTION_OUTPUT_PATH = PROJECT_DIR / "contracts/identity-resolution-output.v1.json"
+RESOLUTION_PACKAGE_DIR = PROJECT_DIR / "src/sai_revenueos_resolution"
+RESOLUTION_TEST_PATH = PROJECT_DIR / "tests/test_identity_resolution.py"
+RESOLUTION_DEMO_PATH = PROJECT_DIR / "scripts/demo_identity_resolution.py"
+RESOLUTION_SNOWFLAKE_PATH = PROJECT_DIR / "scripts/verify_identity_resolution_snowflake.py"
+DECISION_COUNT = 44
 
 REQUIRED_ENTITIES = {
     "Account",
@@ -541,6 +548,7 @@ def validate_p17_reference(errors: list[str]) -> None:
         WAREHOUSE_DBT_DIR / "models/staging/staging.yml",
         WAREHOUSE_DBT_DIR / "models/staging/shared/stg_source_events.sql",
         WAREHOUSE_DBT_DIR / "models/staging/shared/stg_crm_companies.sql",
+        WAREHOUSE_DBT_DIR / "models/staging/shared/stg_crm_people.sql",
         WAREHOUSE_DBT_DIR / "seeds/p17_invalid_globex.csv",
     )
     missing = [str(path.relative_to(REPO_ROOT)) for path in required if not path.is_file()]
@@ -588,6 +596,59 @@ def validate_p17_reference(errors: list[str]) -> None:
             fail(errors, f"P1.7 Snowflake bootstrap is missing safeguard: {safeguard}")
 
 
+def validate_p18_reference(errors: list[str]) -> None:
+    """Check P1.8 matching, manual review, survivorship, and P1.7 integration."""
+    required = (
+        RESOLUTION_GUIDE_PATH,
+        RESOLUTION_POLICY_PATH,
+        RESOLUTION_OUTPUT_PATH,
+        RESOLUTION_PACKAGE_DIR / "__init__.py",
+        RESOLUTION_PACKAGE_DIR / "matcher.py",
+        RESOLUTION_PACKAGE_DIR / "normalization.py",
+        RESOLUTION_PACKAGE_DIR / "policy.py",
+        RESOLUTION_PACKAGE_DIR / "schema.sql",
+        RESOLUTION_PACKAGE_DIR / "service.py",
+        RESOLUTION_PACKAGE_DIR / "staging.py",
+        RESOLUTION_PACKAGE_DIR / "store.py",
+        RESOLUTION_TEST_PATH,
+        RESOLUTION_DEMO_PATH,
+        RESOLUTION_SNOWFLAKE_PATH,
+        WAREHOUSE_DBT_DIR / "models/staging/shared/stg_crm_people.sql",
+    )
+    missing = [str(path.relative_to(REPO_ROOT)) for path in required if not path.is_file()]
+    if missing:
+        fail(errors, f"missing P1.8 reference artifacts: {', '.join(missing)}")
+        return
+    try:
+        policy = json.loads(RESOLUTION_POLICY_PATH.read_text(encoding="utf-8"))
+        output = json.loads(RESOLUTION_OUTPUT_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        fail(errors, f"P1.8 contracts cannot be loaded: {exc}")
+        return
+    if policy.get("contract_version") != "1.0.0":
+        fail(errors, "P1.8 resolution policy must declare version 1.0.0")
+    if set(policy.get("matching", {})) != {"Account", "Person"}:
+        fail(errors, "P1.8 matching must remain limited to Account and Person")
+    decision = policy.get("decision_policy", {})
+    if not decision.get("human_approval_required_for_every_new_crosswalk"):
+        fail(errors, "P1.8 must require human approval for every new crosswalk")
+    if decision.get("automatic_merge") or decision.get("automatic_crosswalk_activation"):
+        fail(errors, "P1.8 cannot automatically merge or activate identities")
+    survivorship = policy.get("survivorship", {})
+    if survivorship.get("authority_contract") != "field-authority-policy.v1.json":
+        fail(errors, "P1.8 survivorship must reuse the P1.4 authority contract")
+    if survivorship.get("matching_score_selects_field_value"):
+        fail(errors, "P1.8 match scores cannot select canonical field values")
+    if output.get("properties", {}).get("mapping_status", {}).get("const") == "proposed":
+        fail(errors, "P1.8 output cannot publish proposed mappings")
+    output_text = RESOLUTION_OUTPUT_PATH.read_text(encoding="utf-8")
+    if '"mapping_status": {"const": "active"}' not in output_text:
+        fail(errors, "P1.8 output contract must publish active mappings only")
+    staging_text = (RESOLUTION_PACKAGE_DIR / "staging.py").read_text(encoding="utf-8")
+    if "STG_CRM_COMPANIES" not in staging_text or "STG_CRM_PEOPLE" not in staging_text:
+        fail(errors, "P1.8 is not connected to both P1.7 identity staging views")
+
+
 def validate_no_tracked_secrets(errors: list[str]) -> None:
     """Flag secret-like filenames among tracked and candidate repository files."""
     try:
@@ -624,6 +685,7 @@ def main() -> int:
     validate_p15_reference(errors)
     validate_p16_reference(errors)
     validate_p17_reference(errors)
+    validate_p18_reference(errors)
     validate_no_tracked_secrets(errors)
 
     if errors:
@@ -637,7 +699,7 @@ def main() -> int:
     print(
         "P1 architecture validation PASSED: "
         f"{entity_count} entities, {relationship_count} relationships, "
-        f"{DECISION_COUNT} decisions, ERD coverage, P1.2–P1.7 reference artifacts, "
+        f"{DECISION_COUNT} decisions, ERD coverage, P1.2–P1.8 reference artifacts, "
         "continuity files, and secret filename checks."
     )
     return 0

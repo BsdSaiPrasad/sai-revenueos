@@ -6,7 +6,7 @@ This walkthrough explains Project 1 through one continuous, synthetic example. N
 
 **Globex Health** appears in both Salesforce and HubSpot. **Sarah Kim** and **John Lee** work there. The company is evaluating a fictional analytics product, signs a contract, and starts a subscription.
 
-The architecture and completed milestones are verified through P1.7. The live connectors passed mocked and authenticated acceptance for marked fictional CRM records, and the Snowflake/dbt path passed authenticated RAW loading, staging, quality, lineage, replay, and failure checks. Write-back execution remains later work.
+The architecture and completed milestones are verified through P1.8. The live connectors passed mocked and authenticated acceptance for marked fictional CRM records; Snowflake/dbt passed authenticated RAW loading and staging checks; and P1.8 passed matching, manual-review, survivorship, replay, and stale-review checks. Write-back execution remains later work.
 
 ## Step 1 — Preserve the Source Records
 
@@ -36,9 +36,7 @@ HubSpot HS-502 ─────┘
 
 The source records are preserved; they are not replaced by the canonical Account.
 
-**Implemented locally:** unresolved cases, candidate evidence, explicit steward decisions, authoritative active mappings, and effective-dated correction history.
-
-**Implemented locally:** mapping states, idempotency, correction, merge, unmerge, rollback, and reconciliation. The complete matching engine still comes later.
+**Implemented locally:** unresolved cases, deterministic Account/Person candidate evidence, version-locked steward review, authoritative active mappings, effective-dated correction history, idempotency, merge/unmerge controls, rollback, and reconciliation. Every new crosswalk requires human approval.
 
 ## Step 4 — Decide Which Source Owns Each Field
 
@@ -54,7 +52,7 @@ If Sarah later joins **Northstar Labs**, her Person ID remains the same. One rel
 
 **Already designed:** Person is durable; employment is effective-dated.
 
-**Later:** matching rules will decide when Salesforce, HubSpot, and product profiles represent the same human.
+**Implemented locally:** P1.8 compares normalized email, name, and mapped-employer evidence for Salesforce and HubSpot people. Ambiguous or weak evidence stays in human review; it never creates an automatic Person mapping.
 
 ## Step 6 — Create an Opportunity
 
@@ -114,7 +112,13 @@ P1.6 connects to Salesforce Developer Edition and HubSpot Free with locally stor
 
 P1.7 copies the same immutable source events into Snowflake RAW. dbt Core extracts consistent company, person, and opportunity fields while retaining every source ID, event, timestamp, hash, and raw payload.
 
-**Implemented and authenticated:** the idempotent loader, seven source-specific models, shared CRM company view, safe type conversions, late-arrival labels, 66 declared dbt tests, lineage metadata, cost-controlled setup, and isolated failure demonstration. The real run loaded 39 source events, replayed them without duplication, passed all 63 production tests, and preserved three HubSpot Globex name versions from RAW through staging.
+**Implemented and authenticated:** the idempotent loader, seven source-specific models, shared CRM company and people views, safe type conversions, late-arrival labels, 71 declared dbt tests, lineage metadata, cost-controlled setup, and isolated failure demonstration. The current build passes 68 production data tests plus 10 model builds and preserves the existing Globex history from RAW through staging.
+
+## Step 13 — Resolve Identity with Human Approval
+
+P1.8 reads the latest Account and Person rows from P1.7 staging. It produces deterministic feature evidence, such as an exact Globex domain, then opens a review instead of activating the proposed crosswalk.
+
+**Implemented and verified:** Sarah Kim acting as an authorized identity steward can approve the proposed mapping; retries are idempotent, stale work cannot overwrite newer evidence, and the active mapping can be consumed by future P1.9 models. Governed field values still pass through P1.4, so conflicting values and their provenance remain available.
 
 ## Where to Go Next
 
@@ -129,3 +133,4 @@ P1.7 copies the same immutable source events into Snowflake RAW. dbt Core extrac
 9. Run the [P1.5 synthetic-data guide](../projects/01-data-foundation/architecture/SYNTHETIC_DATA.md) to create and inspect a connected fictional ecosystem.
 10. Follow the [P1.6 live-ingestion guide](../projects/01-data-foundation/architecture/LIVE_INGESTION.md) for the mocked demo and secure real-account verification.
 11. Follow the [P1.7 Snowflake + dbt guide](../projects/01-data-foundation/architecture/SNOWFLAKE_DBT.md) for RAW loading, staging, data tests, and lineage.
+12. Run the [P1.8 identity-resolution guide](../projects/01-data-foundation/architecture/IDENTITY_RESOLUTION.md) for matching, review, approval, survivorship, and the P1.9 output boundary.

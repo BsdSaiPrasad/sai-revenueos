@@ -82,6 +82,9 @@ jobs:
       - name: Run the mocked live-ingestion demonstration
         run: python projects/01-data-foundation/scripts/demo_live_ingestion.py
 
+      - name: Run the governed identity-resolution demonstration
+        run: python projects/01-data-foundation/scripts/demo_identity_resolution.py
+
       - name: Generate and validate a small synthetic dataset
         run: >-
           python projects/01-data-foundation/scripts/generate_synthetic_gtm_data.py
