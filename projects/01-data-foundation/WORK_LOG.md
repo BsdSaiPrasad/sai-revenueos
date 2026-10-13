@@ -393,3 +393,38 @@ GitHub Actions run [38320413720](https://github.com/BsdSaiPrasad/sai-revenueos/a
 Acceptance commit: `8e1c4f8` (`docs: complete P1.6 acceptance`). Authored and committed as `BsdSaiPrasad <bsdsaiprasad1@gmail.com>` with no co-author attribution.
 
 GitHub Actions run [38321426966](https://github.com/BsdSaiPrasad/sai-revenueos/actions/runs/38321426966) passed the complete workflow on Python 3.9 and 3.14, including all 90 tests, architecture validation, four demonstrations, and 25-company file generation.
+
+## 2026-10-12 — P1.7 Snowflake + dbt Core (Complete)
+
+### Implemented
+
+- Added an atomic, idempotent loader from the existing P1.6 SQLite source-event history to a Snowflake RAW table. Exact replays are no-ops; conflicting reuse of an event ID rolls back the transaction.
+- Added a dbt Core project with 9 staging models for the shared event envelope and all 7 approved Salesforce/HubSpot object types, plus 66 quality tests and lineage metadata.
+- Preserved raw payloads, source identity, source and arrival timestamps, event hashes, historical versions, and explicit latest/late-arrival markers.
+- Added a cost-controlled Snowflake bootstrap with separate least-privilege loader and dbt roles, an extra-small warehouse, 60-second auto-suspend, five-minute statement timeout, and a one-credit monthly resource monitor.
+- Added a concise real Globex demonstration, an isolated intentionally failing data-quality demonstration, a versioned normalization policy, and accepted Decisions D037–D040.
+- Extended credential-free CI with static dbt validation and `dbt parse`; no live credentials or Snowflake connection are used in GitHub Actions.
+
+### Local verification
+
+- `python3 -m unittest discover -s projects/01-data-foundation/tests -v` — **passed**, 102/102 scenarios.
+- `python3 projects/01-data-foundation/scripts/validate_architecture.py` — **passed**: 23 entities, 31 relationships, 40 accepted decisions, and P1.2–P1.7 artifacts.
+- `python3 projects/01-data-foundation/scripts/validate_dbt_project.py` — **passed**.
+- dbt Core 1.12.5 with dbt-snowflake 1.12.2 parsed the project without connecting to Snowflake: 9 models, 66 tests, 1 failure-demo seed, and 1 source.
+- Python compilation, JSON parsing, Markdown links, and diff whitespace checks passed.
+
+### Authenticated acceptance and boundaries
+
+- Created the authorized Snowflake database, RAW and STAGING schemas, immutable event table, two least-privilege roles, X-Small warehouse, 60-second auto-suspend, five-minute statement timeout, and one-credit monthly resource monitor.
+- Created separate loader and dbt service users with current-address network enforcement and role-restricted 30-day PATs. Secrets remain only in an ignored mode-600 local file and were not printed in project output.
+- `dbt debug` — **passed** with the restricted dbt service role.
+- First RAW load — **passed**: selected 39, inserted 39, row count 0 → 39.
+- Immediate RAW replay — **passed**: selected 39, inserted 0, replayed 39, row count remained 39.
+- Authenticated `dbt build --exclude tag:failure_demo` — **passed**: 9 views and 63 production data tests; `PASS=72`, `WARN=0`, `ERROR=0`.
+- `dbt docs generate` — **passed** and wrote the lineage catalog.
+- Real Globex demonstration — **passed**: 3 HubSpot RAW history rows; latest staged name matched `[SAI TEST] Globex Health - Incremental Update`.
+- Isolated bad-data demonstration — **passed**: the required-name test returned dbt exit code 1 as expected, then cleanup removed the temporary table.
+- The canonical v1.0.0 contract, 23 entities, 31 relationships, P1.2–P1.6 behavior, and Decisions D001–D036 remain unchanged.
+- No reverse ETL, live write-back, scheduler, Snowflake ingestion service, downstream workflow, or P1.8 work was added.
+- No **MASTER ARCHITECTURE DECISION NEEDED** change was required.
+- P1.7 is complete. P1 is 50% complete (8 of 16 milestones), and overall RevenueOS completion is approximately 7.14%.

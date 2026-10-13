@@ -85,6 +85,15 @@ Read the repository-wide [beginner walkthrough](../../docs/START_HERE.md) for th
 - Twenty mocked connector scenarios, including Salesforce read-side timestamp regression coverage, and a concise runnable recovery demonstration.
 - Authenticated Salesforce and HubSpot acceptance passed for the controlled marked Globex records, including raw history, real updates, incremental polling, replay, checkpoints, and unresolved identities.
 
+### P1.7 — Snowflake + dbt Core Staging and Normalization
+
+- Snowflake RAW table and an atomic, idempotent loader for the existing P1.3/P1.6 source-event history.
+- dbt Core staging for Salesforce Accounts, Leads, Contacts, and Opportunities plus HubSpot Companies, Contacts, and Deals.
+- Preserved source identities, raw payloads, timestamps, event hashes, history, latest-version markers, and late-arrival markers.
+- Safe type conversion plus dbt quality tests, documentation metadata, lineage, and an isolated expected-failure exercise.
+- Least-privilege roles, an extra-small auto-suspending warehouse, query timeout, and a one-credit monthly resource monitor.
+- Authenticated acceptance loaded 39 immutable source events, replayed all 39 without duplicates, built 9 staging views, passed 63 production tests, generated dbt documentation, verified Globex history, and detected then removed the isolated invalid fixture.
+
 The [project state](PROJECT_STATE.md) is the authoritative source for current status.
 
 ## Key Documents
@@ -103,7 +112,9 @@ The [project state](PROJECT_STATE.md) is the authoritative source for current st
 | [P1.5 Manifest Contract](contracts/synthetic-dataset-manifest.v1.json) | Inspect the versioned scenario-manifest definition. |
 | [P1.6 Live Ingestion Guide](architecture/LIVE_INGESTION.md) | Configure credentials safely and run mocked or real connector verification. |
 | [P1.6 Ingestion Policy](contracts/live-ingestion-policy.v1.json) | Inspect the versioned authentication, API, reliability, seed, and storage boundary. |
-| [Decision Index](DECISIONS.md) | See all 36 approved decisions and open their ADRs. |
+| [P1.7 Snowflake + dbt Guide](architecture/SNOWFLAKE_DBT.md) | Configure the cost-controlled warehouse, load source history, build staging models, and run the demonstrations. |
+| [P1.7 Normalization Policy](contracts/warehouse-normalization-policy.v1.json) | Inspect the versioned RAW, staging, history, test, and completion requirements. |
+| [Decision Index](DECISIONS.md) | See all 40 approved decisions and open their ADRs. |
 | [Shared Contract](../../shared/contracts/canonical-model.v1.json) | Inspect the machine-readable technical definition. |
 | [Project State](PROJECT_STATE.md) | Confirm what works, what is deferred, and what comes next. |
 | [Work Log](WORK_LOG.md) | Review chronological implementation and verification evidence. |
@@ -130,16 +141,17 @@ python3 projects/01-data-foundation/scripts/demo_source_model.py
 python3 projects/01-data-foundation/scripts/demo_field_authority.py
 python3 projects/01-data-foundation/scripts/demo_synthetic_data.py
 python3 projects/01-data-foundation/scripts/demo_live_ingestion.py
+python3 projects/01-data-foundation/scripts/validate_dbt_project.py
 ```
 
-No credentials, package installation, warehouse, or external service is required for these checks. The completed authenticated P1.6 evidence remains local and ignored; CI stays credential-free.
+No credentials, warehouse, or external service is required for these checks. The completed authenticated P1.6 evidence remains local and ignored; CI stays credential-free. P1.7's dbt parser uses the separately pinned Python 3.12 environment described in its guide.
 
 ## What Is Not Implemented?
 
 - A deployed or scheduled live-ingestion service and a complete identity-matching engine.
 - A complete enterprise survivorship catalog beyond the selected P1.4 fields.
-- A deployed production identity service or Snowflake publication pipeline.
-- Physical Snowflake tables and dbt transformations.
+- A deployed production identity service, scheduled warehouse loader, or production Snowflake publication pipeline.
+- A scheduled production Snowflake loader, managed secret rotation, or automated dbt deployment.
 - Live write-back, reverse Extract-Transform-Load (ETL), activation, scoring, routing, or forecasting.
 - Production security policies, monitoring, or stewardship interfaces.
 - Distributed or production-scale synthetic data generation.
@@ -149,4 +161,4 @@ The future folders for those capabilities are intentionally absent until they co
 
 ## What Comes Next?
 
-P1.6 is complete. P1.7 has not started and requires a separate architecture discussion and approved scope.
+Review the completed [P1.7 Snowflake + dbt guide](architecture/SNOWFLAKE_DBT.md), then approve P1.8 scope separately before implementation.

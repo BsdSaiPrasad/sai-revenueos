@@ -16,6 +16,8 @@ This glossary explains terms used in the repository. Definitions are specific to
 | **Crosswalk** | A mapping between a source-system record and a canonical entity. | Salesforce Account `SF-1001` maps to the canonical Globex Health Account. |
 | **Data contract** | A versioned agreement about data meaning, structure, and allowed relationships. | `canonical-model.v1.json` defines the shared P1 logical model. |
 | **Data lineage** | The path showing where data came from and how it changed. | An Activity links back to the source record that produced it. |
+| **Data test** | An automated assertion about stored data, such as uniqueness or a required value. | P1.7 verifies that each staged event ID is unique and not `NULL`. |
+| **dbt Core — data build tool Core** | An open-source command-line tool that turns warehouse data into documented, tested models using SQL. | P1.7 uses dbt Core to standardize Snowflake RAW events without replacing the original payload. |
 | **Entity** | A modeled business concept with its own identity and attributes. | Account, Person, and Subscription are entities. |
 | **ERD — Entity Relationship Diagram** | A visual map of entities, attributes, and relationships. | The P1 ERD shows Account connected to Opportunity and Contract. |
 | **Event** | A time-stamped fact that something happened. | An email Activity occurred at a specific time. |
@@ -39,11 +41,14 @@ This glossary explains terms used in the repository. Definitions are specific to
 | **RevOps — Revenue Operations** | The people and processes that align marketing, sales, customer success, and revenue data. | RevOps needs one reliable view of an Account across tools. |
 | **Rollback** | Undoing all changes in a failed transaction so partial data is not left behind. | If crosswalk creation fails, canonical creation should not remain half-finished. |
 | **Raw payload** | The complete available source record before RevenueOS selects or renames fields. | The synthetic Globex Salesforce payload keeps custom fields outside the standardized subset. |
+| **RAW schema** | A warehouse area that keeps source observations in their original event form before normalization. | Snowflake `RAW.SOURCE_EVENT` stores the complete P1.3 envelope and vendor payload. |
 | **Rate limit** | A vendor rule that caps API requests during a time period. | P1.6 honors `Retry-After` when HubSpot or Salesforce returns HTTP 429. |
 | **SCD Type 2 — Slowly Changing Dimension Type 2** | A history pattern that closes an old row and creates a new effective-dated row. | Globex Health's previous domain remains queryable after a domain change. |
 | **Source of truth** | The system or governed dataset considered authoritative for a specific fact. | A contract system may be authoritative for signed contract dates. |
 | **SourceRecord** | RevenueOS's stable reference to one object in one source system and tenant. | A Salesforce Lead and Contact are separate SourceRecords. |
 | **Source event envelope** | Standard metadata wrapped around a vendor payload for identity, time, tracing, event type, and replay. | Salesforce and HubSpot payloads use the same P1.3 envelope. |
+| **Snowflake** | A cloud data platform that stores and queries structured and semi-structured data. | P1.7 loads immutable CRM source events into a cost-controlled Snowflake database. |
+| **Staging model** | A first transformation that gives source data consistent names and types while retaining traceability. | `stg_hubspot_companies` turns the raw Globex payload into typed company fields and keeps its event ID. |
 | **Service Key** | A scoped HubSpot credential for account-level system-to-system API access. | P1.6 can use a Service Key limited to Company, Contact, and Deal access. |
 | **Survivorship** | Rules that choose which source value becomes the preferred canonical value. | P1.4 implements approved ownership and human review for selected fields; a complete enterprise ruleset remains later work. |
 | **Synthetic data** | Fictional data created for learning or testing. | Globex Health and Sarah Kim are synthetic examples. |

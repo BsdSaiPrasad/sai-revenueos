@@ -1,0 +1,13 @@
+version: 2
+
+data_tests:
+  - name: assert_raw_history_preserved
+    description: Every RAW event must remain represented once in typed staging history.
+  - name: assert_source_timestamps_valid
+    description: Invalid source, observation, checkpoint, or receipt timestamps must fail quality checks.
+  - name: assert_one_latest_version_per_source
+    description: History is retained, but exactly one version is labeled latest for each four-part source identity.
+  - name: assert_payload_identity_matches_envelope
+    description: Vendor payload IDs must agree with immutable envelope source IDs.
+  - name: assert_typed_values_valid
+    description: Present Opportunity and Deal amounts and dates must convert safely.

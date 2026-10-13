@@ -4,7 +4,7 @@
 
 This is the index of Project 1's approved architecture decisions. An Architecture Decision Record (ADR) explains the problem, alternatives, decision, technical design, and tradeoffs.
 
-All 36 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, D014–D019 define the P1.3 source model, D020–D025 define P1.4 field authority, D026–D030 define P1.5 synthetic data, and D031–D036 define P1.6 live ingestion. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
+All 40 decisions below are **Accepted**. D001–D008 define the canonical model, D009–D013 define P1.2 identity control, D014–D019 define the P1.3 source model, D020–D025 define P1.4 field authority, D026–D030 define P1.5 synthetic data, D031–D036 define P1.6 live ingestion, and D037–D040 define P1.7 Snowflake and dbt staging. A future change requires a new superseding ADR. A change that affects Projects 2–7 must be labeled **MASTER ARCHITECTURE DECISION NEEDED** before implementation.
 
 ## Approved Decisions
 
@@ -46,6 +46,10 @@ All 36 decisions below are **Accepted**. D001–D008 define the canonical model,
 | **D034** | Store live records raw-first through the existing local SQLite reference. | Preserves vendor evidence and proven transactions without prematurely adding cloud infrastructure. | [Store Live Data Raw-First in the Existing Local Reference](architecture/adr/0034-store-live-data-raw-first-locally.md) |
 | **D035** | Bound retries, respect rate limits, isolate errors, and advance checkpoints only after durable work. | Prevents vendor overload, duplicate processing, and silent data gaps. | [Bound Retries and Protect Checkpoints](architecture/adr/0035-bound-retries-and-protect-checkpoints.md) |
 | **D036** | Use mocked connector tests in CI and separate authenticated account verification. | Keeps automation deterministic while requiring real evidence before calling either platform live-verified. | [Verify Connectors with Mocks and Live Accounts](architecture/adr/0036-test-connectors-with-mocks-and-live-accounts.md) |
+| **D037** | Use real Snowflake and dbt Core rather than a local warehouse substitute. | Proves the approved warehouse, permissions, cost controls, SQL behavior, and connection boundary. | [Use Snowflake and dbt Core for the Warehouse Layer](architecture/adr/0037-use-snowflake-and-dbt-core.md) |
+| **D038** | Standardize Salesforce and HubSpot records while retaining complete source identity and provenance. | Gives consumers consistent fields without hiding vendor evidence or implying an identity merge. | [Standardize CRM Records Without Losing Their Source Identity](architecture/adr/0038-standardize-sources-with-provenance.md) |
+| **D039** | Use safe conversions, validity flags, immutable history, and explicit late-arrival labels. | Makes malformed or out-of-order data visible without losing good records or source evidence. | [Make Invalid, Historical, and Late Data Visible](architecture/adr/0039-handle-types-history-and-late-data-safely.md) |
+| **D040** | Make dbt quality tests, documentation, lineage, and an isolated failure demonstration executable. | Proves expected success and failure behavior instead of relying on written claims. | [Make Warehouse Quality and Lineage Executable](architecture/adr/0040-test-document-and-demonstrate-dbt-lineage.md) |
 
 ## What These Decisions Do Not Implement
 
@@ -56,4 +60,4 @@ The decisions define the architecture. They do not mean the following capabiliti
 - Physical warehouse constraints and reconciliation jobs.
 - Live field synchronization or write-back delivery.
 
-The P1.2 identity, P1.3 source, P1.4 field-authority, P1.5 synthetic-data, and P1.6 live-ingestion mechanics are local references, not deployed services. Authenticated P1.6 acceptance passed separately for controlled Salesforce and HubSpot test records; CI remains credential-free. P1.7 and later work require a separate approved scope.
+The P1.2 identity, P1.3 source, P1.4 field-authority, P1.5 synthetic-data, P1.6 live-ingestion, and P1.7 warehouse mechanics are reference implementations, not deployed services. Authenticated P1.6 acceptance passed for controlled Salesforce and HubSpot test records, and authenticated P1.7 acceptance passed against the cost-controlled Snowflake account; CI remains credential-free. P1.8 and later work require a separate approved scope.

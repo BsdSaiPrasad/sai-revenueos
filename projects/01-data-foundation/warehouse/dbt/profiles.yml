@@ -1,0 +1,15 @@
+sai_revenueos:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      password: "{{ env_var('SNOWFLAKE_DBT_TOKEN', 'ci_parse_only') }}"
+      role: "{{ env_var('SNOWFLAKE_DBT_ROLE', 'SAI_REVENUEOS_DBT') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE', 'SAI_REVENUEOS') }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'SAI_REVENUEOS_XS') }}"
+      schema: "{{ env_var('SNOWFLAKE_STAGING_SCHEMA', 'STAGING') }}"
+      threads: 2
+      client_session_keep_alive: false
+      query_tag: sai_revenueos_p17

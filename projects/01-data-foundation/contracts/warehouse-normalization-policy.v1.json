@@ -1,0 +1,75 @@
+{
+  "contract_name": "warehouse-normalization-policy",
+  "contract_version": "1.0.0",
+  "scope": "P1.7 Snowflake RAW loading and dbt Core staging",
+  "platform": {
+    "warehouse": "snowflake",
+    "transformation": "dbt-core",
+    "local_substitute_allowed": false
+  },
+  "raw_history": {
+    "source": "P1.3/P1.6 source_event",
+    "target": "SAI_REVENUEOS.RAW.SOURCE_EVENT",
+    "immutable_key": "event_id",
+    "conflicting_replay_action": "fail_batch",
+    "exact_replay_action": "no_op",
+    "preserved_fields": [
+      "source identity",
+      "event type",
+      "source and observation timestamps",
+      "tracing metadata",
+      "checkpoint metadata",
+      "complete raw payload",
+      "payload and envelope hashes",
+      "local processing evidence"
+    ]
+  },
+  "staging": {
+    "materialization": "view",
+    "essential_objects": {
+      "salesforce": ["Account", "Lead", "Contact", "Opportunity"],
+      "hubspot": ["Company", "Contact", "Deal"]
+    },
+    "type_handling": "TRY conversion with explicit validity flags",
+    "null_handling": "blank optional strings become NULL; required values are tested",
+    "history_handling": "retain every event and flag the latest and late-arriving versions",
+    "identity_handling": "preserve source records; do not merge or approve identities"
+  },
+  "quality": {
+    "required": [
+      "unique event IDs",
+      "required source identity fields",
+      "relationships",
+      "valid timestamp and typed values",
+      "one latest version per source identity",
+      "raw-to-staging history row-count parity"
+    ],
+    "failure_demo": "isolated tagged seed excluded from normal builds"
+  },
+  "cost_safeguards": {
+    "warehouse_size": "XSMALL",
+    "auto_suspend_seconds": 60,
+    "auto_resume": true,
+    "max_cluster_count": 1,
+    "statement_timeout_seconds": 300,
+    "monthly_credit_quota": 1,
+    "suspend_percent": 75,
+    "suspend_immediately_percent": 100
+  },
+  "completion_gate": {
+    "mocked_and_static_ci_required": true,
+    "authenticated_snowflake_load_required": true,
+    "authenticated_dbt_build_and_test_required": true,
+    "real_globex_query_required": true,
+    "isolated_failure_demo_required": true
+  },
+  "boundaries": {
+    "scheduled_orchestration": false,
+    "snowpipe": false,
+    "webhooks": false,
+    "production_data": false,
+    "identity_auto_merge": false,
+    "crm_write_back": false,
+    "p1_8": false
+  }
+}

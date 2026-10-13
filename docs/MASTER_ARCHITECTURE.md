@@ -37,7 +37,7 @@ Example: synthetic company Globex Health can appear in Salesforce and HubSpot. P
 
 | Project | What it owns | Current status |
 |---|---|---|
-| **P1 — Data Foundation & Customer Identity** | Canonical entities, source identity, historical relationships, field authority, provenance, shared data contracts, synthetic fixtures, and CRM ingestion. | P1.0–P1.6 complete |
+| **P1 — Data Foundation & Customer Identity** | Canonical entities, source identity, historical relationships, field authority, provenance, shared data contracts, CRM ingestion, and normalized source staging. | P1.0–P1.7 complete |
 | **P2 — Inbound** | Future inbound demand capture, scoring, and routing. | Planned |
 | **P3 — Outbound** | Future prospecting, sequencing, and outbound engagement. | Planned |
 | **P4 — Revenue Intelligence** | Future pipeline, forecasting, and revenue analytics. | Planned |
@@ -71,6 +71,8 @@ A breaking change—such as changing what an Account ID means—requires a new m
 16. Write-back requires explicit authority and approval; P1.4 does not deliver writes.
 17. Live connectors preserve raw responses, use scoped credentials, and never approve identity matches automatically.
 18. API retries are bounded, and a failed stream cannot advance its checkpoint past a gap.
+19. Snowflake RAW preserves the complete P1.3/P1.6 event before dbt normalization.
+20. dbt staging keeps source identities and provenance separate from canonical resolution.
 
 The reasoning is recorded in the [P1 decision index](../projects/01-data-foundation/DECISIONS.md).
 
@@ -86,4 +88,4 @@ Repository validation catches structural drift, but future physical systems will
 
 ## What Comes Next?
 
-P1.6 connector code, mocked recovery coverage, and authenticated Salesforce and HubSpot acceptance checks are complete. P1.7 has not started and requires a separate approved scope; P2–P7 stay planned until their own work begins.
+P1.6 connector code and authenticated Salesforce/HubSpot acceptance are complete. P1.7 code and credential-free checks are ready, but authenticated Snowflake loading and dbt execution must pass before P1.7 is complete. P1.8 has not started; P2–P7 stay planned until their own work begins.

@@ -1,13 +1,13 @@
 # SAI RevenueOS
 
-[![Project status: P1.0 through P1.6 complete](https://img.shields.io/badge/status-P1.0%E2%80%93P1.6%20complete-2f855a)](projects/01-data-foundation/PROJECT_STATE.md)
+[![Project status: P1.0 through P1.7 complete](https://img.shields.io/badge/status-P1.0%E2%80%93P1.7%20complete-2f855a)](projects/01-data-foundation/PROJECT_STATE.md)
 [![CI](https://github.com/BsdSaiPrasad/sai-revenueos/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BsdSaiPrasad/sai-revenueos/actions/workflows/ci.yml)
 
 ## What Is SAI RevenueOS?
 
 SAI RevenueOS is a learning and portfolio project that models how an enterprise business can connect its Go-To-Market (GTM) systems. It creates a consistent view of companies, people, sales opportunities, contracts, subscriptions, and customer activity across disconnected tools. The platform is designed around realistic Business-to-Business Software-as-a-Service (B2B SaaS) scenarios, but every company, person, and data example is synthetic.
 
-The repository contains the completed architecture foundation plus tested local references for P1.2 identity control, P1.3 Salesforce/HubSpot source history, P1.4 field authority, P1.5 deterministic synthetic data, and P1.6 live ingestion. P1.6 passed mocked verification and the complete authenticated acceptance checklist for the marked fictional records in both test accounts. This is not a deployed production platform.
+The repository contains the completed architecture foundation plus tested references for P1.2 identity control, P1.3 Salesforce/HubSpot source history, P1.4 field authority, P1.5 deterministic synthetic data, P1.6 live ingestion, and P1.7 Snowflake/dbt staging. This is not a deployed production platform.
 
 ## What Business Problem Are We Solving?
 
@@ -40,7 +40,7 @@ Start with the [beginner walkthrough](docs/START_HERE.md). Use the [glossary](do
 
 | Project | Purpose | Status |
 |---|---|---|
-| **P1 — Data Foundation & Customer Identity** | Build shared identities, source mappings, and historical business relationships. | P1.0–P1.6 complete |
+| **P1 — Data Foundation & Customer Identity** | Build shared identities, source mappings, historical relationships, and normalized source staging. | P1.0–P1.7 complete |
 | **P2 — Inbound** | Connect future marketing demand, scoring, and routing processes. | Planned |
 | **P3 — Outbound** | Support future prospecting and outbound engagement workflows. | Planned |
 | **P4 — Revenue Intelligence** | Support future pipeline, forecasting, and revenue analysis. | Planned |
@@ -59,11 +59,12 @@ Start with the [beginner walkthrough](docs/START_HERE.md). Use the [glossary](do
 - P1.4 — Field-level source of truth, conflict review, provenance history, and controlled write-back authorization.
 - P1.5 — Deterministic synthetic GTM ecosystems, deliberate quality scenarios, portable files, and automated validation.
 - P1.6 — Salesforce and HubSpot connectors, safe authentication, raw-first initial and incremental polling, retries, replay, checkpoints, mocked recovery tests, and authenticated acceptance verification.
+- P1.7 — Real Snowflake RAW loading, dbt Core staging, quality tests, lineage, cost safeguards, replay verification, and an isolated failure demonstration.
 - Repository readability and learning-documentation improvement.
 
 **Planned next**
 
-- P1.7 has not started; its scope requires a separate architecture discussion and approval.
+- Review P1.7 results and approve P1.8 scope before implementation.
 
 See the authoritative [progress tracker](PROGRESS.md) and [P1 project state](projects/01-data-foundation/PROJECT_STATE.md) for exact status and limitations.
 
@@ -86,8 +87,9 @@ See the authoritative [progress tracker](PROGRESS.md) and [P1 project state](pro
     ├── examples/                  # Synthetic P1.3/P1.4 inputs
     ├── architecture/              # Model, ERD, and ADRs
     ├── scripts/                   # Validation and runnable demonstration
-    ├── src/                       # P1.2–P1.6 Python + SQLite references
-    └── tests/                     # P1.2–P1.6 executable acceptance scenarios
+    ├── src/                       # P1.2–P1.7 Python + SQLite references
+    ├── tests/                     # P1.2–P1.7 executable acceptance scenarios
+    └── warehouse/                 # P1.7 Snowflake setup and dbt Core project
 ```
 
 Future project folders are intentionally absent until they contain real work.
@@ -103,8 +105,9 @@ Future project folders are intentionally absent until they contain real work.
 7. [P1.4 Field Authority](projects/01-data-foundation/architecture/FIELD_AUTHORITY.md) — inspect field ownership, conflicts, reviews, and write-back authorization.
 8. [P1.5 Synthetic Data](projects/01-data-foundation/architecture/SYNTHETIC_DATA.md) — generate reproducible connected fixtures and inspect expected data-quality outcomes.
 9. [P1.6 Live Ingestion](projects/01-data-foundation/architecture/LIVE_INGESTION.md) — understand connector behavior and securely run real-account verification.
-10. [Project State](projects/01-data-foundation/PROJECT_STATE.md) — confirm what is actually working and what remains unverified.
-11. [Progress](PROGRESS.md) — see the milestone-based completion calculation.
+10. [P1.7 Snowflake + dbt](projects/01-data-foundation/architecture/SNOWFLAKE_DBT.md) — prepare and verify RAW loading, staging, tests, and lineage.
+11. [Project State](projects/01-data-foundation/PROJECT_STATE.md) — confirm what is actually working and what remains unverified.
+12. [Progress](PROGRESS.md) — see the milestone-based completion calculation.
 
 ## How to Verify the Current Implementation
 
@@ -112,6 +115,7 @@ Requirements: Python 3.9 or newer. The validator uses only the Python standard l
 
 ```bash
 python3 projects/01-data-foundation/scripts/validate_architecture.py
+python3 projects/01-data-foundation/scripts/validate_dbt_project.py
 python3 -m unittest discover -s projects/01-data-foundation/tests -v
 python3 projects/01-data-foundation/scripts/demo_source_model.py
 python3 projects/01-data-foundation/scripts/demo_field_authority.py
@@ -119,12 +123,13 @@ python3 projects/01-data-foundation/scripts/demo_synthetic_data.py
 python3 projects/01-data-foundation/scripts/demo_live_ingestion.py
 ```
 
-These commands check the unchanged 23 entities and 31 relationships, 36 approved decisions, required reference artifacts, 90 P1.2–P1.6 scenarios, and all four Globex demonstrations. The P1.6 demo uses scripted API responses; follow its guide for authenticated checks. Add `--verbose` to a demonstration command for complete technical evidence.
+These commands check the unchanged 23 entities and 31 relationships, 40 approved decisions, required reference artifacts, 102 P1.2–P1.7 scenarios, the dbt structure, and all four credential-free Globex demonstrations. Authenticated P1.7 evidence is documented separately because CI receives no Snowflake credentials. Add `--verbose` to a demonstration command for complete technical evidence.
 
 ## Important Limitations
 
-- The P1.2–P1.6 runtimes are local reference implementations, not deployed services or a data platform.
+- The P1.2–P1.7 runtimes are reference implementations, not deployed services or a production data platform.
 - Live connector acceptance is verified only for the controlled marked records in the two local test accounts. There is no scheduler, webhook receiver, write-back delivery, production Snowflake schema, complete identity-matching engine, reverse Extract-Transform-Load (ETL), or workflow service.
+- P1.7 is manually operated and learning-scale; it is not a scheduled production warehouse pipeline.
 - The shared JSON contract describes intended meaning and relationships; it does not prove that source data has been loaded.
 - P2–P7 are planned boundaries, not implemented capabilities.
 

@@ -1,0 +1,173 @@
+version: 2
+
+models:
+  - name: stg_source_events
+    description: One typed staging row for every immutable RAW source event.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: source_system
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [salesforce, hubspot]
+      - name: source_tenant
+        data_tests: [not_null]
+      - name: source_object_type
+        data_tests: [not_null]
+      - name: source_object_id
+        data_tests: [not_null]
+      - name: event_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [upsert, delete]
+      - name: payload_sha256
+        data_tests: [not_null]
+      - name: envelope_sha256
+        data_tests: [not_null]
+      - name: raw_payload_json
+        data_tests: [not_null]
+
+  - name: stg_salesforce_accounts
+    description: Salesforce Account history normalized to the shared company field names.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: source_object_id
+        data_tests: [not_null]
+      - name: name
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'upsert'"
+
+  - name: stg_salesforce_leads
+    description: Salesforce Lead history with normalized person and company attributes.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: last_name
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'upsert'"
+      - name: company_name
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'upsert'"
+
+  - name: stg_salesforce_contacts
+    description: Salesforce Contact history with its source Account reference preserved.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: last_name
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'upsert'"
+      - name: account_source_object_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_salesforce_accounts')
+                field: source_object_id
+              config:
+                severity: warn
+                where: "event_type = 'upsert'"
+
+  - name: stg_salesforce_opportunities
+    description: Salesforce Opportunity history with safe amount and date conversions.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: name
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'upsert'"
+      - name: stage
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'upsert'"
+      - name: account_source_object_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_salesforce_accounts')
+                field: source_object_id
+              config:
+                severity: warn
+                where: "event_type = 'upsert'"
+
+  - name: stg_hubspot_companies
+    description: HubSpot Company history normalized to the shared company field names.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: source_object_id
+        data_tests: [not_null]
+      - name: name
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'upsert'"
+
+  - name: stg_hubspot_contacts
+    description: HubSpot Contact history with its source Company reference preserved.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: last_name
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'upsert'"
+      - name: account_source_object_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_hubspot_companies')
+                field: source_object_id
+              config:
+                severity: warn
+                where: "event_type = 'upsert'"
+
+  - name: stg_hubspot_deals
+    description: HubSpot Deal history with safe amount and close-date conversions.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: name
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'upsert'"
+      - name: stage
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'upsert'"
+
+  - name: stg_crm_companies
+    description: Salesforce Accounts and HubSpot Companies with consistent columns but separate source identities.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+      - name: source_system
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [salesforce, hubspot]
+      - name: source_object_id
+        data_tests: [not_null]
+      - name: name
+        data_tests:
+          - not_null:
+              config:
+                where: "event_type = 'upsert'"

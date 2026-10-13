@@ -1,0 +1,2 @@
+# Python 3.12 is the verified local and CI runtime for P1.7 tooling.
+dbt-snowflake==1.12.2

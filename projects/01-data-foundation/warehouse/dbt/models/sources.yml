@@ -1,0 +1,45 @@
+version: 2
+
+sources:
+  - name: revenueos_raw
+    description: Immutable copies of the P1.3/P1.6 source-event envelopes.
+    database: "{{ env_var('SNOWFLAKE_DATABASE', 'SAI_REVENUEOS') }}"
+    schema: "{{ env_var('SNOWFLAKE_RAW_SCHEMA', 'RAW') }}"
+    config:
+      loaded_at_field: loaded_at
+      freshness:
+        warn_after: {count: 1, period: day}
+        error_after: {count: 7, period: day}
+    tables:
+      - name: source_event
+        description: Complete raw source history loaded idempotently by event_id.
+        columns:
+          - name: event_id
+            description: Immutable P1.3/P1.6 source-event identifier.
+            data_tests:
+              - unique
+              - not_null
+          - name: source_system
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [salesforce, hubspot]
+          - name: source_tenant
+            data_tests: [not_null]
+          - name: source_object_type
+            data_tests: [not_null]
+          - name: source_object_id
+            data_tests: [not_null]
+          - name: event_type
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments:
+                    values: [upsert, delete]
+          - name: raw_payload_json
+            data_tests: [not_null]
+          - name: payload_sha256
+            data_tests: [not_null]
+          - name: envelope_sha256
+            data_tests: [not_null]

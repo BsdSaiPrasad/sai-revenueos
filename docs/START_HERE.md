@@ -6,7 +6,7 @@ This walkthrough explains Project 1 through one continuous, synthetic example. N
 
 **Globex Health** appears in both Salesforce and HubSpot. **Sarah Kim** and **John Lee** work there. The company is evaluating a fictional analytics product, signs a contract, and starts a subscription.
 
-The architecture and completed milestones are verified through P1.6. The live connectors passed both mocked recovery checks and authenticated acceptance checks against explicitly marked fictional Salesforce and HubSpot records. Write-back execution remains later work.
+The architecture and completed milestones are verified through P1.7. The live connectors passed mocked and authenticated acceptance for marked fictional CRM records, and the Snowflake/dbt path passed authenticated RAW loading, staging, quality, lineage, replay, and failure checks. Write-back execution remains later work.
 
 ## Step 1 — Preserve the Source Records
 
@@ -110,6 +110,12 @@ P1.6 connects to Salesforce Developer Edition and HubSpot Free with locally stor
 
 **Authenticated acceptance passed:** both marked Globex records were retrieved and stored raw-first; Salesforce and HubSpot changes were captured incrementally; unchanged versions replayed without duplicates; checkpoints advanced only after durable processing; and both source identities remained unresolved.
 
+## Step 12 — Normalize Source History in Snowflake
+
+P1.7 copies the same immutable source events into Snowflake RAW. dbt Core extracts consistent company, person, and opportunity fields while retaining every source ID, event, timestamp, hash, and raw payload.
+
+**Implemented and authenticated:** the idempotent loader, seven source-specific models, shared CRM company view, safe type conversions, late-arrival labels, 66 declared dbt tests, lineage metadata, cost-controlled setup, and isolated failure demonstration. The real run loaded 39 source events, replayed them without duplication, passed all 63 production tests, and preserved three HubSpot Globex name versions from RAW through staging.
+
 ## Where to Go Next
 
 1. Use the [glossary](GLOSSARY.md) for unfamiliar terms.
@@ -122,3 +128,4 @@ P1.6 connects to Salesforce Developer Edition and HubSpot Free with locally stor
 8. Run the [P1.4 field-authority guide](../projects/01-data-foundation/architecture/FIELD_AUTHORITY.md) for ownership, conflict, review, and write-back policy.
 9. Run the [P1.5 synthetic-data guide](../projects/01-data-foundation/architecture/SYNTHETIC_DATA.md) to create and inspect a connected fictional ecosystem.
 10. Follow the [P1.6 live-ingestion guide](../projects/01-data-foundation/architecture/LIVE_INGESTION.md) for the mocked demo and secure real-account verification.
+11. Follow the [P1.7 Snowflake + dbt guide](../projects/01-data-foundation/architecture/SNOWFLAKE_DBT.md) for RAW loading, staging, data tests, and lineage.

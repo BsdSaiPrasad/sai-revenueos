@@ -15,6 +15,12 @@ __pycache__/
 .pytest_cache/
 .venv/
 
+# dbt build artifacts
+**/target/
+**/logs/
+**/dbt_packages/
+**/.user.yml
+
 # Generated reports and local data
 build/
 dist/

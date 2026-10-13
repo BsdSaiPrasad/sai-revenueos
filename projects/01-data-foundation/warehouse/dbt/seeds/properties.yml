@@ -1,0 +1,22 @@
+version: 2
+
+seeds:
+  - name: p17_invalid_globex
+    description: >
+      Isolated intentional failure: a fictional Globex row lacks its required company name.
+    config:
+      tags: ["failure_demo"]
+    columns:
+      - name: event_id
+        data_tests:
+          - unique:
+              config:
+                tags: ["failure_demo"]
+          - not_null:
+              config:
+                tags: ["failure_demo"]
+      - name: company_name
+        data_tests:
+          - not_null:
+              config:
+                tags: ["failure_demo"]

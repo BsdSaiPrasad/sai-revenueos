@@ -3,7 +3,7 @@
 
 This script checks the shared JavaScript Object Notation (JSON) contract, canonical
 Entity Relationship Diagram (ERD), Architecture Decision Records (ADRs), required
-P1.2 through P1.6 artifacts, schema enforcement names, continuity documents, and
+P1.2 through P1.7 artifacts, schema enforcement names, continuity documents, and
 secret-like filenames. It validates repository consistency; it does not execute
 runtime tests or claim that a production service is deployed.
 """
@@ -49,7 +49,17 @@ LIVE_TEST_PATH = PROJECT_DIR / "tests/test_live_connectors.py"
 LIVE_DEMO_PATH = PROJECT_DIR / "scripts/demo_live_ingestion.py"
 LIVE_RUNNER_PATH = PROJECT_DIR / "scripts/run_live_ingestion.py"
 LIVE_AUTH_PATH = PROJECT_DIR / "scripts/configure_live_auth.py"
-DECISION_COUNT = 36
+WAREHOUSE_GUIDE_PATH = PROJECT_DIR / "architecture/SNOWFLAKE_DBT.md"
+WAREHOUSE_POLICY_PATH = PROJECT_DIR / "contracts/warehouse-normalization-policy.v1.json"
+WAREHOUSE_PACKAGE_DIR = PROJECT_DIR / "src/sai_revenueos_warehouse"
+WAREHOUSE_TEST_PATH = PROJECT_DIR / "tests/test_warehouse_staging.py"
+WAREHOUSE_LOADER_PATH = PROJECT_DIR / "scripts/load_source_events_to_snowflake.py"
+WAREHOUSE_DEMO_PATH = PROJECT_DIR / "scripts/demo_snowflake_dbt.py"
+WAREHOUSE_FAILURE_DEMO_PATH = PROJECT_DIR / "scripts/demo_dbt_failure.py"
+WAREHOUSE_VALIDATOR_PATH = PROJECT_DIR / "scripts/validate_dbt_project.py"
+WAREHOUSE_DBT_DIR = PROJECT_DIR / "warehouse/dbt"
+WAREHOUSE_BOOTSTRAP_PATH = PROJECT_DIR / "warehouse/snowflake/bootstrap.sql"
+DECISION_COUNT = 40
 
 REQUIRED_ENTITIES = {
     "Account",
@@ -511,6 +521,73 @@ def validate_p16_reference(errors: list[str]) -> None:
         fail(errors, "P1.6 local credentials and databases are not excluded by generated-data/")
 
 
+def validate_p17_reference(errors: list[str]) -> None:
+    """Check P1.7 Snowflake loader, dbt project, tests, policy, guide, and demos."""
+    required = (
+        WAREHOUSE_GUIDE_PATH,
+        WAREHOUSE_POLICY_PATH,
+        WAREHOUSE_PACKAGE_DIR / "__init__.py",
+        WAREHOUSE_PACKAGE_DIR / "connection.py",
+        WAREHOUSE_PACKAGE_DIR / "loader.py",
+        WAREHOUSE_TEST_PATH,
+        WAREHOUSE_LOADER_PATH,
+        WAREHOUSE_DEMO_PATH,
+        WAREHOUSE_FAILURE_DEMO_PATH,
+        WAREHOUSE_VALIDATOR_PATH,
+        WAREHOUSE_BOOTSTRAP_PATH,
+        WAREHOUSE_DBT_DIR / "dbt_project.yml",
+        WAREHOUSE_DBT_DIR / "profiles.yml",
+        WAREHOUSE_DBT_DIR / "models/sources.yml",
+        WAREHOUSE_DBT_DIR / "models/staging/staging.yml",
+        WAREHOUSE_DBT_DIR / "models/staging/shared/stg_source_events.sql",
+        WAREHOUSE_DBT_DIR / "models/staging/shared/stg_crm_companies.sql",
+        WAREHOUSE_DBT_DIR / "seeds/p17_invalid_globex.csv",
+    )
+    missing = [str(path.relative_to(REPO_ROOT)) for path in required if not path.is_file()]
+    if missing:
+        fail(errors, f"missing P1.7 reference artifacts: {', '.join(missing)}")
+        return
+    try:
+        policy = json.loads(WAREHOUSE_POLICY_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        fail(errors, f"P1.7 warehouse policy cannot be loaded: {exc}")
+        return
+    if policy.get("contract_version") != "1.0.0":
+        fail(errors, "P1.7 warehouse policy must declare version 1.0.0")
+    platform = policy.get("platform", {})
+    if platform.get("warehouse") != "snowflake" or platform.get("transformation") != "dbt-core":
+        fail(errors, "P1.7 must use Snowflake and dbt Core")
+    if platform.get("local_substitute_allowed") is not False:
+        fail(errors, "P1.7 cannot permit a local warehouse substitute")
+    objects = policy.get("staging", {}).get("essential_objects", {})
+    if objects.get("salesforce") != ["Account", "Lead", "Contact", "Opportunity"]:
+        fail(errors, "P1.7 Salesforce staging objects do not match P1.3")
+    if objects.get("hubspot") != ["Company", "Contact", "Deal"]:
+        fail(errors, "P1.7 HubSpot staging objects do not match P1.3")
+    safeguards = policy.get("cost_safeguards", {})
+    if safeguards.get("warehouse_size") != "XSMALL" or safeguards.get("auto_suspend_seconds") != 60:
+        fail(errors, "P1.7 X-Small warehouse and 60-second auto-suspend must remain configured")
+    if safeguards.get("max_cluster_count") != 1 or safeguards.get("monthly_credit_quota") != 1:
+        fail(errors, "P1.7 cluster and monthly credit caps must remain configured")
+    completion = policy.get("completion_gate", {})
+    if not all(completion.values()):
+        fail(errors, "P1.7 completion must require static, authenticated, query, and failure evidence")
+    if any(value is not False for value in policy.get("boundaries", {}).values()):
+        fail(errors, "P1.7 deferred boundaries must remain disabled")
+    expected_models = {
+        "stg_salesforce_accounts.sql", "stg_salesforce_leads.sql",
+        "stg_salesforce_contacts.sql", "stg_salesforce_opportunities.sql",
+        "stg_hubspot_companies.sql", "stg_hubspot_contacts.sql", "stg_hubspot_deals.sql",
+    }
+    found_models = {path.name for path in (WAREHOUSE_DBT_DIR / "models/staging").rglob("*.sql")}
+    if not expected_models.issubset(found_models):
+        fail(errors, "P1.7 dbt project does not cover every P1.3 source object")
+    bootstrap = WAREHOUSE_BOOTSTRAP_PATH.read_text(encoding="utf-8").upper()
+    for safeguard in ("WAREHOUSE_SIZE = XSMALL", "AUTO_SUSPEND = 60", "CREDIT_QUOTA = 1"):
+        if safeguard not in bootstrap:
+            fail(errors, f"P1.7 Snowflake bootstrap is missing safeguard: {safeguard}")
+
+
 def validate_no_tracked_secrets(errors: list[str]) -> None:
     """Flag secret-like filenames among tracked and candidate repository files."""
     try:
@@ -546,6 +623,7 @@ def main() -> int:
     validate_p14_reference(contract, errors)
     validate_p15_reference(errors)
     validate_p16_reference(errors)
+    validate_p17_reference(errors)
     validate_no_tracked_secrets(errors)
 
     if errors:
@@ -559,7 +637,7 @@ def main() -> int:
     print(
         "P1 architecture validation PASSED: "
         f"{entity_count} entities, {relationship_count} relationships, "
-        f"{DECISION_COUNT} decisions, ERD coverage, P1.2–P1.6 reference artifacts, "
+        f"{DECISION_COUNT} decisions, ERD coverage, P1.2–P1.7 reference artifacts, "
         "continuity files, and secret filename checks."
     )
     return 0
